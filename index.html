@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rohan — Rohan Pradyumna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf7ef;
+    --paper-2: #f3ecd8;
+    --ink: #1a1a1a;
+    --ink-2: #4a4a4a;
+    --grid: rgba(160, 140, 80, 0.14);
+    --grid-strong: rgba(160, 140, 80, 0.22);
+    --card: #1a1a1a;
+    --card-ink: #f5f2e8;
+    --accent: #e85d3a;
+    --accent-blue: #2d6cdf;
+    --accent-green: #3a7d44;
+    --accent-yellow: #f2c230;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Warm paper with graph grid - subtle white-gold tone */
+  .board {
+    position: fixed;
+    inset: 0;
+    background-color: #faf7ef;
+    background-image:
+      /* thin minor lines */
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+      /* stronger major every 5 */
+      linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+      /* warm vignette / gold wash */
+      radial-gradient(ellipse at 50% 40%, #fffbef 0%, #faf5e4 55%, #f2e9cf 100%);
+    background-size:
+      28px 28px,
+      28px 28px,
+      140px 140px,
+      140px 140px,
+      100% 100%;
+    overflow: hidden;
+  }
+  /* subtle paper grain */
+  .board::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.6  0 0 0 0 0.5  0 0 0 0 0.3  0 0 0 0.25 0'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.4'/></svg>");
+    opacity: 0.35;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  /* edge vignette */
+  .board::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(120, 90, 40, 0.08) 100%);
+    pointer-events: none;
+  }
+
+  #root { position: relative; width: 100%; height: 100%; }
+
+  /* Header chip */
+  .brand {
+    position: fixed;
+    top: 24px;
+    left: 28px;
+    z-index: 1000;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .brand .name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 34px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .brand .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); align-self: center; }
+  .brand .sub {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 14px;
+    right: 16px;
+    z-index: 1000;
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .corner {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    z-index: 1000;
+    display: flex;
+    gap: 16px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .corner span.live { color: var(--accent); }
+  .corner span.live::before { content: '● '; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.3 } }
+</style>
+</head>
+<body>
+  <div class="board"></div>
+
+  <div class="brand">
+    <span class="name">rohan</span>
+    <span class="dot"></span>
+    <span class="sub">a sticker board by rohan pradyumna</span>
+  </div>
+
+  <div class="corner">
+    <span class="live">online</span>
+    <span id="clock">--:--</span>
+  </div>
+
+  <div class="hint">drag stickers · tap to interact · swipe cards</div>
+
+  <div id="root"></div>
+
+  <!-- Hidden audio element for headphones sticker -->
+  <audio id="song" loop></audio>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <!-- Clock -->
+  <script>
+    function updateClock() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      const el = document.getElementById('clock');
+      if (el) el.textContent = hh + ':' + mm + ' local';
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+  </script>
+
+  <script type="text/babel">
+// ============================================================================
+// Sticker system: draggable, peel-on-hover, click handlers
+// ============================================================================
+
+const { useState, useEffect, useRef, useCallback } = React;
+
+// Tap sound using Web Audio API
+let tapAudioCtx = null;
+function playTapSound() {
+  if (!tapAudioCtx) tapAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = tapAudioCtx;
+  if (ctx.state === 'suspended') ctx.resume();
+
+  const now = ctx.currentTime;
+
+  // Create a short, satisfying "pop" sound
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, now);
+  osc.frequency.exponentialRampToValueAtTime(200, now + 0.08);
+
+  gain.gain.setValueAtTime(0.3, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.1);
+}
+
+// Base Sticker component — handles drag, peel, rotation, shadow, entrance animation
+function Sticker({
+  id,
+  initial,
+  zBase = 1,
+  children,
+  onClick,
+  onDragStart,
+  onDragEnd,
+  title,
+  peelColor = '#ffffff',
+  className = '',
+  style = {},
+  entranceDelay = 0,
+}) {
+  const [pos, setPos] = useState({ x: initial.x, y: initial.y, rot: initial.rot || 0 });
+  const [dragging, setDragging] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [z, setZ] = useState(zBase);
+  const [hasDragged, setHasDragged] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
+  const dragRef = useRef({ active: false, moved: false, startX: 0, startY: 0, origX: 0, origY: 0, pointerId: null });
+  const elRef = useRef(null);
+
+  // Entrance animation trigger
+  useEffect(() => {
+    const timer = setTimeout(() => setHasEntered(true), entranceDelay);
+    return () => clearTimeout(timer);
+  }, [entranceDelay]);
+
+  // Update position when initial changes (window resize) - but only if user hasn't dragged
+  useEffect(() => {
+    if (!hasDragged) {
+      setPos({ x: initial.x, y: initial.y, rot: initial.rot || 0 });
+    }
+  }, [initial.x, initial.y, initial.rot, hasDragged]);
+
+  const onPointerDown = (e) => {
+    if (e.button && e.button !== 0) return;
+    playTapSound(); // Play tap sound on touch
+    elRef.current.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      active: true,
+      moved: false,
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: pos.x,
+      origY: pos.y,
+      pointerId: e.pointerId,
+    };
+    setDragging(true);
+    setZ(9999);
+    onDragStart && onDragStart(id);
+    e.stopPropagation();
+  };
+
+  const onPointerMove = (e) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    if (Math.abs(dx) + Math.abs(dy) > 3) dragRef.current.moved = true;
+    setPos(p => ({ ...p, x: dragRef.current.origX + dx, y: dragRef.current.origY + dy }));
+  };
+
+  const onPointerUp = (e) => {
+    if (!dragRef.current.active) return;
+    const wasMove = dragRef.current.moved;
+    dragRef.current.active = false;
+    setDragging(false);
+    setZ(zBase + (wasMove ? 10 : 0));
+    if (wasMove) setHasDragged(true); // Remember user manually positioned this sticker
+    try { elRef.current.releasePointerCapture(e.pointerId); } catch {}
+    onDragEnd && onDragEnd(id);
+    if (!wasMove && onClick) {
+      onClick(e);
+    }
+  };
+
+  const peelLift = hovered && !dragging ? 1 : 0;
+  const scale = dragging ? 1.08 : (hovered ? 1.05 : 1);
+  // Hover wiggle: subtle rotation offset
+  const hoverRotOffset = hovered && !dragging ? (Math.sin(Date.now() * 0.01) * 0 + 2) : 0;
+
+  return (
+    <div
+      ref={elRef}
+      className={'sticker ' + className}
+      style={{
+        position: 'absolute',
+        left: pos.x,
+        top: pos.y,
+        transform: `rotate(${pos.rot + hoverRotOffset}deg) scale(${scale})`,
+        zIndex: z,
+        cursor: dragging ? 'grabbing' : 'grab',
+        transition: dragging ? 'none' : 'transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        touchAction: 'none',
+        opacity: 0,
+        animation: `stickerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${entranceDelay}ms forwards`,
+        ...style,
+      }}
+      title={title}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div style={{
+        position: 'relative',
+        filter: dragging
+          ? 'drop-shadow(0 24px 32px rgba(40,30,10,0.35)) drop-shadow(0 8px 12px rgba(40,30,10,0.25))'
+          : hovered
+            ? 'drop-shadow(0 16px 24px rgba(40,30,10,0.30)) drop-shadow(0 6px 10px rgba(40,30,10,0.22))'
+            : 'drop-shadow(0 6px 10px rgba(40,30,10,0.20)) drop-shadow(0 2px 4px rgba(40,30,10,0.16))',
+        transition: 'filter 0.28s, transform 0.28s',
+        transform: peelLift ? 'translateY(-4px)' : 'none',
+      }}>
+        {children}
+      </div>
+      <style>{`
+        @keyframes stickerPop {
+          0% { opacity: 0; transform: rotate(${pos.rot - 8}deg) scale(0.3); }
+          60% { opacity: 1; transform: rotate(${pos.rot + 3}deg) scale(1.08); }
+          80% { transform: rotate(${pos.rot - 1}deg) scale(0.97); }
+          100% { opacity: 1; transform: rotate(${pos.rot}deg) scale(1); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Photo sticker — image with thick white die-cut border
+function PhotoSticker(props) {
+  const { src, w = 140, h = 180, shape = 'rounded', ...rest } = props;
+  const radius = shape === 'circle' ? '50%' : shape === 'rounded' ? '14px' : '4px';
+  return (
+    <Sticker {...rest}>
+      <div style={{
+        width: w,
+        height: h,
+        background: '#fff',
+        borderRadius: radius,
+        padding: 8,
+        boxSizing: 'border-box',
+      }}>
+        <div style={{
+          width: '100%',
+          height: '100%',
+          backgroundImage: `url(${src})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          borderRadius: shape === 'circle' ? '50%' : '6px',
+        }} />
+      </div>
+    </Sticker>
+  );
+}
+
+// Image sticker — any image with a white die-cut border
+function ImageSticker(props) {
+  const { src, size = 86, bg = '#ffffff', pad = 8, radius = 18, ...rest } = props;
+  return (
+    <Sticker {...rest}>
+      <div style={{
+        width: size,
+        height: size,
+        background: bg,
+        borderRadius: radius,
+        padding: pad,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <img src={src} alt="" draggable="false" style={{
+          width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none',
+        }}/>
+      </div>
+    </Sticker>
+  );
+}
+
+// Text/word stickers
+function WordSticker({ text, bg = '#1a1a1a', fg = '#f5f2e8', font = "'Geist Mono', monospace", fontSize = 22, padX = 18, padY = 10, rotate = 0, shape = 'rect', ...rest }) {
+  return (
+    <Sticker {...rest}>
+      <div style={{
+        background: bg,
+        color: fg,
+        fontFamily: font,
+        fontSize,
+        fontWeight: 700,
+        padding: `${padY}px ${padX}px`,
+        borderRadius: shape === 'pill' ? 100 : 10,
+        border: '4px solid #ffffff',
+        letterSpacing: '0.02em',
+        whiteSpace: 'nowrap',
+        transform: `rotate(${rotate}deg)`,
+        textTransform: 'uppercase',
+      }}>
+        {text}
+      </div>
+    </Sticker>
+  );
+}
+
+// Email sticker
+function EmailSticker(props) {
+  return (
+    <Sticker {...props}>
+      <svg width="100" height="74" viewBox="0 0 120 90" style={{ overflow: 'visible' }}>
+        <rect x="6" y="10" width="108" height="70" rx="8" fill="#faf7ef" stroke="#fff" strokeWidth="6"/>
+        <rect x="6" y="10" width="108" height="70" rx="8" fill="#faf7ef" stroke="#1a1a1a" strokeWidth="3"/>
+        <path d="M 12 18 L 60 52 L 108 18" fill="none" stroke="#1a1a1a" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="98" cy="18" r="16" fill="#e85d3a" stroke="#fff" strokeWidth="4"/>
+        <text x="98" y="25" textAnchor="middle" fill="#fff" fontSize="18" fontWeight="800" fontFamily="'Geist Mono', monospace">@</text>
+      </svg>
+    </Sticker>
+  );
+}
+
+// Call me sticker
+function CallSticker(props) {
+  return (
+    <Sticker {...props}>
+      <svg width="90" height="100" viewBox="0 0 100 110" style={{ overflow: 'visible' }}>
+        <circle cx="50" cy="50" r="44" fill="#f2c230" stroke="#fff" strokeWidth="6"/>
+        <path d="M 30 38 Q 28 32 34 28 L 44 34 Q 46 38 42 44 Q 48 56 60 62 Q 64 58 68 60 L 74 68 Q 70 74 64 72 Q 42 68 32 50 Q 28 44 30 38 Z" fill="#1a1a1a"/>
+        <rect x="25" y="92" width="50" height="16" rx="4" fill="#1a1a1a"/>
+        <text x="50" y="104" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="800" fontFamily="'Geist Mono', monospace">CALL ME</text>
+      </svg>
+    </Sticker>
+  );
+}
+
+// Headphones sticker
+function HeadphonesSticker(props) {
+  return (
+    <Sticker {...props}>
+      <svg width="96" height="88" viewBox="0 0 100 90" style={{ overflow: 'visible' }}>
+        <path d="M 12 58 Q 12 18 50 18 Q 88 18 88 58" fill="none" stroke="#fff" strokeWidth="14" strokeLinecap="round"/>
+        <path d="M 12 58 Q 12 18 50 18 Q 88 18 88 58" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+        <rect x="2" y="50" width="24" height="36" rx="8" fill="#e85d3a" stroke="#fff" strokeWidth="4"/>
+        <rect x="74" y="50" width="24" height="36" rx="8" fill="#e85d3a" stroke="#fff" strokeWidth="4"/>
+        <circle cx="14" cy="68" r="4" fill="#fff" opacity="0.7"/>
+        <circle cx="86" cy="68" r="4" fill="#fff" opacity="0.7"/>
+      </svg>
+    </Sticker>
+  );
+}
+
+// Camera sticker
+function CameraSticker(props) {
+  return (
+    <Sticker {...props}>
+      <svg width="96" height="76" viewBox="0 0 100 80" style={{ overflow: 'visible' }}>
+        <rect x="6" y="20" width="88" height="54" rx="8" fill="#1a1a1a" stroke="#fff" strokeWidth="5"/>
+        <rect x="32" y="8" width="30" height="16" rx="4" fill="#1a1a1a" stroke="#fff" strokeWidth="4"/>
+        <circle cx="50" cy="48" r="18" fill="#3a3a3a" stroke="#fff" strokeWidth="3"/>
+        <circle cx="50" cy="48" r="12" fill="#1a1a1a"/>
+        <circle cx="54" cy="44" r="4" fill="#f5f2e8"/>
+        <circle cx="80" cy="32" r="4" fill="#e85d3a"/>
+      </svg>
+    </Sticker>
+  );
+}
+
+// Pickleball paddle sticker
+function PickleballSticker(props) {
+  return (
+    <Sticker {...props}>
+      <svg width="74" height="100" viewBox="0 0 80 110" style={{ overflow: 'visible' }}>
+        <rect x="33" y="68" width="14" height="36" rx="4" fill="#1a1a1a" stroke="#fff" strokeWidth="4"/>
+        <ellipse cx="40" cy="40" rx="34" ry="38" fill="#3a7d44" stroke="#fff" strokeWidth="5"/>
+        <ellipse cx="40" cy="40" rx="26" ry="30" fill="#4a9d54" opacity="0.3"/>
+        <circle cx="62" cy="22" r="12" fill="#f9d94a" stroke="#fff" strokeWidth="3"/>
+        <circle cx="64" cy="20" r="3" fill="#fff" opacity="0.5"/>
+      </svg>
+    </Sticker>
+  );
+}
+
+// Lego brick sticker
+function LegoSticker(props) {
+  return (
+    <Sticker {...props}>
+      <svg width="88" height="76" viewBox="0 0 100 88" style={{ overflow: 'visible' }}>
+        <rect x="8" y="24" width="84" height="54" rx="5" fill="#d4584f" stroke="#fff" strokeWidth="5"/>
+        <rect x="8" y="24" width="84" height="8" fill="#c44a42"/>
+        {[[30,18],[58,18]].map(([cx,cy],i)=>(
+          <g key={i}>
+            <ellipse cx={cx} cy={cy+6} rx="12" ry="4" fill="#8a3028"/>
+            <rect x={cx-12} y={cy-5} width="24" height="11" fill="#d4584f" stroke="#fff" strokeWidth="3"/>
+            <ellipse cx={cx} cy={cy-5} rx="12" ry="5" fill="#e06a62" stroke="#fff" strokeWidth="3"/>
+          </g>
+        ))}
+      </svg>
+    </Sticker>
+  );
+}
+
+// ============================================================================
+// Card Stack component
+// ============================================================================
+
+const CARDS = [
+  {
+    kind: 'intro',
+    body: "Yo, I'm Rohan. I help small businesses figure out their AI strategy — and actually ship it.",
+    foot: 'ex-founder · pm · builder',
+  },
+  {
+    kind: 'bullets',
+    title: 'what I do',
+    items: [
+      'AI strategy + roadmaps for SMBs',
+      'Product discovery → launch in weeks',
+      'Zero-to-one builder, ex-startup founder',
+      'Bridge between customers, design, engineering',
+    ],
+  },
+  {
+    kind: 'bullets',
+    title: 'currently',
+    items: [
+      'Consulting on AI adoption for SMBs',
+      'Shipping small tools + experiments',
+      'Based in DC · often in Hyderabad',
+    ],
+  },
+  {
+    kind: 'bullets',
+    title: 'past lives',
+    items: [
+      'Founder → built + sold early-stage ideas',
+      'PM across fintech + productivity',
+      'Launched products used by thousands',
+    ],
+  },
+  {
+    kind: 'quote',
+    body: '"Ship the ugly version. Then listen harder than you talk."',
+    foot: '— my operating principle',
+  },
+  {
+    kind: 'bullets',
+    title: "what I'm good at",
+    items: [
+      'Turning fuzzy problems into shippable scopes',
+      'Customer interviews that go somewhere',
+      'Prototyping in code (badly, but fast)',
+      'Keeping teams honest about tradeoffs',
+    ],
+  },
+  {
+    kind: 'bullets',
+    title: 'off the clock',
+    items: [
+      'Pickleball (still bad, working on it)',
+      'Long runs · photo walks · bad coffee',
+      'Flying back home to Hyderabad',
+      'Rebuilding my record collection',
+    ],
+  },
+  {
+    kind: 'bullets',
+    title: 'how I like to work',
+    items: [
+      'Small teams, tight loops, short docs',
+      'Write → show → decide → repeat',
+      'Defaulting to action beats defaulting to meetings',
+    ],
+  },
+  {
+    kind: 'cta',
+    title: 'say hi',
+    body: "Working on something AI-shaped and want a product brain? Or just want to talk pickleball strategy? The email / call / whatsapp stickers around this card all work.",
+    foot: 'pradyumnarohan@gmail.com',
+  },
+];
+
+const chevBtn = {
+  background: 'rgba(245,242,232,0.08)',
+  border: '1px solid rgba(245,242,232,0.28)',
+  color: 'rgba(245,242,232,0.9)',
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  cursor: 'pointer',
+  fontSize: 18,
+  fontFamily: 'serif',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 0,
+  lineHeight: 1,
+  transition: 'background 0.15s, transform 0.15s',
+};
+
+const titleStyle = {
+  fontFamily: "'Instrument Serif', serif",
+  fontSize: 30,
+  fontStyle: 'italic',
+  color: '#f5f2e8',
+  letterSpacing: '-0.01em',
+};
+
+const footStyle = {
+  marginTop: 14,
+  fontFamily: "'Geist Mono', monospace",
+  fontSize: 11,
+  color: 'rgba(245,242,232,0.5)',
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase',
+};
+
+const ctaBtn = {
+  display: 'inline-block',
+  padding: '8px 14px',
+  background: '#e85d3a',
+  color: '#faf7ef',
+  fontFamily: "'Geist Mono', monospace",
+  fontSize: 12,
+  fontWeight: 600,
+  borderRadius: 8,
+  textDecoration: 'none',
+  letterSpacing: '0.02em',
+};
+
+function CardBody({ card }) {
+  if (card.kind === 'intro') {
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{
+          fontFamily: "'Geist Mono', monospace",
+          fontSize: 19,
+          lineHeight: 1.5,
+          fontWeight: 500,
+          textWrap: 'pretty',
+        }}>
+          {card.body}
+        </div>
+        <div style={footStyle}>{card.foot}</div>
+      </div>
+    );
+  }
+  if (card.kind === 'quote') {
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{
+          fontFamily: "'Instrument Serif', serif",
+          fontSize: 28,
+          lineHeight: 1.25,
+          fontStyle: 'italic',
+          color: '#f5f2e8',
+          textWrap: 'balance',
+        }}>
+          {card.body}
+        </div>
+        <div style={footStyle}>{card.foot}</div>
+      </div>
+    );
+  }
+  if (card.kind === 'cta') {
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={titleStyle}>{card.title}</div>
+        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: 14, lineHeight: 1.55, color: 'rgba(245,242,232,0.85)', marginTop: 10, textWrap:'pretty' }}>
+          {card.body}
+        </div>
+        <div style={{ marginTop: 14 }}>
+          <a href="mailto:pradyumnarohan@gmail.com" style={ctaBtn}>
+            {card.foot} →
+          </a>
+        </div>
+      </div>
+    );
+  }
+  // bullets
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div style={titleStyle}>{card.title}</div>
+      <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0' }}>
+        {card.items.map((t, i) => (
+          <li key={i} style={{
+            fontFamily: "'Geist Mono', monospace",
+            fontSize: 13.5,
+            lineHeight: 1.55,
+            color: 'rgba(245,242,232,0.92)',
+            padding: '5px 0',
+            display: 'flex',
+            gap: 10,
+          }}>
+            <span style={{ color: '#e85d3a', flexShrink: 0 }}>▸</span>
+            <span style={{textWrap:'pretty'}}>{t}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CardStack() {
+  const [idx, setIdx] = useState(0);
+  const [drag, setDrag] = useState({ active: false, dx: 0, dy: 0 });
+  const [flyOff, setFlyOff] = useState(null);
+  const startRef = useRef(null);
+
+  const cardOrder = [];
+  for (let i = 0; i < 3; i++) {
+    const c = (idx + i) % CARDS.length;
+    cardOrder.push(c);
+  }
+
+  const DRAG_THRESHOLD = 60;
+  const DRAG_MIN = 4;
+  const FLY_MS = 950;
+
+  const onDown = (e) => {
+    if (e.button && e.button !== 0) return;
+    if (e.target.closest('[data-nodrag]')) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    startRef.current = { x: e.clientX, y: e.clientY, moved: false };
+  };
+
+  const onMove = (e) => {
+    if (!startRef.current) return;
+    const dx = e.clientX - startRef.current.x;
+    const dy = e.clientY - startRef.current.y;
+    if (!startRef.current.moved && Math.hypot(dx, dy) < DRAG_MIN) return;
+    startRef.current.moved = true;
+    setDrag({ active: true, dx, dy });
+  };
+
+  const onUp = (e) => {
+    if (!startRef.current) return;
+    const moved = startRef.current.moved;
+    const { dx, dy } = drag;
+    const dist = Math.hypot(dx, dy);
+    startRef.current = null;
+    if (moved && dist > DRAG_THRESHOLD) {
+      const angle = Math.atan2(dy, dx);
+      const fx = Math.cos(angle) * 1000;
+      const fy = Math.sin(angle) * 800 - 30;
+      setFlyOff({ dx: fx, dy: fy, rot: dx * 0.035 });
+      setTimeout(() => {
+        setIdx(i => (i + 1) % CARDS.length);
+        setFlyOff(null);
+        setDrag({ active: false, dx: 0, dy: 0 });
+      }, FLY_MS);
+    } else {
+      setDrag({ active: false, dx: 0, dy: 0 });
+    }
+  };
+
+  const next = () => {
+    setFlyOff({ dx: 900, dy: 40, rot: 8 });
+    setTimeout(() => {
+      setIdx(i => (i + 1) % CARDS.length);
+      setFlyOff(null);
+      setDrag({ active: false, dx: 0, dy: 0 });
+    }, FLY_MS);
+  };
+
+  const prev = () => {
+    setFlyOff({ dx: -900, dy: 40, rot: -8 });
+    setTimeout(() => {
+      setIdx(i => (i - 1 + CARDS.length) % CARDS.length);
+      setFlyOff(null);
+      setDrag({ active: false, dx: 0, dy: 0 });
+    }, FLY_MS);
+  };
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  return (
+    <div style={{
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: 440,
+      height: 320,
+      zIndex: 500,
+    }}>
+      {/* pile of cards behind - more visible layering */}
+      {[5,4,3,2,1].map(n => (
+        <div key={'shadow'+n} style={{
+          position: 'absolute',
+          inset: 0,
+          background: n <= 2 ? '#232323' : '#1a1a1a',
+          borderRadius: 18,
+          transform: `translateY(${n*10}px) scale(${1 - n*0.018}) rotate(${n * 0.3}deg)`,
+          opacity: n <= 2 ? 0.95 : 0.4 - n*0.06,
+          boxShadow: n <= 2 ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
+          zIndex: -n,
+        }}/>
+      ))}
+
+      {cardOrder.map((cardIdx, stackPos) => {
+        const card = CARDS[cardIdx];
+        const isTop = stackPos === 0;
+        const flying = isTop && flyOff;
+        const translate = isTop
+          ? (flying ? `translate(calc(-50% + ${flyOff.dx}px), calc(-50% + ${flyOff.dy}px)) rotate(${flyOff.rot}deg)`
+                    : `translate(calc(-50% + ${drag.dx}px), calc(-50% + ${drag.dy}px)) rotate(${drag.dx * 0.05}deg)`)
+          : `translate(-50%, calc(-50% + ${stackPos*6}px)) scale(${1 - stackPos*0.03})`;
+
+        return (
+          <div
+            key={cardIdx + '-' + stackPos}
+            onPointerDown={isTop ? onDown : undefined}
+            onPointerMove={isTop ? onMove : undefined}
+            onPointerUp={isTop ? onUp : undefined}
+            onPointerCancel={isTop ? onUp : undefined}
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              width: 440,
+              minHeight: 300,
+              background: '#1a1a1a',
+              color: '#f5f2e8',
+              borderRadius: 18,
+              padding: '28px 30px 26px',
+              boxSizing: 'border-box',
+              transform: translate,
+              transition: flying
+                ? 'transform 0.95s cubic-bezier(0.16, 0.84, 0.44, 1)'
+                : drag.active && isTop ? 'none' : 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              boxShadow: isTop
+                ? '0 25px 50px rgba(20,15,5,0.4), 0 12px 24px rgba(20,15,5,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset'
+                : '0 10px 20px rgba(20,15,5,0.25)',
+              zIndex: 100 - stackPos,
+              cursor: isTop ? (drag.active ? 'grabbing' : 'grab') : 'default',
+              touchAction: 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              pointerEvents: isTop ? 'auto' : 'none',
+            }}
+          >
+            {/* Top chrome: prev / idx / next */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 14,
+              marginBottom: 16,
+              fontFamily: "'Geist Mono', monospace",
+              fontSize: 12,
+              color: 'rgba(245,242,232,0.5)',
+              whiteSpace: 'nowrap',
+            }}>
+              <button
+                data-nodrag
+                onPointerDown={(e)=>e.stopPropagation()}
+                onClick={(e)=>{e.stopPropagation(); prev();}}
+                style={chevBtn}
+                aria-label="previous card">‹</button>
+              <span style={{whiteSpace:'nowrap', minWidth: 56, textAlign:'center', display:'inline-block'}}>{String(cardIdx + 1).padStart(2,'0')}&nbsp;/&nbsp;{String(CARDS.length).padStart(2,'0')}</span>
+              <button
+                data-nodrag
+                onPointerDown={(e)=>e.stopPropagation()}
+                onClick={(e)=>{e.stopPropagation(); next();}}
+                style={chevBtn}
+                aria-label="next card">›</button>
+            </div>
+
+            <CardBody card={card} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============================================================================
+// Modal component
+// ============================================================================
+
+function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
+  if (!open) return null;
+  return (
+    <div
+      onPointerDown={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(20,15,5,0.45)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 100000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        animation: 'fadeIn 0.2s ease',
+      }}
+    >
+      <div
+        onPointerDown={(e) => e.stopPropagation()}
+        style={{
+          background: color,
+          color: '#f5f2e8',
+          borderRadius: 16,
+          padding: '28px 32px',
+          maxWidth: 460,
+          minWidth: 340,
+          boxShadow: '0 30px 60px rgba(20,10,0,0.4)',
+          fontFamily: "'Geist Mono', monospace",
+          position: 'relative',
+          animation: 'pop 0.25s cubic-bezier(0.2,0.8,0.2,1)',
+        }}
+      >
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 12, right: 14, background: 'transparent', border: 'none',
+          color: 'rgba(245,242,232,0.6)', fontSize: 20, cursor: 'pointer', padding: 4,
+        }}>×</button>
+        {title && <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontStyle:'italic', marginBottom: 12 }}>{title}</div>}
+        <div style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(245,242,232,0.9)', textWrap:'pretty' }}>
+          {children}
+        </div>
+      </div>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes pop { from { transform: scale(0.9); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+      `}</style>
+    </div>
+  );
+}
+
+// ============================================================================
+// Synth player for headphones
+// ============================================================================
+
+let audioCtx = null;
+function playSongSnippet() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = audioCtx;
+  if (ctx.state === 'suspended') ctx.resume();
+  const now = ctx.currentTime;
+  const chords = [
+    [349.23, 440.00, 523.25, 659.25],
+    [329.63, 392.00, 493.88, 587.33],
+    [293.66, 349.23, 440.00, 523.25],
+    [261.63, 329.63, 392.00, 493.88],
+  ];
+  chords.forEach((notes, i) => {
+    const start = now + i * 0.9;
+    notes.forEach(freq => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.09, start + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.85);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.9);
+    });
+  });
+}
+
+function EqBars({ playing }) {
+  return (
+    <div style={{ display:'flex', alignItems:'flex-end', gap: 3, height: 28 }}>
+      {[0,1,2,3,4].map(i => (
+        <div key={i} style={{
+          width: 4,
+          background: '#e85d3a',
+          borderRadius: 2,
+          height: playing ? undefined : 6,
+          animation: playing ? `eq${i} 0.7s ${i*0.1}s infinite ease-in-out alternate` : 'none',
+        }}/>
+      ))}
+      <style>{`
+        @keyframes eq0 { 0% { height: 6px } 100% { height: 22px } }
+        @keyframes eq1 { 0% { height: 14px } 100% { height: 28px } }
+        @keyframes eq2 { 0% { height: 8px } 100% { height: 24px } }
+        @keyframes eq3 { 0% { height: 18px } 100% { height: 26px } }
+        @keyframes eq4 { 0% { height: 10px } 100% { height: 20px } }
+      `}</style>
+    </div>
+  );
+}
+
+// ============================================================================
+// Main App
+// ============================================================================
+
+function App() {
+  const [modal, setModal] = useState(null);
+  const [phoneShown, setPhoneShown] = useState(false);
+  const [legoCount, setLegoCount] = useState(0);
+  const [musicPlaying, setMusicPlaying] = useState(false);
+
+  const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
+  useEffect(() => {
+    const onR = () => setDims({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener('resize', onR);
+    return () => window.removeEventListener('resize', onR);
+  }, []);
+
+  // Center-based orbital positioning - stickers cluster around the card
+  const cx = dims.w / 2;
+  const cy = dims.h / 2;
+  const cardW = 440, cardH = 320;
+
+  // Place sticker at angle (degrees) and distance from center
+  // Distance is from the edge of the card, not absolute from center
+  function placeOrbital(angleDeg, distance, w, h, rot) {
+    const angle = (angleDeg * Math.PI) / 180;
+    // Elliptical base distance accounts for card dimensions
+    const baseX = cardW / 2 + 40; // card half-width + padding
+    const baseY = cardH / 2 + 40; // card half-height + padding
+
+    // Calculate position on ellipse + additional distance
+    const radiusX = baseX + distance;
+    const radiusY = baseY + distance * 0.7; // Slightly compressed vertically
+
+    const x = cx + Math.cos(angle) * radiusX - w / 2;
+    const y = cy + Math.sin(angle) * radiusY - h / 2;
+
+    return { x, y, w, h, rot };
+  }
+
+  function overlaps(a, b, pad = 6) {
+    return a.x + a.w + pad > b.x && a.x < b.x + b.w + pad
+        && a.y + a.h + pad > b.y && a.y < b.y + b.h + pad;
+  }
+
+  function resolveOverlaps(list) {
+    for (let i = 0; i < list.length; i++) {
+      for (let j = 0; j < i; j++) {
+        let tries = 0;
+        while (overlaps(list[i], list[j]) && tries < 30) {
+          const ax = list[i].x + list[i].w/2;
+          const ay = list[i].y + list[i].h/2;
+          const bx = list[j].x + list[j].w/2;
+          const by = list[j].y + list[j].h/2;
+          // Push away from center AND from other sticker
+          const dx = ax - bx || 0.5;
+          const dy = ay - by || 0.5;
+          const len = Math.hypot(dx, dy) || 1;
+          list[i].x += (dx/len) * 10;
+          list[i].y += (dy/len) * 10;
+          tries++;
+        }
+      }
+    }
+    return list;
+  }
+
+  // Layout key to force re-mount when viewport changes significantly
+  const layoutKey = `${Math.floor(dims.w / 100)}-${Math.floor(dims.h / 100)}`;
+
+  const portraitW = 154, portraitH = 194;
+
+  // Orbital positions - angle (degrees), distance from card edge, width, height, rotation
+  // All stickers kept straight (0 rotation)
+  const raw = [
+    // Upper area
+    { id: 'plane',       ...placeOrbital(-95, 90, 110, 76, 0) },
+    { id: 'tagPM',       ...placeOrbital(-140, 85, 160, 36, 0) },
+    { id: 'tagAI',       ...placeOrbital(5, 75, 140, 36, 0) },
+    { id: 'charminar',   ...placeOrbital(-125, 150, 120, 110, 0) },
+    { id: 'washingtondc',...placeOrbital(-35, 145, 120, 86, 0) },
+
+    // Left side
+    { id: 'portrait',    ...placeOrbital(160, 130, portraitW, portraitH, 0) },
+    { id: 'linkedin',    ...placeOrbital(185, 85, 90, 90, 0) },
+    { id: 'whatsapp',    ...placeOrbital(195, 160, 90, 90, 0) },
+    { id: 'pickleball',  ...placeOrbital(215, 100, 74, 100, 0) },
+
+    // Right side
+    { id: 'email',       ...placeOrbital(15, 90, 100, 74, 0) },
+    { id: 'call',        ...placeOrbital(35, 155, 90, 100, 0) },
+    { id: 'beach',       ...placeOrbital(55, 115, 92, 92, 0) },
+    { id: 'coffee',      ...placeOrbital(25, 220, 80, 86, 0) },
+    { id: 'lego',        ...placeOrbital(60, 190, 88, 76, 0) },
+
+    // Bottom area
+    { id: 'headphones',  ...placeOrbital(240, 85, 96, 88, 0) },
+    { id: 'camera',      ...placeOrbital(260, 150, 96, 76, 0) },
+    { id: 'gym',         ...placeOrbital(295, 95, 96, 96, 0) },
+  ];
+
+  const resolved = resolveOverlaps(raw);
+  const positions = {};
+  resolved.forEach(p => { positions[p.id] = { x: p.x, y: p.y, rot: p.rot }; });
+  const portraitPos = positions.portrait;
+
+  // Interaction handlers
+  const openLinkedIn = () => window.open('https://www.linkedin.com/in/rohanpradyumna/', '_blank');
+  const openWhatsApp = () => window.open('https://wa.me/12408543253', '_blank');
+  const openEmail = () => window.location.href = 'mailto:pradyumnarohan@gmail.com';
+  const showPhone = () => { setPhoneShown(true); setModal('phone'); };
+  const toggleMusic = () => {
+    setMusicPlaying(true);
+    playSongSnippet();
+    setModal('music');
+    setTimeout(() => setMusicPlaying(false), 3600);
+  };
+  const bumpLego = () => { setLegoCount(c => c + 1); setModal('lego'); };
+  const charminarFact = () => setModal('charminar');
+  const dcFact = () => setModal('dc');
+  const travelList = () => setModal('travel');
+  const beachVibes = () => setModal('beach');
+  const pickleballVibes = () => setModal('pickleball');
+  const cameraVibes = () => setModal('camera');
+  const coffeeVibes = () => setModal('coffee');
+  const gymVibes = () => setModal('gym');
+  const portraitClick = () => setModal('portrait');
+
+  return (
+    <>
+      {/* Word tags at top */}
+      <WordSticker id="tag-pm" text="product · manager" initial={positions.tagPM} zBase={5}
+        bg="#1a1a1a" fg="#faf7ef" fontSize={13} padX={14} padY={7} entranceDelay={100} />
+      <WordSticker id="tag-ai" text="ai · builder" initial={positions.tagAI} zBase={5}
+        bg="#e85d3a" fg="#faf7ef" fontSize={13} padX={14} padY={7} entranceDelay={150} />
+
+      {/* Portrait */}
+      <PhotoSticker
+        id="portrait"
+        src="assets/rohan-portrait.jpg"
+        w={portraitW}
+        h={portraitH}
+        initial={portraitPos}
+        zBase={15}
+        shape="rounded"
+        onClick={portraitClick}
+        entranceDelay={50}
+      />
+
+      {/* Location stickers */}
+      <ImageSticker id="charminar" src="assets/icons/charminar.png" size={116} initial={positions.charminar} zBase={8} onClick={charminarFact} entranceDelay={200} />
+      <ImageSticker id="dc" src="assets/icons/dc.png" size={110} initial={positions.washingtondc} zBase={8} onClick={dcFact} entranceDelay={250} />
+
+      {/* Communication */}
+      <ImageSticker id="linkedin" src="assets/icons/linkedin.png" size={92} initial={positions.linkedin} zBase={10} onClick={openLinkedIn} entranceDelay={300} />
+      <ImageSticker id="whatsapp" src="assets/icons/whatsapp.png" size={92} initial={positions.whatsapp} zBase={10} onClick={openWhatsApp} entranceDelay={350} />
+      <EmailSticker id="email" initial={positions.email} zBase={10} onClick={openEmail} entranceDelay={400} />
+      <CallSticker id="call" initial={positions.call} zBase={10} onClick={showPhone} entranceDelay={450} />
+
+      {/* Travel */}
+      <ImageSticker id="plane" src="assets/icons/plane.png" size={104} initial={positions.plane} zBase={7} onClick={travelList} entranceDelay={500} />
+      <ImageSticker id="beach" src="assets/icons/beach.png" size={98} initial={positions.beach} zBase={7} onClick={beachVibes} entranceDelay={550} />
+
+      {/* Hobbies / lifestyle */}
+      <HeadphonesSticker id="headphones" initial={positions.headphones} zBase={7} onClick={toggleMusic} entranceDelay={600} />
+      <ImageSticker id="coffee" src="assets/icons/coffee.png" size={88} initial={positions.coffee} zBase={7} onClick={coffeeVibes} entranceDelay={650} />
+      <CameraSticker id="camera" initial={positions.camera} zBase={7} onClick={cameraVibes} entranceDelay={700} />
+      <ImageSticker id="gym" src="assets/icons/gym.png" size={96} initial={positions.gym} zBase={7} onClick={gymVibes} entranceDelay={750} />
+      <PickleballSticker id="pickleball" initial={positions.pickleball} zBase={7} onClick={pickleballVibes} entranceDelay={800} />
+      <LegoSticker id="lego" initial={positions.lego} zBase={7} onClick={bumpLego} entranceDelay={850} />
+
+      {/* CENTER — card stack */}
+      <CardStack />
+
+      {/* Modals */}
+      <Modal open={modal==='phone'} onClose={()=>setModal(null)} title="call me" color="#1a1a1a">
+        <div style={{ fontSize: 28, fontFamily:"'Geist Mono', monospace", letterSpacing:'0.05em', margin:'8px 0 14px', color:'#f2c230' }}>
+          +1 (240) 854-3253
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.55)', marginBottom: 16 }}>tap below to dial · or just call me.</div>
+        <a href="tel:+12408543253" style={{
+          display:'inline-block', padding:'10px 16px', background:'#f2c230', color:'#1a1a1a',
+          fontSize:12, fontWeight:700, borderRadius:8, textDecoration:'none', letterSpacing:'0.02em'
+        }}>dial now →</a>
+      </Modal>
+
+      <Modal open={modal==='music'} onClose={()=>setModal(null)} title="now playing" color="#1a1a1a">
+        <div style={{ display:'flex', alignItems:'center', gap: 14, marginBottom: 6 }}>
+          <EqBars playing={musicPlaying} />
+          <div>
+            <div style={{ fontSize: 14, color:'#f5f2e8' }}>a soft chord progression</div>
+            <div style={{ fontSize: 11, color:'rgba(245,242,232,0.55)', marginTop: 4 }}>lo-fi · f maj7 → e min7 → d min7 → c maj7</div>
+          </div>
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.55)', marginTop: 14 }}>what I'm actually listening to: a lot of yussef dayes, hiatus kaiyote, and anything with rhodes piano.</div>
+      </Modal>
+
+      <Modal open={modal==='lego'} onClose={()=>setModal(null)} title="click!" color="#d4584f">
+        <div style={{ fontSize: 14, color:'#f5f2e8', marginBottom: 8 }}>
+          you've clicked the brick <b>{legoCount}</b> {legoCount === 1 ? 'time' : 'times'}.
+        </div>
+        <div style={{ fontSize: 12, color:'rgba(255,255,255,0.75)' }}>
+          building is the same whether it's lego or software — you start with one brick, and keep going.
+        </div>
+        <div style={{ marginTop: 16, display:'flex', gap:4, flexWrap:'wrap' }}>
+          {Array.from({length: Math.min(legoCount, 24)}).map((_, i)=>(
+            <span key={i} style={{
+              display:'inline-block', width:18, height:12,
+              background: ['#f2c230','#2d6cdf','#3a7d44','#1a1a1a','#faf7ef'][i%5],
+              border:'1px solid rgba(255,255,255,0.3)', borderRadius: 2,
+              animation: `pop 0.3s ease ${i*0.02}s both`,
+            }}/>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal open={modal==='charminar'} onClose={()=>setModal(null)} title="charminar, hyderabad" color="#a8794a">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
+          home. this is where I grew up — the four minarets in old hyderabad, built in 1591.
+        </div>
+        <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
+          the city gave me biryani, urdu poetry, the best chai of my life, and the stubbornness that every founder needs. I try to go back once a year.
+        </div>
+      </Modal>
+
+      <Modal open={modal==='dc'} onClose={()=>setModal(null)} title="washington, dc" color="#2d6cdf">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
+          current base. DC is where I do most of my work — good coffee, long runs along the potomac, and just enough startup energy to keep it interesting.
+        </div>
+        <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)' }}>
+          always up for coffee if you're in town.
+        </div>
+      </Modal>
+
+      <Modal open={modal==='travel'} onClose={()=>setModal(null)} title="places I've been" color="#1a1a1a">
+        <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.6)', marginBottom: 12 }}>a non-exhaustive list, in no order:</div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: '6px 18px', fontSize: 13, color:'#f5f2e8' }}>
+          {['hyderabad','washington dc','new york','lisbon','tokyo','berlin','bali','reykjavík','mexico city','san francisco','istanbul','kerala'].map(p=>(
+            <div key={p} style={{ display:'flex', alignItems:'center', gap: 8 }}>
+              <span style={{ color:'#e85d3a' }}>✦</span>{p}
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', marginTop: 14, fontStyle:'italic' }}>next up: buenos aires, hopefully.</div>
+      </Modal>
+
+      <Modal open={modal==='beach'} onClose={()=>setModal(null)} title="beach brain" color="#2d6cdf">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
+          my best product ideas happen when I'm 10 feet from the water and nowhere near a laptop. kerala backwaters &gt; boardrooms.
+        </div>
+      </Modal>
+
+      <Modal open={modal==='pickleball'} onClose={()=>setModal(null)} title="pickleball szn" color="#3a7d44">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
+          currently 3.2 DUPR. working my way up. if you play in DC, hit me up — I need doubles partners who don't mind losing a few.
+        </div>
+      </Modal>
+
+      <Modal open={modal==='camera'} onClose={()=>setModal(null)} title="photo walks" color="#1a1a1a">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#f5f2e8' }}>
+          mostly street + architecture on a fuji x100v. not for the 'gram — just for me. there's something about noticing that makes me a better PM too.
+        </div>
+      </Modal>
+
+      <Modal open={modal==='coffee'} onClose={()=>setModal(null)} title="coffee order" color="#6b3a1f">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
+          cortado, no sugar. if it's after 3pm, a matcha. if we're meeting for coffee, I probably want to talk about what you're building.
+        </div>
+      </Modal>
+
+      <Modal open={modal==='gym'} onClose={()=>setModal(null)} title="lifting" color="#2d6cdf">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
+          5x/week, push-pull-legs. shipping products is mostly sitting down — the gym is where I pay the tax. current bench PR: a polite number I'm working on.
+        </div>
+      </Modal>
+
+      <Modal open={modal==='portrait'} onClose={()=>setModal(null)} title="hi, that's me" color="#1a1a1a">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#f5f2e8' }}>
+          taken under the cherry blossoms last spring. the stripes were a mistake, the blossoms were not.
+        </div>
+      </Modal>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
