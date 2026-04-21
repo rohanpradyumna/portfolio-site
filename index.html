@@ -957,36 +957,20 @@ function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
 }
 
 // ============================================================================
-// Synth player for headphones
+// Audio player for headphones
 // ============================================================================
 
-let audioCtx = null;
-function playSongSnippet() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const ctx = audioCtx;
-  if (ctx.state === 'suspended') ctx.resume();
-  const now = ctx.currentTime;
-  const chords = [
-    [349.23, 440.00, 523.25, 659.25],
-    [329.63, 392.00, 493.88, 587.33],
-    [293.66, 349.23, 440.00, 523.25],
-    [261.63, 329.63, 392.00, 493.88],
-  ];
-  chords.forEach((notes, i) => {
-    const start = now + i * 0.9;
-    notes.forEach(freq => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(0.09, start + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.85);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + 0.9);
-    });
-  });
+const songAudio = document.getElementById('song');
+songAudio.src = 'assets/believer.mp3';
+
+function toggleSong() {
+  if (songAudio.paused) {
+    songAudio.play();
+    return true;
+  } else {
+    songAudio.pause();
+    return false;
+  }
 }
 
 function EqBars({ playing }) {
@@ -1124,10 +1108,9 @@ function App() {
   const openEmail = () => window.location.href = 'mailto:pradyumnarohan@gmail.com';
   const showPhone = () => { setPhoneShown(true); setModal('phone'); };
   const toggleMusic = () => {
-    setMusicPlaying(true);
-    playSongSnippet();
+    const playing = toggleSong();
+    setMusicPlaying(playing);
     setModal('music');
-    setTimeout(() => setMusicPlaying(false), 3600);
   };
   const bumpLego = () => { setLegoCount(c => c + 1); setModal('lego'); };
   const charminarFact = () => setModal('charminar');
@@ -1198,15 +1181,21 @@ function App() {
         }}>dial now →</a>
       </Modal>
 
-      <Modal open={modal==='music'} onClose={()=>setModal(null)} title="now playing" color="#1a1a1a">
+      <Modal open={modal==='music'} onClose={()=>{ setModal(null); songAudio.pause(); setMusicPlaying(false); }} title="now playing" color="#1a1a1a">
         <div style={{ display:'flex', alignItems:'center', gap: 14, marginBottom: 6 }}>
           <EqBars playing={musicPlaying} />
           <div>
-            <div style={{ fontSize: 14, color:'#f5f2e8' }}>a soft chord progression</div>
-            <div style={{ fontSize: 11, color:'rgba(245,242,232,0.55)', marginTop: 4 }}>lo-fi · f maj7 → e min7 → d min7 → c maj7</div>
+            <div style={{ fontSize: 14, color:'#f5f2e8', fontWeight: 500 }}>Believer</div>
+            <div style={{ fontSize: 11, color:'rgba(245,242,232,0.55)', marginTop: 4 }}>Imagine Dragons</div>
           </div>
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.55)', marginTop: 14 }}>what I'm actually listening to: a lot of yussef dayes, hiatus kaiyote, and anything with rhodes piano.</div>
+        <button onClick={() => { const p = toggleSong(); setMusicPlaying(p); }} style={{
+          marginTop: 14, padding: '10px 20px', background: musicPlaying ? 'rgba(245,242,232,0.15)' : '#e85d3a',
+          color: '#f5f2e8', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+          fontFamily: "'Geist Mono', monospace"
+        }}>
+          {musicPlaying ? '⏸ pause' : '▶ play'}
+        </button>
       </Modal>
 
       <Modal open={modal==='lego'} onClose={()=>setModal(null)} title="click!" color="#d4584f">
