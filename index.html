@@ -1089,76 +1089,77 @@ function StoicWisdomModal({ open, onClose, quote }) {
 const CARDS = [
   {
     kind: 'intro',
-    body: "Hey, I'm Rohan. I'm endlessly curious about the messy problems in the world — and I love building products to solve them.",
-    foot: 'founder · ai strategist · builder',
+    body: "Yo, I'm Rohan. The world is messy, there's too much to fix, and I can't stop building things. It's a problem, honestly. 🛠️",
+    foot: 'founder · ai nerd · professional curious person',
   },
   {
     kind: 'bullets',
     title: 'what I do',
     items: [
-      'Lead AI product development at Yottaflex.ai',
-      'Help companies 5x-100x productivity with AI',
-      'Turn requirements into production code',
-      'Change teams from doers to reviewers',
+      'Build AI products at Yottaflex.ai (it\'s cool, trust me)',
+      'Help teams go from "we should use AI" to actually shipping',
+      'Turn messy requirements → working code',
+      'Make engineers reviewers, not typers 🤖',
     ],
   },
   {
     kind: 'bullets',
     title: 'currently',
     items: [
-      'Building YottaBuilder — AI-powered SDLC platform',
-      'Leading AI transformation strategy',
-      'Based in DC · heart in Hyderabad',
+      'Building YottaBuilder — think AI-powered SDLC on steroids',
+      'Turning Yottaflex from dev shop → AI company',
+      'Living in DC · dreaming of Hyderabad biryani',
     ],
   },
   {
     kind: 'bullets',
-    title: 'past lives',
+    title: 'lore',
     items: [
-      'Founded Intripid — AI travel planning (15K users, Antler-backed)',
-      'First startup gig at Flock Shopping',
-      'MS in Information Systems, UMD',
+      'Founded Intripid — AI travel app, 15K users, Antler gang 🚀',
+      'Built "What\'s Next" — still think it\'s a billion dollar idea',
+      'First startup gig at Flock (now an AI company too, hmm 🤔)',
+      'UMD grad — go Terps!',
     ],
   },
   {
     kind: 'quote',
-    body: '"The ugly version is really, really, really important."',
-    foot: '— learned the hard way',
+    body: '"Ship the ugly version. Seriously. Do it. Stop overthinking."',
+    foot: '— me, to myself, daily',
   },
   {
     kind: 'bullets',
-    title: "hard-won lessons",
+    title: "things I learned the hard way",
     items: [
-      'Sell the product, not just build it',
-      'Obsess over user problems, not features',
-      'Walk the hard miles — experience matters',
-      'Pitch value to open wallets',
+      'Nobody cares how you built it, only that it works',
+      'Your users\' problems > your clever solution',
+      'Immigrant founder visa math is... a lot 📊',
+      'The compound effect is real (annoyingly so)',
     ],
   },
   {
     kind: 'bullets',
-    title: 'off the clock',
+    title: 'when not working',
     items: [
-      'Racket sports — pickleball, tennis, badminton, TT',
-      'Coffee obsession (Ethiopian · Colombian · Vietnamese)',
-      'Philosophy books and long conversations',
-      'Returning to Annapolis again and again',
+      'Losing at pickleball, tennis, badminton, TT (still fun tho)',
+      'Researching coffee origins like it\'s my thesis ☕',
+      'Reading philosophy, connecting it to everything',
+      'Driving to Annapolis for the 11th time',
     ],
   },
   {
     kind: 'bullets',
-    title: 'what drives me',
+    title: 'vibes',
     items: [
-      'Knowledge is freedom — ignorance is fear',
-      'Compound effect: small steps, big results',
-      'Innovation can come from anywhere now',
-      'Someday: give back to Hyderabad',
+      'Knowledge is freedom — empty mind = devil\'s workshop',
+      'Small steps compound into big things (gym, startups, life)',
+      'Silicon Valley isn\'t the only place to build anymore',
+      'Someday: go home, build things, eat biryani daily 🍛',
     ],
   },
   {
     kind: 'cta',
-    title: 'say hi',
-    body: "Building something AI-shaped? Navigating the immigrant founder journey? Or just want to talk coffee origins and philosophy? Reach out — I love meeting curious people.",
+    title: 'let\'s talk',
+    body: "Building with AI? Navigating the immigrant founder chaos? Want to debate coffee origins or stoic philosophy? I'm down. The stickers around here actually work — pick your weapon.",
     foot: 'pradyumnarohan@gmail.com',
   },
 ];
@@ -1991,33 +1992,33 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='charminar'} onClose={()=>setModal(null)} title="hyderabad" color="#a8794a">
+      <Modal open={modal==='charminar'} onClose={()=>setModal(null)} title="hyderabad 🍛" color="#a8794a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
-          home. the city that never sleeps — and taught me to pour my heart and soul into what I love.
+          home. my heart lives here even when I don't. the city that never sleeps — and neither did I when I was there.
         </div>
         <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-          a friend helped bring the AWS region here, and I saw the generational impact. someday I want to go back, consult governments and companies on AI strategy, angel invest in startups, and help ambitious kids take the leap of faith.
+          the biryani hits different. the nightlife hits different. the energy of the city hits different. someday I'm going back to build things there. until then, I cope with phone calls home and food that's never quite the same.
         </div>
       </Modal>
 
-      <Modal open={modal==='dc'} onClose={()=>setModal(null)} title="washington, dc" color="#2d6cdf">
+      <Modal open={modal==='dc'} onClose={()=>setModal(null)} title="washington, dc 🏛️" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
-          current base. this is where I'm building, exploring, and figuring out what's next.
+          current base of operations. UMD brought me here, AI keeps me here, Hyderabad will eventually take me back.
         </div>
         <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)' }}>
-          UMD grad. love the coffee shops and the occasional escape to Annapolis. always up for a chat if you're in town.
+          solid coffee scene, good energy, and Annapolis is a quick escape when I need water vibes. hit me up if you're around — I'm always down for a chat.
         </div>
       </Modal>
 
-      <Modal open={modal==='travel'} onClose={()=>setModal(null)} title="travel philosophy" color="#1a1a1a">
+      <Modal open={modal==='travel'} onClose={()=>setModal(null)} title="travel vibes ✈️" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 12 }}>
-          I like going to the same places again and again. once I find my connection with a city, I want to return — they tell me a story.
+          hot take: I'd rather go back to a place I love than hunt for somewhere new. once a city clicks, I want to keep going back. they tell me stories.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.7)', marginBottom: 12 }}>
-          <b style={{ color: '#e85d3a' }}>annapolis, maryland</b> — been there 10+ times. it has an energy that keeps pulling me back.
+          <b style={{ color: '#e85d3a' }}>annapolis, maryland</b> — been there 10+ times and counting. idk what it is, but that place has me.
         </div>
         <div style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontStyle:'italic' }}>
-          I haven't had the privilege to travel a lot yet, but every trip has left amazing memories.
+          haven't traveled as much as I'd like yet, but working on it.
         </div>
       </Modal>
 
@@ -2027,12 +2028,12 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='pickleball'} onClose={()=>setModal(null)} title="racket sports" color="#3a7d44">
+      <Modal open={modal==='pickleball'} onClose={()=>setModal(null)} title="racket sports 🏓" color="#3a7d44">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
-          pickleball, tennis, badminton, table tennis — I love them all. not a pro, but a solid intermediate in each.
+          pickleball, tennis, badminton, TT — I play them all and I'm weirdly decent at each? not pro level, but I'll make you work for it.
         </div>
         <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)' }}>
-          recently dabbling in golf too. if you play any of these in DC, let's rally.
+          also trying golf now because apparently I needed another hobby. if you're in DC and want to play anything with a racket (or club), let's go.
         </div>
       </Modal>
 
@@ -2042,21 +2043,21 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='coffee'} onClose={()=>setModal(null)} title="coffee obsession" color="#6b3a1f">
+      <Modal open={modal==='coffee'} onClose={()=>setModal(null)} title="coffee obsession ☕" color="#6b3a1f">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
-          black. or if I'm at a new spot, their specialty — always caffeine-heavy and coffee-rich.
+          yes, I'm that guy who asks where the beans are from. black, or their specialty if I'm feeling fancy — but always strong.
         </div>
         <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)', lineHeight: 1.6, marginBottom: 10 }}>
-          I drink based on the coffee belt: <b>Ethiopian · Colombian · Vietnamese · Indian · Peruvian</b>. Medium roast, proper brews, fine grinds for espresso.
+          I drink based on the coffee belt: <b>Ethiopian · Colombian · Vietnamese · Indian · Peruvian</b>. Medium roast, proper brews, fine grinds for espresso. I have opinions.
         </div>
         <div style={{ fontSize: 11, color:'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
-          if we're meeting for coffee, I probably want to talk about what you're building.
+          if we're getting coffee, I'm 100% going to ask what you're building.
         </div>
       </Modal>
 
-      <Modal open={modal==='gym'} onClose={()=>setModal(null)} title="getting fit" color="#2d6cdf">
+      <Modal open={modal==='gym'} onClose={()=>setModal(null)} title="fitness arc 💪" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
-          working on this journey. shipping products is mostly sitting — the gym is where I balance it out. compound effect applies here too.
+          currently in my "get fit" era. shipping products = sitting all day, so the gym is non-negotiable. compound effect works here too — small reps, big gains. (that's the plan anyway)
         </div>
       </Modal>
 
