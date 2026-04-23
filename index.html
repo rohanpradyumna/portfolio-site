@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Rohan — Rohan Pradyumna</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,6 +135,80 @@
   .corner span.live { color: var(--accent); }
   .corner span.live::before { content: '● '; animation: pulse 2s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.3 } }
+
+  /* ============================================================================
+     MOBILE RESPONSIVE STYLES
+     ============================================================================ */
+
+  /* Mobile: Allow scrolling */
+  @media (max-width: 768px) {
+    html, body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: auto;
+      min-height: 100%;
+      min-height: 100dvh;
+    }
+
+    .board {
+      position: fixed;
+      min-height: 100%;
+      min-height: 100dvh;
+    }
+
+    #root {
+      min-height: 100%;
+      min-height: 100dvh;
+      padding-bottom: 40px;
+    }
+
+    /* Smaller header */
+    .brand {
+      top: 16px;
+      left: 16px;
+      gap: 6px;
+    }
+    .brand .name {
+      font-size: 26px;
+    }
+    .brand .dot {
+      width: 5px;
+      height: 5px;
+    }
+    .brand .sub {
+      display: none;
+    }
+
+    /* Smaller corner */
+    .corner {
+      top: 16px;
+      right: 16px;
+      gap: 10px;
+      font-size: 10px;
+    }
+
+    /* Mobile hint */
+    .hint {
+      bottom: 10px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      font-size: 9px;
+      text-align: center;
+      white-space: nowrap;
+    }
+  }
+
+  /* Small mobile adjustments */
+  @media (max-width: 380px) {
+    .brand .name {
+      font-size: 22px;
+    }
+    .corner {
+      font-size: 9px;
+      gap: 8px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -455,18 +529,144 @@ function CallSticker(props) {
   );
 }
 
-// Headphones sticker
-function HeadphonesSticker(props) {
+// AirPods sticker with opening animation
+function AirPodsSticker({ onPlay, ...props }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleClick = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setIsOpen(true);
+
+    // Play the opening sound effect
+    if (tapAudioCtx) {
+      const ctx = tapAudioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    }
+
+    setTimeout(() => {
+      onPlay && onPlay();
+      setTimeout(() => {
+        setIsOpen(false);
+        setIsAnimating(false);
+      }, 800);
+    }, 400);
+  };
+
+  return (
+    <Sticker {...props} onClick={handleClick}>
+      <div style={{
+        width: 90,
+        height: 100,
+        background: '#fff',
+        borderRadius: 14,
+        padding: 6,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'visible',
+      }}>
+        <img
+          src="assets/icons/earphone.png"
+          alt="AirPods"
+          draggable="false"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            pointerEvents: 'none',
+            transform: isOpen ? 'scale(1.1)' : 'scale(1)',
+            transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        />
+        {/* Music notes animation when open */}
+        {isOpen && (
+          <>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                position: 'absolute',
+                top: -10 - i * 8,
+                left: 20 + i * 20,
+                fontSize: 16,
+                animation: `musicNote 0.8s ease-out ${i * 0.15}s forwards`,
+                opacity: 0,
+              }}>♪</div>
+            ))}
+          </>
+        )}
+        <style>{`
+          @keyframes musicNote {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-30px) rotate(20deg); opacity: 0; }
+          }
+        `}</style>
+      </div>
+    </Sticker>
+  );
+}
+
+// Laptop sticker for "My Work" section
+function LaptopSticker(props) {
   return (
     <Sticker {...props}>
-      <svg width="96" height="88" viewBox="0 0 100 90" style={{ overflow: 'visible' }}>
-        <path d="M 12 58 Q 12 18 50 18 Q 88 18 88 58" fill="none" stroke="#fff" strokeWidth="14" strokeLinecap="round"/>
-        <path d="M 12 58 Q 12 18 50 18 Q 88 18 88 58" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
-        <rect x="2" y="50" width="24" height="36" rx="8" fill="#e85d3a" stroke="#fff" strokeWidth="4"/>
-        <rect x="74" y="50" width="24" height="36" rx="8" fill="#e85d3a" stroke="#fff" strokeWidth="4"/>
-        <circle cx="14" cy="68" r="4" fill="#fff" opacity="0.7"/>
-        <circle cx="86" cy="68" r="4" fill="#fff" opacity="0.7"/>
-      </svg>
+      <div style={{
+        width: 100,
+        height: 90,
+        background: '#fff',
+        borderRadius: 14,
+        padding: 6,
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+      }}>
+        <img
+          src="assets/icons/programming.png"
+          alt="My Work"
+          draggable="false"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            pointerEvents: 'none',
+          }}
+        />
+        <div style={{
+          position: 'absolute',
+          bottom: -2,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#1a1a1a',
+          color: '#faf7ef',
+          fontFamily: "'Geist Mono', monospace",
+          fontSize: 8,
+          fontWeight: 700,
+          padding: '3px 8px',
+          borderRadius: 4,
+          letterSpacing: '0.05em',
+          whiteSpace: 'nowrap',
+          border: '2px solid #fff',
+        }}>
+          MY WORK
+        </div>
+      </div>
     </Sticker>
   );
 }
@@ -522,102 +722,469 @@ function LegoSticker(props) {
 }
 
 // ============================================================================
+// Coffee Machine Easter Egg - "Brew Me" sticker with Stoic wisdom
+// ============================================================================
+
+const STOIC_QUOTES = [
+  { text: "The happiness of your life depends upon the quality of your thoughts.", author: "Marcus Aurelius" },
+  { text: "We suffer more often in imagination than in reality.", author: "Seneca" },
+  { text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus" },
+  { text: "Waste no more time arguing about what a good man should be. Be one.", author: "Marcus Aurelius" },
+  { text: "If it is not right, do not do it. If it is not true, do not say it.", author: "Marcus Aurelius" },
+  { text: "Luck is what happens when preparation meets opportunity.", author: "Seneca" },
+  { text: "No person has the power to have everything they want, but it is in their power not to want what they don't have.", author: "Seneca" },
+  { text: "He who fears death will never do anything worthy of a living man.", author: "Seneca" },
+  { text: "First say to yourself what you would be; and then do what you have to do.", author: "Epictetus" },
+  { text: "The best revenge is not to be like your enemy.", author: "Marcus Aurelius" },
+];
+
+function CoffeeMachineSticker({ onBrew, ...props }) {
+  const [brewing, setBrewing] = useState(false);
+
+  const handleClick = () => {
+    if (brewing) return;
+    setBrewing(true);
+    // Play a subtle brewing sound effect
+    if (tapAudioCtx) {
+      const ctx = tapAudioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      // Create a low rumble + hiss sound
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(80, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 1.5);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 2);
+    }
+    setTimeout(() => {
+      setBrewing(false);
+      onBrew && onBrew();
+    }, 2200);
+  };
+
+  return (
+    <Sticker {...props} onClick={handleClick}>
+      <div style={{ position: 'relative', width: 100, height: 130 }}>
+        {/* Steam particles - only visible when brewing */}
+        <div style={{
+          position: 'absolute',
+          top: -20,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 60,
+          height: 40,
+          pointerEvents: 'none',
+          opacity: brewing ? 1 : 0,
+          transition: 'opacity 0.3s',
+        }}>
+          {[0,1,2,3,4].map(i => (
+            <div key={i} style={{
+              position: 'absolute',
+              left: 10 + i * 10,
+              bottom: 0,
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.7)',
+              animation: brewing ? `steam ${0.8 + i * 0.15}s ease-out infinite` : 'none',
+              animationDelay: `${i * 0.12}s`,
+            }} />
+          ))}
+        </div>
+
+        {/* Coffee machine body */}
+        <div style={{
+          width: 100,
+          height: 110,
+          background: '#fff',
+          borderRadius: 14,
+          padding: 6,
+          boxSizing: 'border-box',
+          animation: brewing ? 'machineShake 0.1s infinite' : 'none',
+        }}>
+          <img
+            src="assets/icons/coffee-machine.png"
+            alt="Coffee Machine"
+            draggable="false"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              pointerEvents: 'none',
+            }}
+          />
+
+          {/* Coffee drip animation overlay */}
+          {brewing && (
+            <div style={{
+              position: 'absolute',
+              bottom: 28,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 4,
+              height: 0,
+              background: 'linear-gradient(to bottom, #8B4513, #5D3A1A)',
+              borderRadius: 2,
+              animation: 'coffeeDrip 0.6s ease-in-out infinite',
+            }} />
+          )}
+        </div>
+
+        {/* BREW ME label */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: brewing ? '#8B4513' : '#6b3a1f',
+          color: '#faf7ef',
+          fontFamily: "'Geist Mono', monospace",
+          fontSize: 9,
+          fontWeight: 700,
+          padding: '4px 10px',
+          borderRadius: 6,
+          letterSpacing: '0.08em',
+          whiteSpace: 'nowrap',
+          border: '2px solid #fff',
+          transition: 'background 0.3s, transform 0.3s',
+          animation: brewing ? 'none' : 'brewPulse 2s ease-in-out infinite',
+        }}>
+          {brewing ? '☕ BREWING...' : '☕ BREW ME'}
+        </div>
+
+        <style>{`
+          @keyframes steam {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-15px) scale(1.3); opacity: 0.5; }
+            100% { transform: translateY(-30px) scale(0.6); opacity: 0; }
+          }
+          @keyframes machineShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px) rotate(-0.5deg); }
+            75% { transform: translateX(1px) rotate(0.5deg); }
+          }
+          @keyframes coffeeDrip {
+            0% { height: 0; opacity: 0; }
+            20% { height: 12px; opacity: 1; }
+            80% { height: 12px; opacity: 1; }
+            100% { height: 0; opacity: 0; transform: translateX(-50%) translateY(15px); }
+          }
+          @keyframes brewPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+          }
+        `}</style>
+      </div>
+    </Sticker>
+  );
+}
+
+// Stoic Wisdom Modal - special coffee-themed design
+function StoicWisdomModal({ open, onClose, quote }) {
+  if (!open || !quote) return null;
+  const isMobileModal = window.innerWidth <= 768;
+
+  return (
+    <div
+      onPointerDown={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(59, 32, 18, 0.65)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        zIndex: 100000,
+        display: 'flex',
+        alignItems: isMobileModal ? 'flex-end' : 'center',
+        justifyContent: 'center',
+        animation: 'fadeIn 0.3s ease',
+      }}
+    >
+      <div
+        onPointerDown={(e) => e.stopPropagation()}
+        style={{
+          background: 'linear-gradient(145deg, #f5e6d3 0%, #e8d4bc 50%, #dcc5a8 100%)',
+          color: '#3d2314',
+          borderRadius: isMobileModal ? '24px 24px 0 0' : 20,
+          padding: isMobileModal ? '32px 24px 40px' : '40px 44px',
+          maxWidth: isMobileModal ? '100%' : 440,
+          width: isMobileModal ? '100%' : 'auto',
+          boxShadow: '0 -4px 40px rgba(59, 32, 18, 0.3), 0 30px 60px rgba(59, 32, 18, 0.4), inset 0 1px 0 rgba(255,255,255,0.5)',
+          position: 'relative',
+          animation: isMobileModal ? 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)' : 'wisdomAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Coffee ring stain decoration */}
+        <div style={{
+          position: 'absolute',
+          top: -30,
+          right: -20,
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          border: '3px solid rgba(139, 69, 19, 0.12)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: -40,
+          left: -30,
+          width: 120,
+          height: 120,
+          borderRadius: '50%',
+          border: '2px solid rgba(139, 69, 19, 0.08)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Drag handle for mobile */}
+        {isMobileModal && (
+          <div style={{
+            width: 40,
+            height: 4,
+            background: 'rgba(61, 35, 20, 0.25)',
+            borderRadius: 2,
+            margin: '0 auto 20px',
+          }} />
+        )}
+
+        {/* Close button */}
+        <button onClick={onClose} style={{
+          position: 'absolute',
+          top: isMobileModal ? 24 : 16,
+          right: isMobileModal ? 16 : 16,
+          background: 'rgba(61, 35, 20, 0.1)',
+          border: 'none',
+          color: '#5d3a1a',
+          fontSize: 18,
+          cursor: 'pointer',
+          padding: 8,
+          borderRadius: 10,
+          minWidth: 40,
+          minHeight: 40,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background 0.2s',
+        }}>×</button>
+
+        {/* Header with coffee cup icon */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          marginBottom: 24,
+        }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            background: 'linear-gradient(135deg, #8B4513 0%, #5D3A1A 100%)',
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            boxShadow: '0 4px 12px rgba(93, 58, 26, 0.3)',
+          }}>
+            ☕
+          </div>
+          <div>
+            <div style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: isMobileModal ? 20 : 24,
+              fontStyle: 'italic',
+              color: '#3d2314',
+              letterSpacing: '-0.01em',
+            }}>
+              your daily brew
+            </div>
+            <div style={{
+              fontFamily: "'Geist Mono', monospace",
+              fontSize: 10,
+              color: '#8B6914',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              marginTop: 2,
+            }}>
+              a cup of stoic wisdom
+            </div>
+          </div>
+        </div>
+
+        {/* Quote */}
+        <div style={{
+          fontFamily: "'Instrument Serif', serif",
+          fontSize: isMobileModal ? 20 : 24,
+          lineHeight: 1.4,
+          color: '#3d2314',
+          marginBottom: 20,
+          fontStyle: 'italic',
+          textWrap: 'balance',
+        }}>
+          "{quote.text}"
+        </div>
+
+        {/* Author */}
+        <div style={{
+          fontFamily: "'Geist Mono', monospace",
+          fontSize: 12,
+          color: '#6b5344',
+          letterSpacing: '0.04em',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}>
+          <span style={{
+            width: 24,
+            height: 1,
+            background: '#8B6914',
+            opacity: 0.5,
+          }} />
+          {quote.author}
+        </div>
+
+        {/* Brew another button */}
+        <button
+          onClick={onClose}
+          style={{
+            marginTop: 28,
+            width: '100%',
+            padding: '14px 20px',
+            background: 'linear-gradient(135deg, #6b3a1f 0%, #4a2815 100%)',
+            color: '#f5e6d3',
+            border: 'none',
+            borderRadius: 12,
+            fontFamily: "'Geist Mono', monospace",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            letterSpacing: '0.03em',
+            boxShadow: '0 4px 16px rgba(74, 40, 21, 0.35)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}
+        >
+          savor this thought ✨
+        </button>
+
+        <style>{`
+          @keyframes wisdomAppear {
+            0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Card Stack component
 // ============================================================================
 
 const CARDS = [
   {
     kind: 'intro',
-    body: "Yo, I'm Rohan. I help small businesses figure out their AI strategy — and actually ship it.",
-    foot: 'ex-founder · pm · builder',
+    body: "Hey, I'm Rohan. I'm endlessly curious about the messy problems in the world — and I love building products to solve them.",
+    foot: 'founder · ai strategist · builder',
   },
   {
     kind: 'bullets',
     title: 'what I do',
     items: [
-      'AI strategy + roadmaps for SMBs',
-      'Product discovery → launch in weeks',
-      'Zero-to-one builder, ex-startup founder',
-      'Bridge between customers, design, engineering',
+      'Lead AI product development at Yottaflex.ai',
+      'Help companies 5x-100x productivity with AI',
+      'Turn requirements into production code',
+      'Change teams from doers to reviewers',
     ],
   },
   {
     kind: 'bullets',
     title: 'currently',
     items: [
-      'Consulting on AI adoption for SMBs',
-      'Shipping small tools + experiments',
-      'Based in DC · often in Hyderabad',
+      'Building YottaBuilder — AI-powered SDLC platform',
+      'Leading AI transformation strategy',
+      'Based in DC · heart in Hyderabad',
     ],
   },
   {
     kind: 'bullets',
     title: 'past lives',
     items: [
-      'Founder → built + sold early-stage ideas',
-      'PM across fintech + productivity',
-      'Launched products used by thousands',
+      'Founded Intripid — AI travel planning (15K users, Antler-backed)',
+      'First startup gig at Flock Shopping',
+      'MS in Information Systems, UMD',
     ],
   },
   {
     kind: 'quote',
-    body: '"Ship the ugly version. Then listen harder than you talk."',
-    foot: '— my operating principle',
+    body: '"The ugly version is really, really, really important."',
+    foot: '— learned the hard way',
   },
   {
     kind: 'bullets',
-    title: "what I'm good at",
+    title: "hard-won lessons",
     items: [
-      'Turning fuzzy problems into shippable scopes',
-      'Customer interviews that go somewhere',
-      'Prototyping in code (badly, but fast)',
-      'Keeping teams honest about tradeoffs',
+      'Sell the product, not just build it',
+      'Obsess over user problems, not features',
+      'Walk the hard miles — experience matters',
+      'Pitch value to open wallets',
     ],
   },
   {
     kind: 'bullets',
     title: 'off the clock',
     items: [
-      'Pickleball (still bad, working on it)',
-      'Long runs · photo walks · bad coffee',
-      'Flying back home to Hyderabad',
-      'Rebuilding my record collection',
+      'Racket sports — pickleball, tennis, badminton, TT',
+      'Coffee obsession (Ethiopian · Colombian · Vietnamese)',
+      'Philosophy books and long conversations',
+      'Returning to Annapolis again and again',
     ],
   },
   {
     kind: 'bullets',
-    title: 'how I like to work',
+    title: 'what drives me',
     items: [
-      'Small teams, tight loops, short docs',
-      'Write → show → decide → repeat',
-      'Defaulting to action beats defaulting to meetings',
+      'Knowledge is freedom — ignorance is fear',
+      'Compound effect: small steps, big results',
+      'Innovation can come from anywhere now',
+      'Someday: give back to Hyderabad',
     ],
   },
   {
     kind: 'cta',
     title: 'say hi',
-    body: "Working on something AI-shaped and want a product brain? Or just want to talk pickleball strategy? The email / call / whatsapp stickers around this card all work.",
+    body: "Building something AI-shaped? Navigating the immigrant founder journey? Or just want to talk coffee origins and philosophy? Reach out — I love meeting curious people.",
     foot: 'pradyumnarohan@gmail.com',
   },
 ];
 
-const chevBtn = {
-  background: 'rgba(245,242,232,0.08)',
-  border: '1px solid rgba(245,242,232,0.28)',
-  color: 'rgba(245,242,232,0.9)',
-  width: 32,
-  height: 32,
-  borderRadius: 16,
-  cursor: 'pointer',
-  fontSize: 18,
-  fontFamily: 'serif',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 0,
-  lineHeight: 1,
-  transition: 'background 0.15s, transform 0.15s',
-};
+// Responsive chevron button style (used inside CardStack with isMobile)
+function getChevBtnStyle(isMobile) {
+  return {
+    background: 'rgba(245,242,232,0.08)',
+    border: '1px solid rgba(245,242,232,0.28)',
+    color: 'rgba(245,242,232,0.9)',
+    width: isMobile ? 40 : 32,
+    height: isMobile ? 40 : 32,
+    borderRadius: isMobile ? 20 : 16,
+    cursor: 'pointer',
+    fontSize: isMobile ? 20 : 18,
+    fontFamily: 'serif',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
+    lineHeight: 1,
+    transition: 'background 0.15s, transform 0.15s',
+    minWidth: 44,
+    minHeight: 44,
+  };
+}
 
 const titleStyle = {
   fontFamily: "'Instrument Serif', serif",
@@ -649,20 +1216,37 @@ const ctaBtn = {
   letterSpacing: '0.02em',
 };
 
-function CardBody({ card }) {
+function CardBody({ card, isMobile }) {
+  const mTitleStyle = {
+    ...titleStyle,
+    fontSize: isMobile ? 24 : 30,
+  };
+  const mFootStyle = {
+    ...footStyle,
+    fontSize: isMobile ? 10 : 11,
+    marginTop: isMobile ? 10 : 14,
+  };
+  const mCtaBtn = {
+    ...ctaBtn,
+    padding: isMobile ? '12px 18px' : '8px 14px',
+    fontSize: isMobile ? 13 : 12,
+    minWidth: isMobile ? 44 : 'auto',
+    minHeight: isMobile ? 44 : 'auto',
+  };
+
   if (card.kind === 'intro') {
     return (
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{
           fontFamily: "'Geist Mono', monospace",
-          fontSize: 19,
+          fontSize: isMobile ? 16 : 19,
           lineHeight: 1.5,
           fontWeight: 500,
           textWrap: 'pretty',
         }}>
           {card.body}
         </div>
-        <div style={footStyle}>{card.foot}</div>
+        <div style={mFootStyle}>{card.foot}</div>
       </div>
     );
   }
@@ -671,7 +1255,7 @@ function CardBody({ card }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{
           fontFamily: "'Instrument Serif', serif",
-          fontSize: 28,
+          fontSize: isMobile ? 22 : 28,
           lineHeight: 1.25,
           fontStyle: 'italic',
           color: '#f5f2e8',
@@ -679,19 +1263,19 @@ function CardBody({ card }) {
         }}>
           {card.body}
         </div>
-        <div style={footStyle}>{card.foot}</div>
+        <div style={mFootStyle}>{card.foot}</div>
       </div>
     );
   }
   if (card.kind === 'cta') {
     return (
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={titleStyle}>{card.title}</div>
-        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: 14, lineHeight: 1.55, color: 'rgba(245,242,232,0.85)', marginTop: 10, textWrap:'pretty' }}>
+        <div style={mTitleStyle}>{card.title}</div>
+        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: isMobile ? 12 : 14, lineHeight: 1.55, color: 'rgba(245,242,232,0.85)', marginTop: isMobile ? 8 : 10, textWrap:'pretty' }}>
           {card.body}
         </div>
-        <div style={{ marginTop: 14 }}>
-          <a href="mailto:pradyumnarohan@gmail.com" style={ctaBtn}>
+        <div style={{ marginTop: isMobile ? 16 : 14 }}>
+          <a href="mailto:pradyumnarohan@gmail.com" style={mCtaBtn}>
             {card.foot} →
           </a>
         </div>
@@ -701,17 +1285,17 @@ function CardBody({ card }) {
   // bullets
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      <div style={titleStyle}>{card.title}</div>
-      <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0' }}>
+      <div style={mTitleStyle}>{card.title}</div>
+      <ul style={{ listStyle: 'none', padding: 0, margin: isMobile ? '8px 0 0' : '10px 0 0' }}>
         {card.items.map((t, i) => (
           <li key={i} style={{
             fontFamily: "'Geist Mono', monospace",
-            fontSize: 13.5,
+            fontSize: isMobile ? 12 : 13.5,
             lineHeight: 1.55,
             color: 'rgba(245,242,232,0.92)',
-            padding: '5px 0',
+            padding: isMobile ? '4px 0' : '5px 0',
             display: 'flex',
-            gap: 10,
+            gap: isMobile ? 8 : 10,
           }}>
             <span style={{ color: '#e85d3a', flexShrink: 0 }}>▸</span>
             <span style={{textWrap:'pretty'}}>{t}</span>
@@ -727,6 +1311,20 @@ function CardStack() {
   const [drag, setDrag] = useState({ active: false, dx: 0, dy: 0 });
   const [flyOff, setFlyOff] = useState(null);
   const startRef = useRef(null);
+
+  // Responsive sizing
+  const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
+  useEffect(() => {
+    const onR = () => setDims({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener('resize', onR);
+    return () => window.removeEventListener('resize', onR);
+  }, []);
+
+  const isMobile = dims.w <= 768;
+  const cardW = isMobile ? Math.min(dims.w - 32, 400) : 440;
+  const cardH = isMobile ? 'auto' : 320;
+  const cardMinH = isMobile ? 280 : 300;
+  const cardPadding = isMobile ? '24px 20px 22px' : '28px 30px 26px';
 
   const cardOrder = [];
   for (let i = 0; i < 3; i++) {
@@ -804,13 +1402,15 @@ function CardStack() {
 
   return (
     <div style={{
-      position: 'absolute',
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: 440,
-      height: 320,
+      position: isMobile ? 'relative' : 'absolute',
+      left: isMobile ? 'auto' : '50%',
+      top: isMobile ? 'auto' : '50%',
+      transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+      width: cardW,
+      height: isMobile ? 'auto' : 320,
+      minHeight: cardMinH,
       zIndex: 500,
+      margin: isMobile ? '80px auto 0' : 0,
     }}>
       {/* pile of cards behind - more visible layering */}
       {[5,4,3,2,1].map(n => (
@@ -818,8 +1418,8 @@ function CardStack() {
           position: 'absolute',
           inset: 0,
           background: n <= 2 ? '#232323' : '#1a1a1a',
-          borderRadius: 18,
-          transform: `translateY(${n*10}px) scale(${1 - n*0.018}) rotate(${n * 0.3}deg)`,
+          borderRadius: isMobile ? 14 : 18,
+          transform: `translateY(${n*(isMobile ? 6 : 10)}px) scale(${1 - n*0.018}) rotate(${n * 0.3}deg)`,
           opacity: n <= 2 ? 0.95 : 0.4 - n*0.06,
           boxShadow: n <= 2 ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
           zIndex: -n,
@@ -846,12 +1446,12 @@ function CardStack() {
               position: 'absolute',
               left: '50%',
               top: '50%',
-              width: 440,
-              minHeight: 300,
+              width: cardW,
+              minHeight: cardMinH,
               background: '#1a1a1a',
               color: '#f5f2e8',
-              borderRadius: 18,
-              padding: '28px 30px 26px',
+              borderRadius: isMobile ? 14 : 18,
+              padding: cardPadding,
               boxSizing: 'border-box',
               transform: translate,
               transition: flying
@@ -873,10 +1473,10 @@ function CardStack() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 14,
-              marginBottom: 16,
+              gap: isMobile ? 10 : 14,
+              marginBottom: isMobile ? 12 : 16,
               fontFamily: "'Geist Mono', monospace",
-              fontSize: 12,
+              fontSize: isMobile ? 11 : 12,
               color: 'rgba(245,242,232,0.5)',
               whiteSpace: 'nowrap',
             }}>
@@ -884,18 +1484,18 @@ function CardStack() {
                 data-nodrag
                 onPointerDown={(e)=>e.stopPropagation()}
                 onClick={(e)=>{e.stopPropagation(); prev();}}
-                style={chevBtn}
+                style={getChevBtnStyle(isMobile)}
                 aria-label="previous card">‹</button>
               <span style={{whiteSpace:'nowrap', minWidth: 56, textAlign:'center', display:'inline-block'}}>{String(cardIdx + 1).padStart(2,'0')}&nbsp;/&nbsp;{String(CARDS.length).padStart(2,'0')}</span>
               <button
                 data-nodrag
                 onPointerDown={(e)=>e.stopPropagation()}
                 onClick={(e)=>{e.stopPropagation(); next();}}
-                style={chevBtn}
+                style={getChevBtnStyle(isMobile)}
                 aria-label="next card">›</button>
             </div>
 
-            <CardBody card={card} />
+            <CardBody card={card} isMobile={isMobile} />
           </div>
         );
       })}
@@ -909,6 +1509,7 @@ function CardStack() {
 
 function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
   if (!open) return null;
+  const isMobileModal = window.innerWidth <= 768;
   return (
     <div
       onPointerDown={onClose}
@@ -917,11 +1518,13 @@ function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
         inset: 0,
         background: 'rgba(20,15,5,0.45)',
         backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
         zIndex: 100000,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: isMobileModal ? 'flex-end' : 'center',
         justifyContent: 'center',
         animation: 'fadeIn 0.2s ease',
+        padding: isMobileModal ? 0 : 20,
       }}
     >
       <div
@@ -929,28 +1532,43 @@ function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
         style={{
           background: color,
           color: '#f5f2e8',
-          borderRadius: 16,
-          padding: '28px 32px',
-          maxWidth: 460,
-          minWidth: 340,
-          boxShadow: '0 30px 60px rgba(20,10,0,0.4)',
+          borderRadius: isMobileModal ? '20px 20px 0 0' : 16,
+          padding: isMobileModal ? '24px 20px 32px' : '28px 32px',
+          maxWidth: isMobileModal ? '100%' : 460,
+          minWidth: isMobileModal ? '100%' : 340,
+          width: isMobileModal ? '100%' : 'auto',
+          boxShadow: '0 -10px 40px rgba(20,10,0,0.3), 0 30px 60px rgba(20,10,0,0.4)',
           fontFamily: "'Geist Mono', monospace",
           position: 'relative',
-          animation: 'pop 0.25s cubic-bezier(0.2,0.8,0.2,1)',
+          animation: isMobileModal ? 'slideUp 0.3s cubic-bezier(0.2,0.8,0.2,1)' : 'pop 0.25s cubic-bezier(0.2,0.8,0.2,1)',
+          maxHeight: isMobileModal ? '85vh' : 'none',
+          overflowY: 'auto',
         }}
       >
+        {/* Drag handle for mobile */}
+        {isMobileModal && (
+          <div style={{
+            width: 36,
+            height: 4,
+            background: 'rgba(245,242,232,0.3)',
+            borderRadius: 2,
+            margin: '0 auto 16px',
+          }} />
+        )}
         <button onClick={onClose} style={{
-          position: 'absolute', top: 12, right: 14, background: 'transparent', border: 'none',
-          color: 'rgba(245,242,232,0.6)', fontSize: 20, cursor: 'pointer', padding: 4,
+          position: 'absolute', top: isMobileModal ? 20 : 12, right: isMobileModal ? 16 : 14, background: 'transparent', border: 'none',
+          color: 'rgba(245,242,232,0.6)', fontSize: 24, cursor: 'pointer', padding: 8,
+          minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>×</button>
-        {title && <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontStyle:'italic', marginBottom: 12 }}>{title}</div>}
-        <div style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(245,242,232,0.9)', textWrap:'pretty' }}>
+        {title && <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: isMobileModal ? 24 : 28, fontStyle:'italic', marginBottom: 12, paddingRight: 40 }}>{title}</div>}
+        <div style={{ fontSize: isMobileModal ? 13 : 14, lineHeight: 1.6, color: 'rgba(245,242,232,0.9)', textWrap:'pretty' }}>
           {children}
         </div>
       </div>
       <style>{`
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes pop { from { transform: scale(0.9); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
       `}</style>
     </div>
   );
@@ -1005,6 +1623,7 @@ function App() {
   const [phoneShown, setPhoneShown] = useState(false);
   const [legoCount, setLegoCount] = useState(0);
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [stoicQuote, setStoicQuote] = useState(null);
 
   const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
   useEffect(() => {
@@ -1012,6 +1631,10 @@ function App() {
     window.addEventListener('resize', onR);
     return () => window.removeEventListener('resize', onR);
   }, []);
+
+  // Responsive breakpoints
+  const isMobile = dims.w <= 768;
+  const isSmallMobile = dims.w <= 380;
 
   // Center-based orbital positioning - stickers cluster around the card
   const cx = dims.w / 2;
@@ -1066,11 +1689,15 @@ function App() {
   // Layout key to force re-mount when viewport changes significantly
   const layoutKey = `${Math.floor(dims.w / 100)}-${Math.floor(dims.h / 100)}`;
 
-  const portraitW = 154, portraitH = 194;
+  const portraitW = isMobile ? 120 : 154;
+  const portraitH = isMobile ? 150 : 194;
+
+  // Mobile grid positions - stickers arranged in a flowing grid below card
+  const mobileScale = isSmallMobile ? 0.75 : 0.85;
 
   // Orbital positions - angle (degrees), distance from card edge, width, height, rotation
   // All stickers kept straight (0 rotation)
-  const raw = [
+  const raw = isMobile ? [] : [
     // Upper area
     { id: 'plane',       ...placeOrbital(-95, 90, 110, 76, 0) },
     { id: 'tagPM',       ...placeOrbital(-140, 85, 160, 36, 0) },
@@ -1092,15 +1719,18 @@ function App() {
     { id: 'lego',        ...placeOrbital(60, 190, 88, 76, 0) },
 
     // Bottom area
-    { id: 'headphones',  ...placeOrbital(240, 85, 96, 88, 0) },
+    { id: 'headphones',  ...placeOrbital(240, 85, 90, 100, 0) },
     { id: 'camera',      ...placeOrbital(260, 150, 96, 76, 0) },
     { id: 'gym',         ...placeOrbital(295, 95, 96, 96, 0) },
+
+    // Laptop - My Work
+    { id: 'laptop',      ...placeOrbital(-60, 130, 100, 90, 0) },
   ];
 
   const resolved = resolveOverlaps(raw);
   const positions = {};
   resolved.forEach(p => { positions[p.id] = { x: p.x, y: p.y, rot: p.rot }; });
-  const portraitPos = positions.portrait;
+  const portraitPos = positions.portrait || { x: 0, y: 0, rot: 0 };
 
   // Interaction handlers
   const openLinkedIn = () => window.open('https://www.linkedin.com/in/rohanpradyumna/', '_blank');
@@ -1122,13 +1752,135 @@ function App() {
   const coffeeVibes = () => setModal('coffee');
   const gymVibes = () => setModal('gym');
   const portraitClick = () => setModal('portrait');
+  const brewCoffee = () => {
+    const randomQuote = STOIC_QUOTES[Math.floor(Math.random() * STOIC_QUOTES.length)];
+    setStoicQuote(randomQuote);
+    setModal('stoic');
+  };
 
-  return (
+  // Mobile sticker grid component
+  const MobileStickerGrid = () => {
+    const gridStyle = {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: isSmallMobile ? 12 : 16,
+      padding: '24px 16px 32px',
+      maxWidth: 420,
+      margin: '0 auto',
+    };
+
+    const stickerWrapStyle = {
+      position: 'relative',
+      transform: `scale(${mobileScale})`,
+      transformOrigin: 'center center',
+    };
+
+    return (
+      <div style={gridStyle}>
+        {/* Portrait - larger, centered first */}
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+          <div style={{ ...stickerWrapStyle, transform: 'scale(1)' }}>
+            <PhotoSticker
+              id="portrait-m"
+              src="assets/rohan-portrait.jpg"
+              w={portraitW}
+              h={portraitH}
+              initial={{ x: 0, y: 0, rot: 0 }}
+              zBase={15}
+              shape="rounded"
+              onClick={portraitClick}
+              entranceDelay={50}
+              style={{ position: 'relative' }}
+            />
+          </div>
+        </div>
+
+        {/* Tags row */}
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 8 }}>
+          <div style={stickerWrapStyle}>
+            <WordSticker id="tag-founder-m" text="founder" initial={{ x: 0, y: 0, rot: 0 }} zBase={5}
+              bg="#1a1a1a" fg="#faf7ef" fontSize={11} padX={10} padY={5} entranceDelay={100} style={{ position: 'relative' }} />
+          </div>
+          <div style={stickerWrapStyle}>
+            <WordSticker id="tag-ai-m" text="ai · strategist" initial={{ x: 0, y: 0, rot: 0 }} zBase={5}
+              bg="#e85d3a" fg="#faf7ef" fontSize={11} padX={10} padY={5} entranceDelay={150} style={{ position: 'relative' }} />
+          </div>
+        </div>
+
+        {/* Contact stickers - prominent */}
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="linkedin-m" src="assets/icons/linkedin.png" size={76} initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={openLinkedIn} entranceDelay={200} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="whatsapp-m" src="assets/icons/whatsapp.png" size={76} initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={openWhatsApp} entranceDelay={250} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <EmailSticker id="email-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={openEmail} entranceDelay={300} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <CallSticker id="call-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={showPhone} entranceDelay={350} style={{ position: 'relative' }} />
+        </div>
+
+        {/* Location stickers */}
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="charminar-m" src="assets/icons/charminar.png" size={90} initial={{ x: 0, y: 0, rot: 0 }} zBase={8} onClick={charminarFact} entranceDelay={400} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="dc-m" src="assets/icons/dc.png" size={86} initial={{ x: 0, y: 0, rot: 0 }} zBase={8} onClick={dcFact} entranceDelay={450} style={{ position: 'relative' }} />
+        </div>
+
+        {/* My Work - Laptop sticker */}
+        <div style={stickerWrapStyle}>
+          <LaptopSticker id="laptop-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={8} onClick={() => setModal('work')} entranceDelay={475} style={{ position: 'relative' }} />
+        </div>
+
+        {/* Hobby stickers */}
+        <div style={stickerWrapStyle}>
+          <AirPodsSticker id="airpods-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onPlay={toggleMusic} entranceDelay={500} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="plane-m" src="assets/icons/plane.png" size={84} initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onClick={travelList} entranceDelay={550} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="beach-m" src="assets/icons/beach.png" size={78} initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onClick={beachVibes} entranceDelay={600} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <CameraSticker id="camera-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onClick={cameraVibes} entranceDelay={650} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="coffee-m" src="assets/icons/coffee.png" size={72} initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onClick={coffeeVibes} entranceDelay={700} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <ImageSticker id="gym-m" src="assets/icons/gym.png" size={76} initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onClick={gymVibes} entranceDelay={750} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <PickleballSticker id="pickleball-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onClick={pickleballVibes} entranceDelay={800} style={{ position: 'relative' }} />
+        </div>
+        <div style={stickerWrapStyle}>
+          <LegoSticker id="lego-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={7} onClick={bumpLego} entranceDelay={850} style={{ position: 'relative' }} />
+        </div>
+
+        {/* Easter Egg: Coffee Machine - separate section */}
+        <div style={{ width: '100%', marginTop: 24, paddingTop: 20, borderTop: '1px dashed rgba(160, 140, 80, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: 9, color: 'var(--ink-2)', letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.6 }}>
+            ↓ easter egg ↓
+          </div>
+          <div style={{ ...stickerWrapStyle, transform: 'scale(0.9)' }}>
+            <CoffeeMachineSticker id="coffeeMachine-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={6} onBrew={brewCoffee} entranceDelay={1000} style={{ position: 'relative' }} />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Desktop stickers (orbital layout)
+  const DesktopStickers = () => (
     <>
       {/* Word tags at top */}
-      <WordSticker id="tag-pm" text="product · manager" initial={positions.tagPM} zBase={5}
+      <WordSticker id="tag-founder" text="founder" initial={positions.tagPM} zBase={5}
         bg="#1a1a1a" fg="#faf7ef" fontSize={13} padX={14} padY={7} entranceDelay={100} />
-      <WordSticker id="tag-ai" text="ai · builder" initial={positions.tagAI} zBase={5}
+      <WordSticker id="tag-ai" text="ai · strategist" initial={positions.tagAI} zBase={5}
         bg="#e85d3a" fg="#faf7ef" fontSize={13} padX={14} padY={7} entranceDelay={150} />
 
       {/* Portrait */}
@@ -1159,15 +1911,37 @@ function App() {
       <ImageSticker id="beach" src="assets/icons/beach.png" size={98} initial={positions.beach} zBase={7} onClick={beachVibes} entranceDelay={550} />
 
       {/* Hobbies / lifestyle */}
-      <HeadphonesSticker id="headphones" initial={positions.headphones} zBase={7} onClick={toggleMusic} entranceDelay={600} />
+      <AirPodsSticker id="airpods" initial={positions.headphones} zBase={7} onPlay={toggleMusic} entranceDelay={600} />
       <ImageSticker id="coffee" src="assets/icons/coffee.png" size={88} initial={positions.coffee} zBase={7} onClick={coffeeVibes} entranceDelay={650} />
       <CameraSticker id="camera" initial={positions.camera} zBase={7} onClick={cameraVibes} entranceDelay={700} />
       <ImageSticker id="gym" src="assets/icons/gym.png" size={96} initial={positions.gym} zBase={7} onClick={gymVibes} entranceDelay={750} />
       <PickleballSticker id="pickleball" initial={positions.pickleball} zBase={7} onClick={pickleballVibes} entranceDelay={800} />
       <LegoSticker id="lego" initial={positions.lego} zBase={7} onClick={bumpLego} entranceDelay={850} />
 
+      {/* My Work - Laptop sticker */}
+      <LaptopSticker id="laptop" initial={positions.laptop} zBase={8} onClick={() => setModal('work')} entranceDelay={900} />
+
+      {/* Easter Egg: Coffee Machine - positioned in bottom-left corner, away from main stickers */}
+      <CoffeeMachineSticker
+        id="coffeeMachine"
+        initial={{ x: 40, y: dims.h - 180, rot: -3 }}
+        zBase={6}
+        onBrew={brewCoffee}
+        entranceDelay={1200}
+      />
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop: orbital stickers */}
+      {!isMobile && <DesktopStickers />}
+
       {/* CENTER — card stack */}
       <CardStack />
+
+      {/* Mobile: sticker grid below card */}
+      {isMobile && <MobileStickerGrid />}
 
       {/* Modals */}
       <Modal open={modal==='phone'} onClose={()=>setModal(null)} title="call me" color="#1a1a1a">
@@ -1217,34 +1991,34 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='charminar'} onClose={()=>setModal(null)} title="charminar, hyderabad" color="#a8794a">
+      <Modal open={modal==='charminar'} onClose={()=>setModal(null)} title="hyderabad" color="#a8794a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
-          home. this is where I grew up — the four minarets in old hyderabad, built in 1591.
+          home. the city that never sleeps — and taught me to pour my heart and soul into what I love.
         </div>
         <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-          the city gave me biryani, urdu poetry, the best chai of my life, and the stubbornness that every founder needs. I try to go back once a year.
+          a friend helped bring the AWS region here, and I saw the generational impact. someday I want to go back, consult governments and companies on AI strategy, angel invest in startups, and help ambitious kids take the leap of faith.
         </div>
       </Modal>
 
       <Modal open={modal==='dc'} onClose={()=>setModal(null)} title="washington, dc" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
-          current base. DC is where I do most of my work — good coffee, long runs along the potomac, and just enough startup energy to keep it interesting.
+          current base. this is where I'm building, exploring, and figuring out what's next.
         </div>
         <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)' }}>
-          always up for coffee if you're in town.
+          UMD grad. love the coffee shops and the occasional escape to Annapolis. always up for a chat if you're in town.
         </div>
       </Modal>
 
-      <Modal open={modal==='travel'} onClose={()=>setModal(null)} title="places I've been" color="#1a1a1a">
-        <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.6)', marginBottom: 12 }}>a non-exhaustive list, in no order:</div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: '6px 18px', fontSize: 13, color:'#f5f2e8' }}>
-          {['hyderabad','washington dc','new york','lisbon','tokyo','berlin','bali','reykjavík','mexico city','san francisco','istanbul','kerala'].map(p=>(
-            <div key={p} style={{ display:'flex', alignItems:'center', gap: 8 }}>
-              <span style={{ color:'#e85d3a' }}>✦</span>{p}
-            </div>
-          ))}
+      <Modal open={modal==='travel'} onClose={()=>setModal(null)} title="travel philosophy" color="#1a1a1a">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 12 }}>
+          I like going to the same places again and again. once I find my connection with a city, I want to return — they tell me a story.
         </div>
-        <div style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', marginTop: 14, fontStyle:'italic' }}>next up: buenos aires, hopefully.</div>
+        <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.7)', marginBottom: 12 }}>
+          <b style={{ color: '#e85d3a' }}>annapolis, maryland</b> — been there 10+ times. it has an energy that keeps pulling me back.
+        </div>
+        <div style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontStyle:'italic' }}>
+          I haven't had the privilege to travel a lot yet, but every trip has left amazing memories.
+        </div>
       </Modal>
 
       <Modal open={modal==='beach'} onClose={()=>setModal(null)} title="beach brain" color="#2d6cdf">
@@ -1253,9 +2027,12 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='pickleball'} onClose={()=>setModal(null)} title="pickleball szn" color="#3a7d44">
-        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
-          currently 3.2 DUPR. working my way up. if you play in DC, hit me up — I need doubles partners who don't mind losing a few.
+      <Modal open={modal==='pickleball'} onClose={()=>setModal(null)} title="racket sports" color="#3a7d44">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
+          pickleball, tennis, badminton, table tennis — I love them all. not a pro, but a solid intermediate in each.
+        </div>
+        <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)' }}>
+          recently dabbling in golf too. if you play any of these in DC, let's rally.
         </div>
       </Modal>
 
@@ -1265,15 +2042,21 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='coffee'} onClose={()=>setModal(null)} title="coffee order" color="#6b3a1f">
-        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
-          cortado, no sugar. if it's after 3pm, a matcha. if we're meeting for coffee, I probably want to talk about what you're building.
+      <Modal open={modal==='coffee'} onClose={()=>setModal(null)} title="coffee obsession" color="#6b3a1f">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
+          black. or if I'm at a new spot, their specialty — always caffeine-heavy and coffee-rich.
+        </div>
+        <div style={{ fontSize: 12, color:'rgba(255,255,255,0.8)', lineHeight: 1.6, marginBottom: 10 }}>
+          I drink based on the coffee belt: <b>Ethiopian · Colombian · Vietnamese · Indian · Peruvian</b>. Medium roast, proper brews, fine grinds for espresso.
+        </div>
+        <div style={{ fontSize: 11, color:'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+          if we're meeting for coffee, I probably want to talk about what you're building.
         </div>
       </Modal>
 
-      <Modal open={modal==='gym'} onClose={()=>setModal(null)} title="lifting" color="#2d6cdf">
+      <Modal open={modal==='gym'} onClose={()=>setModal(null)} title="getting fit" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
-          5x/week, push-pull-legs. shipping products is mostly sitting down — the gym is where I pay the tax. current bench PR: a polite number I'm working on.
+          working on this journey. shipping products is mostly sitting — the gym is where I balance it out. compound effect applies here too.
         </div>
       </Modal>
 
@@ -1282,6 +2065,51 @@ function App() {
           taken under the cherry blossoms last spring. the stripes were a mistake, the blossoms were not.
         </div>
       </Modal>
+
+      {/* My Work Modal */}
+      <Modal open={modal==='work'} onClose={()=>setModal(null)} title="my work" color="#1a1a1a">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* YottaBuilder */}
+          <div style={{ borderLeft: '3px solid #e85d3a', paddingLeft: 14 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#f5f2e8', marginBottom: 4 }}>
+              YottaBuilder <span style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontWeight: 400 }}>@ Yottaflex.ai</span>
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.75)', lineHeight: 1.5 }}>
+              Leading the team building an AI-powered SDLC platform. Requirements → production code. Turning agile teams from doers to reviewers.
+            </div>
+            <div style={{ fontSize: 10, color: '#e85d3a', marginTop: 6, fontFamily: "'Geist Mono', monospace" }}>CURRENT · STEALTH</div>
+          </div>
+
+          {/* Intripid */}
+          <div style={{ borderLeft: '3px solid #2d6cdf', paddingLeft: 14 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#f5f2e8', marginBottom: 4 }}>
+              Intripid <span style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontWeight: 400 }}>(formally Travana)</span>
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.75)', lineHeight: 1.5 }}>
+              Founded an AI travel planning app. Built "What's Next" — predicting what you should do based on mood, location, and patterns. 15K users, Antler-backed.
+            </div>
+            <div style={{ fontSize: 10, color: '#2d6cdf', marginTop: 6, fontFamily: "'Geist Mono', monospace" }}>FOUNDER · 2022-2023</div>
+          </div>
+
+          {/* Flock */}
+          <div style={{ borderLeft: '3px solid #3a7d44', paddingLeft: 14 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#f5f2e8', marginBottom: 4 }}>
+              Flock Shopping
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.75)', lineHeight: 1.5 }}>
+              My first startup gig. Social commerce platform — now pivoted to AI image generation for beauty brands.
+            </div>
+            <div style={{ fontSize: 10, color: '#3a7d44', marginTop: 6, fontFamily: "'Geist Mono', monospace" }}>FIRST STARTUP · INTERN</div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Stoic Wisdom Modal - Easter Egg */}
+      <StoicWisdomModal
+        open={modal==='stoic'}
+        onClose={()=>{ setModal(null); setStoicQuote(null); }}
+        quote={stoicQuote}
+      />
     </>
   );
 }
