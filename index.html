@@ -1372,7 +1372,7 @@ function CardStack() {
     }
   };
 
-  // Shuffle sound effect
+  // Shuffle sound effect - hard card slap into deck
   const playShuffleSound = () => {
     if (!tapAudioCtx) tapAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = tapAudioCtx;
@@ -1380,30 +1380,64 @@ function CardStack() {
 
     const now = ctx.currentTime;
 
-    // Create a card shuffle sound - quick swoosh with paper texture
-    const bufferSize = ctx.sampleRate * 0.15;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-
-    for (let i = 0; i < bufferSize; i++) {
-      const t = i / bufferSize;
-      const envelope = Math.sin(t * Math.PI) * Math.exp(-t * 2.5);
-      data[i] = (Math.random() * 2 - 1) * envelope * 0.5;
+    // Layer 1: Sharp attack "slap" transient
+    const slapSize = ctx.sampleRate * 0.03;
+    const slapBuffer = ctx.createBuffer(1, slapSize, ctx.sampleRate);
+    const slapData = slapBuffer.getChannelData(0);
+    for (let i = 0; i < slapSize; i++) {
+      const t = i / slapSize;
+      const envelope = Math.exp(-t * 15);
+      slapData[i] = (Math.random() * 2 - 1) * envelope;
     }
+    const slap = ctx.createBufferSource();
+    slap.buffer = slapBuffer;
 
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
+    const slapFilter = ctx.createBiquadFilter();
+    slapFilter.type = 'highpass';
+    slapFilter.frequency.value = 800;
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 2000;
-    filter.Q.value = 0.7;
+    const slapGain = ctx.createGain();
+    slapGain.gain.value = 0.6;
 
-    const gain = ctx.createGain();
-    gain.gain.value = 0.2;
+    slap.connect(slapFilter).connect(slapGain).connect(ctx.destination);
+    slap.start(now);
 
-    noise.connect(filter).connect(gain).connect(ctx.destination);
-    noise.start(now);
+    // Layer 2: Low thump for impact
+    const thump = ctx.createOscillator();
+    thump.type = 'sine';
+    thump.frequency.setValueAtTime(150, now);
+    thump.frequency.exponentialRampToValueAtTime(50, now + 0.08);
+
+    const thumpGain = ctx.createGain();
+    thumpGain.gain.setValueAtTime(0.4, now);
+    thumpGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+    thump.connect(thumpGain).connect(ctx.destination);
+    thump.start(now);
+    thump.stop(now + 0.1);
+
+    // Layer 3: Paper shuffle texture
+    const shuffleSize = ctx.sampleRate * 0.12;
+    const shuffleBuffer = ctx.createBuffer(1, shuffleSize, ctx.sampleRate);
+    const shuffleData = shuffleBuffer.getChannelData(0);
+    for (let i = 0; i < shuffleSize; i++) {
+      const t = i / shuffleSize;
+      const envelope = (1 - t) * Math.exp(-t * 4);
+      shuffleData[i] = (Math.random() * 2 - 1) * envelope;
+    }
+    const shuffle = ctx.createBufferSource();
+    shuffle.buffer = shuffleBuffer;
+
+    const shuffleFilter = ctx.createBiquadFilter();
+    shuffleFilter.type = 'bandpass';
+    shuffleFilter.frequency.value = 1200;
+    shuffleFilter.Q.value = 1;
+
+    const shuffleGain = ctx.createGain();
+    shuffleGain.gain.value = 0.35;
+
+    shuffle.connect(shuffleFilter).connect(shuffleGain).connect(ctx.destination);
+    shuffle.start(now + 0.015);
   };
 
   const next = () => {
