@@ -1372,8 +1372,43 @@ function CardStack() {
     }
   };
 
+  // Shuffle sound effect
+  const playShuffleSound = () => {
+    if (!tapAudioCtx) tapAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = tapAudioCtx;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+
+    // Create a card shuffle sound - quick swoosh with paper texture
+    const bufferSize = ctx.sampleRate * 0.15;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / bufferSize;
+      const envelope = Math.sin(t * Math.PI) * Math.exp(-t * 2.5);
+      data[i] = (Math.random() * 2 - 1) * envelope * 0.5;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 0.7;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.2;
+
+    noise.connect(filter).connect(gain).connect(ctx.destination);
+    noise.start(now);
+  };
+
   const next = () => {
     if (shuffling) return;
+    playShuffleSound();
     setShuffling('next');
     setDrag({ active: false, dx: 0, dy: 0 });
     setTimeout(() => {
@@ -1384,10 +1419,12 @@ function CardStack() {
 
   const prev = () => {
     if (shuffling) return;
+    playShuffleSound();
+    // For prev: change index first, then animate new card coming from back
+    setIdx(i => (i - 1 + CARDS.length) % CARDS.length);
     setShuffling('prev');
     setDrag({ active: false, dx: 0, dy: 0 });
     setTimeout(() => {
-      setIdx(i => (i - 1 + CARDS.length) % CARDS.length);
       setShuffling(null);
     }, SHUFFLE_MS);
   };
@@ -1401,6 +1438,8 @@ function CardStack() {
     return () => window.removeEventListener('keydown', onKey);
   }, [shuffling]);
 
+  const stackOffset = isMobile ? 6 : 10;
+
   return (
     <div style={{
       position: isMobile ? 'relative' : 'absolute',
@@ -1413,6 +1452,20 @@ function CardStack() {
       zIndex: 500,
       margin: isMobile ? '80px auto 0' : 0,
     }}>
+      {/* Card shuffle animation */}
+      <style>{`
+        @keyframes cardFromBack {
+          0% {
+            transform: translate(-50%, calc(-50% + ${5 * stackOffset}px)) scale(0.88) rotate(-4deg);
+            opacity: 0.5;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+      `}</style>
+
       {/* pile of cards behind - more visible layering */}
       {[5,4,3,2,1].map(n => (
         <div key={'shadow'+n} style={{
@@ -1434,19 +1487,29 @@ function CardStack() {
 
         // Stack shuffle animation logic
         let transform, opacity, zIndex;
-        const stackOffset = isMobile ? 6 : 10;
 
-        if (shuffling && isTop) {
-          // Top card moves to the back of the stack
-          const direction = shuffling === 'next' ? 1 : -1;
-          transform = `translate(-50%, calc(-50% + ${5 * stackOffset}px)) scale(0.88) rotate(${direction * 4}deg)`;
+        if (shuffling === 'next' && isTop) {
+          // NEXT: Top card moves to the back of the stack
+          transform = `translate(-50%, calc(-50% + ${5 * stackOffset}px)) scale(0.88) rotate(4deg)`;
           opacity = 0.4;
           zIndex = 90;
-        } else if (shuffling && !isTop) {
-          // Other cards move up one position
+        } else if (shuffling === 'next' && !isTop) {
+          // NEXT: Other cards move up one position
           const newStackPos = Math.max(0, stackPos - 1);
           transform = `translate(-50%, calc(-50% + ${newStackPos * stackOffset}px)) scale(${1 - newStackPos * 0.03})`;
+          opacity = newStackPos === 0 ? 1 : 0.95;
+          zIndex = 100 - newStackPos;
+        } else if (shuffling === 'prev' && isTop) {
+          // PREV: New top card comes FROM the back to front
+          // We use CSS animation to make it appear from the back
+          transform = `translate(-50%, -50%) scale(1) rotate(-2deg)`;
           opacity = 1;
+          zIndex = 100;
+        } else if (shuffling === 'prev' && !isTop) {
+          // PREV: Other cards move down one position
+          const newStackPos = stackPos + 1;
+          transform = `translate(-50%, calc(-50% + ${newStackPos * stackOffset}px)) scale(${1 - newStackPos * 0.03})`;
+          opacity = 0.7;
           zIndex = 100 - newStackPos;
         } else if (isTop && drag.active) {
           // Dragging the top card
@@ -1480,9 +1543,14 @@ function CardStack() {
               boxSizing: 'border-box',
               transform,
               opacity,
-              transition: shuffling
-                ? 'transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.45s ease, z-index 0s'
-                : drag.active && isTop ? 'none' : 'transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.3s ease',
+              transition: (shuffling === 'prev' && isTop)
+                ? 'none'
+                : shuffling
+                  ? 'transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.45s ease'
+                  : drag.active && isTop ? 'none' : 'transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.3s ease',
+              animation: (shuffling === 'prev' && isTop)
+                ? 'cardFromBack 0.45s cubic-bezier(0.34, 1.3, 0.64, 1) forwards'
+                : 'none',
               boxShadow: isTop && !shuffling
                 ? '0 25px 50px rgba(20,15,5,0.4), 0 12px 24px rgba(20,15,5,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset'
                 : '0 10px 20px rgba(20,15,5,0.25)',
