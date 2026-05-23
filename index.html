@@ -1449,10 +1449,13 @@ function CardStack() {
   }, []);
 
   const isMobile = dims.w <= 768;
-  const cardW = isMobile ? Math.min(dims.w - 32, 400) : 440;
-  const cardH = isMobile ? 'auto' : 320;
-  const cardMinH = isMobile ? 280 : 300;
-  const cardPadding = isMobile ? '24px 20px 22px' : '28px 30px 26px';
+  // Scale factor for larger screens
+  const baseWidth = 1440;
+  const scale = isMobile ? 1 : Math.max(1, Math.min(1.5, dims.w / baseWidth));
+  const cardW = isMobile ? Math.min(dims.w - 32, 400) : Math.round(440 * scale);
+  const cardH = isMobile ? 'auto' : Math.round(320 * scale);
+  const cardMinH = isMobile ? 280 : Math.round(300 * scale);
+  const cardPadding = isMobile ? '24px 20px 22px' : `${Math.round(28 * scale)}px ${Math.round(30 * scale)}px ${Math.round(26 * scale)}px`;
 
   const cardOrder = [];
   for (let i = 0; i < 3; i++) {
@@ -1859,10 +1862,17 @@ function App() {
   const isMobile = dims.w <= 768;
   const isSmallMobile = dims.w <= 380;
 
+  // Scale factor for larger screens - grows proportionally with viewport
+  // Base: 1.0 at 1440px, scales up for larger monitors
+  const baseWidth = 1440;
+  const scale = isMobile ? 1 : Math.max(1, Math.min(1.5, dims.w / baseWidth));
+
   // Center-based orbital positioning - stickers cluster around the card
   const cx = dims.w / 2;
   const cy = dims.h / 2;
-  const cardW = 440, cardH = 320;
+  const baseCardW = 440, baseCardH = 320;
+  const cardW = baseCardW * scale;
+  const cardH = baseCardH * scale;
 
   // Place sticker at angle (degrees) and distance from center
   // Distance is from the edge of the card, not absolute from center
@@ -1912,45 +1922,47 @@ function App() {
   // Layout key to force re-mount when viewport changes significantly
   const layoutKey = `${Math.floor(dims.w / 100)}-${Math.floor(dims.h / 100)}`;
 
-  const portraitW = isMobile ? 120 : 154;
-  const portraitH = isMobile ? 150 : 194;
+  // Scaled sizes for portrait
+  const portraitW = isMobile ? 120 : Math.round(170 * scale);
+  const portraitH = isMobile ? 150 : Math.round(255 * scale);
 
   // Mobile grid positions - stickers arranged in a flowing grid below card
   const mobileScale = isSmallMobile ? 0.75 : 0.85;
+
+  // Helper to scale sizes
+  const s = (size) => Math.round(size * scale);
 
   // Orbital positions - angle (degrees), distance from card edge, width, height, rotation
   // All stickers kept straight (0 rotation)
   const raw = isMobile ? [] : [
     // Upper area
-    { id: 'plane',       ...placeOrbital(-95, 90, 110, 76, 0) },
-    { id: 'tagPM',       ...placeOrbital(-140, 85, 160, 36, 0) },
-    { id: 'tagAI',       ...placeOrbital(5, 75, 140, 36, 0) },
-    { id: 'charminar',   ...placeOrbital(-125, 150, 120, 110, 0) },
-    { id: 'washingtondc',...placeOrbital(-35, 145, 120, 86, 0) },
+    { id: 'plane',       ...placeOrbital(-95, s(90), s(110), s(76), 0) },
+    { id: 'tagPM',       ...placeOrbital(-140, s(85), s(160), s(36), 0) },
+    { id: 'tagAI',       ...placeOrbital(5, s(75), s(140), s(36), 0) },
+    { id: 'charminar',   ...placeOrbital(-125, s(150), s(120), s(110), 0) },
+    { id: 'washingtondc',...placeOrbital(-35, s(145), s(120), s(86), 0) },
 
     // Left side
-    { id: 'portrait',    ...placeOrbital(160, 130, portraitW, portraitH, 0) },
-    { id: 'linkedin',    ...placeOrbital(185, 85, 90, 90, 0) },
-    { id: 'whatsapp',    ...placeOrbital(195, 160, 90, 90, 0) },
-    { id: 'pickleball',  ...placeOrbital(215, 100, 74, 100, 0) },
+    { id: 'portrait',    ...placeOrbital(160, s(130), portraitW, portraitH, 0) },
+    { id: 'linkedin',    ...placeOrbital(185, s(85), s(90), s(90), 0) },
+    { id: 'pickleball',  ...placeOrbital(215, s(100), s(90), s(90), 0) },
 
     // Right side
-    { id: 'email',       ...placeOrbital(15, 90, 100, 74, 0) },
-    { id: 'call',        ...placeOrbital(35, 155, 90, 100, 0) },
-    { id: 'beach',       ...placeOrbital(55, 115, 92, 92, 0) },
-    { id: 'coffee',      ...placeOrbital(25, 220, 80, 86, 0) },
-    { id: 'lego',        ...placeOrbital(60, 190, 88, 76, 0) },
+    { id: 'email',       ...placeOrbital(15, s(90), s(100), s(74), 0) },
+    { id: 'beach',       ...placeOrbital(55, s(115), s(92), s(92), 0) },
+    { id: 'coffee',      ...placeOrbital(25, s(220), s(80), s(86), 0) },
+    { id: 'lego',        ...placeOrbital(60, s(190), s(88), s(76), 0) },
 
     // Bottom area
-    { id: 'headphones',  ...placeOrbital(240, 85, 90, 100, 0) },
-    { id: 'camera',      ...placeOrbital(260, 150, 96, 76, 0) },
-    { id: 'gym',         ...placeOrbital(295, 95, 96, 96, 0) },
+    { id: 'headphones',  ...placeOrbital(240, s(85), s(90), s(100), 0) },
+    { id: 'camera',      ...placeOrbital(260, s(150), s(96), s(76), 0) },
+    { id: 'gym',         ...placeOrbital(295, s(95), s(96), s(96), 0) },
 
     // Laptop - My Work
-    { id: 'laptop',      ...placeOrbital(-60, 130, 100, 90, 0) },
+    { id: 'laptop',      ...placeOrbital(-60, s(130), s(100), s(90), 0) },
 
     // Writing folder - left side of card
-    { id: 'folder',      ...placeOrbital(145, 95, 100, 80, 0) },
+    { id: 'folder',      ...placeOrbital(145, s(95), s(100), s(80), 0) },
   ];
 
   const resolved = resolveOverlaps(raw);
@@ -2112,8 +2124,8 @@ function App() {
       <PhotoSticker
         id="portrait"
         src="assets/rohan-casual.png"
-        w={isMobile ? 143 : 187}
-        h={isMobile ? 215 : 281}
+        w={isMobile ? 143 : s(187)}
+        h={isMobile ? 215 : s(281)}
         initial={portraitPos}
         zBase={15}
         noBorder={true}
@@ -2122,30 +2134,30 @@ function App() {
       />
 
       {/* Location stickers */}
-      <ImageSticker id="charminar" src="assets/icons/charminar.png" size={116} initial={positions.charminar} zBase={8} onClick={charminarFact} entranceDelay={200} />
-      <ImageSticker id="dc" src="assets/icons/dc.png" size={110} initial={positions.washingtondc} zBase={8} onClick={dcFact} entranceDelay={250} />
+      <ImageSticker id="charminar" src="assets/icons/charminar.png" size={s(116)} initial={positions.charminar} zBase={8} onClick={charminarFact} entranceDelay={200} />
+      <ImageSticker id="dc" src="assets/icons/dc.png" size={s(110)} initial={positions.washingtondc} zBase={8} onClick={dcFact} entranceDelay={250} />
 
       {/* Communication */}
-      <ImageSticker id="linkedin" src="assets/icons/linkedin.png" size={92} initial={positions.linkedin} zBase={10} onClick={openLinkedIn} entranceDelay={300} />
-      <EmailSticker id="email" initial={positions.email} zBase={10} onClick={openEmail} entranceDelay={350} />
+      <ImageSticker id="linkedin" src="assets/icons/linkedin.png" size={s(92)} initial={positions.linkedin} zBase={10} onClick={openLinkedIn} entranceDelay={300} />
+      <EmailSticker id="email" initial={positions.email} zBase={10} onClick={openEmail} entranceDelay={350} scale={scale} />
 
       {/* Travel */}
-      <ImageSticker id="plane" src="assets/icons/plane.png" size={104} initial={positions.plane} zBase={7} onClick={travelList} entranceDelay={500} />
-      <ImageSticker id="beach" src="assets/icons/beach.png" size={98} initial={positions.beach} zBase={7} onClick={beachVibes} entranceDelay={550} />
+      <ImageSticker id="plane" src="assets/icons/plane.png" size={s(104)} initial={positions.plane} zBase={7} onClick={travelList} entranceDelay={500} />
+      <ImageSticker id="beach" src="assets/icons/beach.png" size={s(98)} initial={positions.beach} zBase={7} onClick={beachVibes} entranceDelay={550} />
 
       {/* Hobbies / lifestyle */}
-      <AirPodsSticker id="airpods" initial={positions.headphones} zBase={7} onPlay={toggleMusic} entranceDelay={600} />
-      <ImageSticker id="coffee" src="assets/icons/coffee.png" size={88} initial={positions.coffee} zBase={7} onClick={coffeeVibes} entranceDelay={650} />
-      <CameraSticker id="camera" initial={positions.camera} zBase={7} onClick={cameraVibes} entranceDelay={700} />
-      <ImageSticker id="gym" src="assets/icons/gym.png" size={96} initial={positions.gym} zBase={7} onClick={gymVibes} entranceDelay={750} />
-      <PickleballSticker id="pickleball" initial={positions.pickleball} zBase={7} onClick={pickleballVibes} entranceDelay={800} />
-      <LegoSticker id="lego" initial={positions.lego} zBase={7} onClick={bumpLego} entranceDelay={850} />
+      <AirPodsSticker id="airpods" initial={positions.headphones} zBase={7} onPlay={toggleMusic} entranceDelay={600} scale={scale} />
+      <ImageSticker id="coffee" src="assets/icons/coffee.png" size={s(88)} initial={positions.coffee} zBase={7} onClick={coffeeVibes} entranceDelay={650} />
+      <CameraSticker id="camera" initial={positions.camera} zBase={7} onClick={cameraVibes} entranceDelay={700} scale={scale} />
+      <ImageSticker id="gym" src="assets/icons/gym.png" size={s(96)} initial={positions.gym} zBase={7} onClick={gymVibes} entranceDelay={750} />
+      <PickleballSticker id="pickleball" initial={positions.pickleball} zBase={7} onClick={pickleballVibes} entranceDelay={800} scale={scale} />
+      <LegoSticker id="lego" initial={positions.lego} zBase={7} onClick={bumpLego} entranceDelay={850} scale={scale} />
 
       {/* My Work - Laptop sticker */}
-      <LaptopSticker id="laptop" initial={positions.laptop} zBase={8} onClick={() => setModal('work')} entranceDelay={900} />
+      <LaptopSticker id="laptop" initial={positions.laptop} zBase={8} onClick={() => setModal('work')} entranceDelay={900} scale={scale} />
 
       {/* Writing - Folder sticker */}
-      <FolderSticker id="folder" initial={positions.folder} zBase={8} onClick={() => window.location.href = '/blog.html'} entranceDelay={950} />
+      <FolderSticker id="folder" initial={positions.folder} zBase={8} onClick={() => window.location.href = '/blog.html'} entranceDelay={950} scale={scale} />
 
       {/* Easter Egg: Coffee Machine - positioned in bottom-left corner, away from main stickers */}
       <CoffeeMachineSticker
