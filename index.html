@@ -2039,13 +2039,7 @@ function App() {
           <ImageSticker id="linkedin-m" src="assets/icons/linkedin.png" size={76} initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={openLinkedIn} entranceDelay={200} style={{ position: 'relative' }} />
         </div>
         <div style={stickerWrapStyle}>
-          <ImageSticker id="whatsapp-m" src="assets/icons/whatsapp.png" size={76} initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={openWhatsApp} entranceDelay={250} style={{ position: 'relative' }} />
-        </div>
-        <div style={stickerWrapStyle}>
-          <EmailSticker id="email-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={openEmail} entranceDelay={300} style={{ position: 'relative' }} />
-        </div>
-        <div style={stickerWrapStyle}>
-          <CallSticker id="call-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={showPhone} entranceDelay={350} style={{ position: 'relative' }} />
+          <EmailSticker id="email-m" initial={{ x: 0, y: 0, rot: 0 }} zBase={10} onClick={openEmail} entranceDelay={250} style={{ position: 'relative' }} />
         </div>
 
         {/* Location stickers */}
@@ -2133,9 +2127,7 @@ function App() {
 
       {/* Communication */}
       <ImageSticker id="linkedin" src="assets/icons/linkedin.png" size={92} initial={positions.linkedin} zBase={10} onClick={openLinkedIn} entranceDelay={300} />
-      <ImageSticker id="whatsapp" src="assets/icons/whatsapp.png" size={92} initial={positions.whatsapp} zBase={10} onClick={openWhatsApp} entranceDelay={350} />
-      <EmailSticker id="email" initial={positions.email} zBase={10} onClick={openEmail} entranceDelay={400} />
-      <CallSticker id="call" initial={positions.call} zBase={10} onClick={showPhone} entranceDelay={450} />
+      <EmailSticker id="email" initial={positions.email} zBase={10} onClick={openEmail} entranceDelay={350} />
 
       {/* Travel */}
       <ImageSticker id="plane" src="assets/icons/plane.png" size={104} initial={positions.plane} zBase={7} onClick={travelList} entranceDelay={500} />
