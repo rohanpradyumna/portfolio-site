@@ -430,8 +430,6 @@ function Sticker({
 
   const peelLift = hovered && !dragging ? 1 : 0;
   const scale = dragging ? 1.08 : (hovered ? 1.05 : 1);
-  // Hover wiggle: subtle rotation offset
-  const hoverRotOffset = hovered && !dragging ? (Math.sin(Date.now() * 0.01) * 0 + 2) : 0;
 
   return (
     <div
@@ -441,7 +439,7 @@ function Sticker({
         position: 'absolute',
         left: pos.x,
         top: pos.y,
-        transform: `rotate(${pos.rot + hoverRotOffset}deg) scale(${scale})`,
+        transform: `scale(${scale})`,
         zIndex: z,
         cursor: dragging ? 'grabbing' : 'grab',
         transition: dragging ? 'none' : 'transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -472,10 +470,10 @@ function Sticker({
       </div>
       <style>{`
         @keyframes stickerPop {
-          0% { opacity: 0; transform: rotate(${pos.rot - 8}deg) scale(0.3); }
-          60% { opacity: 1; transform: rotate(${pos.rot + 3}deg) scale(1.08); }
-          80% { transform: rotate(${pos.rot - 1}deg) scale(0.97); }
-          100% { opacity: 1; transform: rotate(${pos.rot}deg) scale(1); }
+          0% { opacity: 0; transform: scale(0.3); }
+          60% { opacity: 1; transform: scale(1.08); }
+          80% { transform: scale(0.97); }
+          100% { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>
@@ -1841,6 +1839,183 @@ function EqBars({ playing }) {
 }
 
 // ============================================================================
+// Projects Data & ProjectSticker Component
+// ============================================================================
+
+const PROJECTS = [
+  {
+    id: 'yotta',
+    name: 'YottaBuilder',
+    subtitle: '@ Yottaflex.ai',
+    tagline: 'Shipped AI tools used by 50+ teams',
+    color: '#e85d3a',
+    icon: '🚀',
+    period: 'CURRENT · STEALTH',
+    role: 'Leading Engineering',
+    description: 'Building an AI-powered SDLC platform that transforms requirements into production code. Turning agile teams from doers to reviewers.',
+    techStack: ['React', 'TypeScript', 'Python', 'LLMs', 'AWS'],
+    rotation: -2,
+  },
+  {
+    id: 'intripid',
+    name: 'Intripid',
+    subtitle: '(formally Travana)',
+    tagline: '15K travelers found their next adventure',
+    color: '#2d6cdf',
+    icon: '✈️',
+    period: 'FOUNDER · 2022-2023',
+    role: 'Co-founder & Tech Lead',
+    description: 'Founded an AI travel planning app. Built "What\'s Next" — predicting activities based on mood, location, and patterns. Antler-backed.',
+    techStack: ['React Native', 'Node.js', 'MongoDB', 'ML'],
+    rotation: 2,
+  },
+  {
+    id: 'flock',
+    name: 'Flock Shopping',
+    subtitle: '',
+    tagline: 'Antler-backed social commerce platform',
+    color: '#3a7d44',
+    icon: '🛍️',
+    period: 'FIRST STARTUP · INTERN',
+    role: 'Engineering Intern',
+    description: 'My first startup gig. Social commerce platform — now pivoted to AI image generation for beauty brands.',
+    techStack: ['React', 'Node.js', 'PostgreSQL'],
+    rotation: -1,
+  }
+];
+
+function ProjectSticker({ project, isExpanded, onToggle, index, shouldAnimate }) {
+  const isMobile = window.innerWidth <= 768;
+
+  return (
+    <div
+      onClick={onToggle}
+      style={{
+        background: '#ffffff',
+        borderRadius: 14,
+        borderLeft: `4px solid ${project.color}`,
+        padding: isMobile ? '14px 16px' : '16px 20px',
+        cursor: 'pointer',
+        boxShadow: isExpanded
+          ? '0 8px 24px rgba(0,0,0,0.15)'
+          : '0 3px 12px rgba(0,0,0,0.08)',
+        transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        animation: shouldAnimate ? `projectPop 0.4s ${index * 80}ms cubic-bezier(0.2, 0.8, 0.2, 1) both` : 'none',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header - always visible */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontSize: isMobile ? 18 : 20 }}>{project.icon}</span>
+            <span style={{
+              fontSize: isMobile ? 15 : 16,
+              fontWeight: 600,
+              color: '#1a1a1a',
+              fontFamily: "'Geist', sans-serif"
+            }}>
+              {project.name}
+            </span>
+            {project.subtitle && (
+              <span style={{
+                fontSize: isMobile ? 10 : 11,
+                color: 'rgba(26,26,26,0.5)',
+                fontWeight: 400
+              }}>
+                {project.subtitle}
+              </span>
+            )}
+          </div>
+          <div style={{
+            fontSize: isMobile ? 12 : 13,
+            color: 'rgba(26,26,26,0.7)',
+            lineHeight: 1.4,
+            fontFamily: "'Geist', sans-serif"
+          }}>
+            {project.tagline}
+          </div>
+        </div>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: 6,
+          marginLeft: 12
+        }}>
+          <span style={{
+            fontSize: isMobile ? 9 : 10,
+            color: project.color,
+            fontFamily: "'Geist Mono', monospace",
+            fontWeight: 500,
+          }}>
+            {project.period.split('·')[0].trim()}
+          </span>
+          <span style={{
+            fontSize: 14,
+            color: 'rgba(26,26,26,0.4)',
+            transition: 'transform 0.3s ease',
+            transform: `rotate(${isExpanded ? 180 : 0}deg)`,
+          }}>
+            ▾
+          </span>
+        </div>
+      </div>
+
+      {/* Expanded content */}
+      <div style={{
+        maxHeight: isExpanded ? 200 : 0,
+        opacity: isExpanded ? 1 : 0,
+        overflow: 'hidden',
+        transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        marginTop: isExpanded ? 14 : 0,
+      }}>
+        <div style={{
+          borderTop: '1px solid rgba(26,26,26,0.1)',
+          paddingTop: 14,
+        }}>
+          <div style={{
+            fontSize: 11,
+            color: project.color,
+            fontWeight: 600,
+            fontFamily: "'Geist Mono', monospace",
+            marginBottom: 6,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            {project.role}
+          </div>
+          <div style={{
+            fontSize: isMobile ? 12 : 13,
+            color: 'rgba(26,26,26,0.8)',
+            lineHeight: 1.5,
+            fontFamily: "'Geist', sans-serif",
+            marginBottom: 12
+          }}>
+            {project.description}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {project.techStack.map((tech, i) => (
+              <span key={i} style={{
+                fontSize: isMobile ? 10 : 11,
+                padding: '4px 10px',
+                borderRadius: 20,
+                background: `${project.color}15`,
+                color: project.color,
+                fontFamily: "'Geist Mono', monospace",
+                fontWeight: 500,
+              }}>
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Main App
 // ============================================================================
 
@@ -1850,6 +2025,8 @@ function App() {
   const [legoCount, setLegoCount] = useState(0);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [stoicQuote, setStoicQuote] = useState(null);
+  const [expandedProject, setExpandedProject] = useState(null);
+  const workModalOpenedRef = React.useRef(false);
 
   const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
   useEffect(() => {
@@ -2305,41 +2482,31 @@ function App() {
       </Modal>
 
       {/* My Work Modal */}
-      <Modal open={modal==='work'} onClose={()=>setModal(null)} title="my work" color="#1a1a1a">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* YottaBuilder */}
-          <div style={{ borderLeft: '3px solid #e85d3a', paddingLeft: 14 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#f5f2e8', marginBottom: 4 }}>
-              YottaBuilder <span style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontWeight: 400 }}>@ Yottaflex.ai</span>
+      <Modal open={modal==='work'} onClose={()=>{ setModal(null); setExpandedProject(null); }} title="my work" color="#1a1a1a">
+        {(() => {
+          const shouldAnimate = !workModalOpenedRef.current;
+          if (!workModalOpenedRef.current) workModalOpenedRef.current = true;
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: '8px 0' }}>
+              {PROJECTS.map((project, index) => (
+                <ProjectSticker
+                  key={project.id}
+                  project={project}
+                  isExpanded={expandedProject === project.id}
+                  onToggle={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
+                  index={index}
+                  shouldAnimate={shouldAnimate}
+                />
+              ))}
             </div>
-            <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.75)', lineHeight: 1.5 }}>
-              Leading the team building an AI-powered SDLC platform. Requirements → production code. Turning agile teams from doers to reviewers.
-            </div>
-            <div style={{ fontSize: 10, color: '#e85d3a', marginTop: 6, fontFamily: "'Geist Mono', monospace" }}>CURRENT · STEALTH</div>
-          </div>
-
-          {/* Intripid */}
-          <div style={{ borderLeft: '3px solid #2d6cdf', paddingLeft: 14 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#f5f2e8', marginBottom: 4 }}>
-              Intripid <span style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontWeight: 400 }}>(formally Travana)</span>
-            </div>
-            <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.75)', lineHeight: 1.5 }}>
-              Founded an AI travel planning app. Built "What's Next" — predicting what you should do based on mood, location, and patterns. 15K users, Antler-backed.
-            </div>
-            <div style={{ fontSize: 10, color: '#2d6cdf', marginTop: 6, fontFamily: "'Geist Mono', monospace" }}>FOUNDER · 2022-2023</div>
-          </div>
-
-          {/* Flock */}
-          <div style={{ borderLeft: '3px solid #3a7d44', paddingLeft: 14 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#f5f2e8', marginBottom: 4 }}>
-              Flock Shopping
-            </div>
-            <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.75)', lineHeight: 1.5 }}>
-              My first startup gig. Social commerce platform — now pivoted to AI image generation for beauty brands.
-            </div>
-            <div style={{ fontSize: 10, color: '#3a7d44', marginTop: 6, fontFamily: "'Geist Mono', monospace" }}>FIRST STARTUP · INTERN</div>
-          </div>
-        </div>
+          );
+        })()}
+        <style>{`
+          @keyframes projectPop {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+          }
+        `}</style>
       </Modal>
 
       {/* Stoic Wisdom Modal - Easter Egg */}
