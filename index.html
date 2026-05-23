@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://rohanpradyumna.vercel.app/" />
 <meta property="og:title" content="Rohan Pradyumna — Builder, AI Enthusiast, Immigrant Founder" />
 <meta property="og:description" content="Founder and software engineer building AI-powered developer tools. Writing about vibe coding, startups, and the immigrant founder experience." />
-<meta property="og:image" content="https://rohanpradyumna.vercel.app/assets/rohan-portrait-new.png" />
+<meta property="og:image" content="https://rohanpradyumna.vercel.app/assets/rohan-suit.png" />
 <meta property="og:site_name" content="Rohan Pradyumna" />
 
 <!-- Twitter Card -->
@@ -24,11 +24,11 @@
 <meta name="twitter:url" content="https://rohanpradyumna.vercel.app/" />
 <meta name="twitter:title" content="Rohan Pradyumna — Builder, AI Enthusiast, Immigrant Founder" />
 <meta name="twitter:description" content="Founder and software engineer building AI-powered developer tools. Writing about vibe coding, startups, and the immigrant founder experience." />
-<meta name="twitter:image" content="https://rohanpradyumna.vercel.app/assets/rohan-portrait-new.png" />
+<meta name="twitter:image" content="https://rohanpradyumna.vercel.app/assets/rohan-suit.png" />
 
 <!-- Favicon -->
-<link rel="icon" type="image/png" href="/assets/rohan-portrait-new.png" />
-<link rel="apple-touch-icon" href="/assets/rohan-portrait-new.png" />
+<link rel="icon" type="image/png" href="/assets/rohan-suit.png" />
+<link rel="apple-touch-icon" href="/assets/rohan-suit.png" />
 
 <!-- JSON-LD Structured Data: Person -->
 <script type="application/ld+json">
@@ -37,7 +37,7 @@
   "@type": "Person",
   "name": "Rohan Pradyumna",
   "url": "https://rohanpradyumna.vercel.app",
-  "image": "https://rohanpradyumna.vercel.app/assets/rohan-portrait-new.png",
+  "image": "https://rohanpradyumna.vercel.app/assets/rohan-suit.png",
   "jobTitle": "Founder & Software Engineer",
   "worksFor": {
     "@type": "Organization",
@@ -482,10 +482,31 @@ function Sticker({
   );
 }
 
-// Photo sticker — image with thick white die-cut border
+// Photo sticker — image with optional white die-cut border
 function PhotoSticker(props) {
-  const { src, w = 140, h = 180, shape = 'rounded', ...rest } = props;
+  const { src, w = 140, h = 180, shape = 'rounded', noBorder = false, ...rest } = props;
   const radius = shape === 'circle' ? '50%' : shape === 'rounded' ? '14px' : '4px';
+
+  // Clean sticker mode - no border, just the image with a subtle shadow
+  if (noBorder) {
+    return (
+      <Sticker {...rest}>
+        <img
+          src={src}
+          alt=""
+          draggable="false"
+          style={{
+            width: w,
+            height: h,
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.25))',
+            pointerEvents: 'none',
+          }}
+        />
+      </Sticker>
+    );
+  }
+
   return (
     <Sticker {...rest}>
       <div style={{
@@ -1984,12 +2005,12 @@ function App() {
           <div style={{ ...stickerWrapStyle, transform: 'scale(1)' }}>
             <PhotoSticker
               id="portrait-m"
-              src="assets/rohan-portrait-new.png"
-              w={portraitW}
-              h={portraitH}
+              src="assets/rohan-suit.png"
+              w={130}
+              h={195}
               initial={{ x: 0, y: 0, rot: 0 }}
               zBase={15}
-              shape="rounded"
+              noBorder={true}
               onClick={portraitClick}
               entranceDelay={50}
               style={{ position: 'relative' }}
@@ -2092,12 +2113,12 @@ function App() {
       {/* Portrait */}
       <PhotoSticker
         id="portrait"
-        src="assets/rohan-portrait-new.png"
-        w={portraitW}
-        h={portraitH}
+        src="assets/rohan-suit.png"
+        w={isMobile ? 130 : 170}
+        h={isMobile ? 195 : 255}
         initial={portraitPos}
         zBase={15}
-        shape="rounded"
+        noBorder={true}
         onClick={portraitClick}
         entranceDelay={50}
       />
