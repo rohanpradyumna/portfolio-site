@@ -91,3 +91,7 @@ After deployment, users may need to hard refresh (`Cmd+Shift+R`) to clear browse
 
 ### Update contact info
 Search for phone number or email patterns in `index.html` and update accordingly.
+
+## Coding Style
+
+- **Comments:** Use sparingly. Only comment genuinely complex code, and make it funny.

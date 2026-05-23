@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Writing — Rohan Pradyumna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf7ef;
+    --paper-2: #f3ecd8;
+    --ink: #1a1a1a;
+    --ink-2: #4a4a4a;
+    --grid: rgba(160, 140, 80, 0.14);
+    --grid-strong: rgba(160, 140, 80, 0.22);
+    --card: #1a1a1a;
+    --card-ink: #f5f2e8;
+    --accent: #e85d3a;
+    --accent-blue: #2d6cdf;
+    --accent-green: #3a7d44;
+    --accent-yellow: #f2c230;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    min-height: 100%;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  /* Warm paper with graph grid */
+  .board {
+    position: fixed;
+    inset: 0;
+    background-color: #faf7ef;
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+      linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+      radial-gradient(ellipse at 50% 40%, #fffbef 0%, #faf5e4 55%, #f2e9cf 100%);
+    background-size:
+      28px 28px,
+      28px 28px,
+      140px 140px,
+      140px 140px,
+      100% 100%;
+    z-index: -1;
+  }
+  .board::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.6  0 0 0 0 0.5  0 0 0 0 0.3  0 0 0 0.25 0'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.4'/></svg>");
+    opacity: 0.35;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  .board::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(120, 90, 40, 0.08) 100%);
+    pointer-events: none;
+  }
+
+  /* Header */
+  .brand {
+    position: fixed;
+    top: 24px;
+    left: 28px;
+    z-index: 1000;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .brand a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .brand .name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 34px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .brand .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); align-self: center; }
+  .brand .sub {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .corner {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    z-index: 1000;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .corner a {
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .corner a:hover {
+    color: var(--accent);
+  }
+
+  /* Main content */
+  .content {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 120px 24px 60px;
+  }
+
+  .page-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 48px;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+    margin-bottom: 32px;
+  }
+
+  /* Tag Filter */
+  .tag-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .tag-pill {
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    text-transform: lowercase;
+  }
+
+  .tag-pill.all {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .tag-pill.all.inactive {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .tag-pill.ai {
+    background: var(--accent);
+    color: white;
+  }
+  .tag-pill.ai.inactive {
+    background: transparent;
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .tag-pill.startups {
+    background: var(--accent-blue);
+    color: white;
+  }
+  .tag-pill.startups.inactive {
+    background: transparent;
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+  }
+
+  .tag-pill.philosophy {
+    background: var(--accent-green);
+    color: white;
+  }
+  .tag-pill.philosophy.inactive {
+    background: transparent;
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+  }
+
+  .tag-pill.life {
+    background: var(--accent-yellow);
+    color: var(--ink);
+  }
+  .tag-pill.life.inactive {
+    background: transparent;
+    color: #b8940d;
+    border-color: var(--accent-yellow);
+  }
+
+  /* Post Grid */
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  /* Post Card - Index card style */
+  .post-card {
+    position: relative;
+    background: linear-gradient(180deg, #fffef8 0%, #faf7ef 100%);
+    border: 3px solid white;
+    border-radius: 6px;
+    padding: 24px 20px 20px;
+    box-shadow:
+      0 4px 12px rgba(40, 30, 10, 0.12),
+      0 2px 4px rgba(40, 30, 10, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  /* Card rotations handled by CSS custom properties in animation */
+
+  /* Push pin */
+  .push-pin {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #e85d3a 0%, #c44a2f 100%);
+    border-radius: 50%;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.3),
+      inset 0 -2px 4px rgba(0,0,0,0.2),
+      inset 0 2px 4px rgba(255,255,255,0.3);
+  }
+  .push-pin::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 6px;
+    height: 6px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+  }
+
+  /* Red lines like index card */
+  .post-card::before {
+    content: '';
+    position: absolute;
+    top: 48px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(220, 80, 80, 0.2);
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .post-tag {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .post-tag.ai { background: rgba(232, 93, 58, 0.15); color: var(--accent); }
+  .post-tag.startups { background: rgba(45, 108, 223, 0.15); color: var(--accent-blue); }
+  .post-tag.philosophy { background: rgba(58, 125, 68, 0.15); color: var(--accent-green); }
+  .post-tag.life { background: rgba(242, 194, 48, 0.25); color: #9a7a0a; }
+
+  .post-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .post-excerpt {
+    font-family: 'Geist', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin-bottom: 16px;
+  }
+
+  .post-date {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    opacity: 0.7;
+    letter-spacing: 0.02em;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-2);
+  }
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  .empty-state-text {
+    font-family: 'Geist Mono', monospace;
+    font-size: 14px;
+  }
+
+  /* Loading state */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--grid-strong);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Sticker pop entrance animation - matches homepage */
+  @keyframes stickerPop {
+    0% {
+      opacity: 0;
+      transform: rotate(var(--card-rot, 0deg)) scale(0.3);
+    }
+    60% {
+      opacity: 1;
+      transform: rotate(calc(var(--card-rot, 0deg) + 3deg)) scale(1.08);
+    }
+    80% {
+      transform: rotate(calc(var(--card-rot, 0deg) - 1deg)) scale(0.97);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(var(--card-rot, 0deg)) scale(1);
+    }
+  }
+
+  .post-card {
+    opacity: 0;
+    animation: stickerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: var(--entrance-delay, 0ms);
+  }
+
+  .post-card:nth-child(1) { --card-rot: -0.8deg; --entrance-delay: 100ms; }
+  .post-card:nth-child(2) { --card-rot: 0.6deg; --entrance-delay: 180ms; }
+  .post-card:nth-child(3) { --card-rot: -0.4deg; --entrance-delay: 260ms; }
+  .post-card:nth-child(4) { --card-rot: 0.7deg; --entrance-delay: 340ms; }
+  .post-card:nth-child(5) { --card-rot: -0.5deg; --entrance-delay: 420ms; }
+  .post-card:nth-child(6) { --card-rot: 0.4deg; --entrance-delay: 500ms; }
+  .post-card:nth-child(7) { --card-rot: -0.6deg; --entrance-delay: 580ms; }
+  .post-card:nth-child(8) { --card-rot: 0.5deg; --entrance-delay: 660ms; }
+  .post-card:nth-child(9) { --card-rot: -0.3deg; --entrance-delay: 740ms; }
+  .post-card:nth-child(10) { --card-rot: 0.8deg; --entrance-delay: 820ms; }
+
+  /* Subtle hover - gentle lift, keeps natural rotation */
+  .post-card:hover {
+    transform: rotate(var(--card-rot, 0deg)) translateY(-3px);
+    box-shadow:
+      0 8px 20px rgba(40, 30, 10, 0.15),
+      0 4px 8px rgba(40, 30, 10, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .brand {
+      top: 16px;
+      left: 16px;
+      gap: 6px;
+    }
+    .brand .name {
+      font-size: 26px;
+    }
+    .brand .dot {
+      width: 5px;
+      height: 5px;
+    }
+    .brand .sub {
+      display: none;
+    }
+    .corner {
+      top: 16px;
+      right: 16px;
+      font-size: 10px;
+    }
+    .content {
+      padding: 90px 16px 40px;
+    }
+    .page-title {
+      font-size: 36px;
+    }
+    .post-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .post-card {
+      transform: rotate(0deg) !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .brand .name {
+      font-size: 22px;
+    }
+    .page-title {
+      font-size: 30px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="board"></div>
+
+  <div class="brand">
+    <a href="/">
+      <span class="name">rohan</span>
+    </a>
+    <span class="dot"></span>
+    <span class="sub">writing</span>
+  </div>
+
+  <div class="corner">
+    <a href="/">back to stickers</a>
+  </div>
+
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <script type="text/babel">
+const { useState, useEffect } = React;
+
+const TAG_COLORS = {
+  ai: 'ai',
+  startups: 'startups',
+  philosophy: 'philosophy',
+  life: 'life',
+};
+
+function TagFilter({ tags, activeTag, onTagChange }) {
+  const allTags = ['all', ...tags];
+
+  return (
+    <div className="tag-filter">
+      {allTags.map(tag => (
+        <button
+          key={tag}
+          className={`tag-pill ${tag} ${activeTag !== tag ? 'inactive' : ''}`}
+          onClick={() => onTagChange(tag)}
+        >
+          {tag === 'all' ? 'all posts' : tag}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function PostCard({ post }) {
+  return (
+    <a href={`/blog/${post.slug}`} className="post-card">
+      <div className="push-pin"></div>
+      <div className="post-tags">
+        {post.tags.map(tag => (
+          <span key={tag} className={`post-tag ${TAG_COLORS[tag] || ''}`}>
+            {tag}
+          </span>
+        ))}
+      </div>
+      <h2 className="post-title">{post.title}</h2>
+      <p className="post-excerpt">{post.excerpt}</p>
+      <div className="post-date">{formatDate(post.date)}</div>
+    </a>
+  );
+}
+
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
+function Blog() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTag, setActiveTag] = useState('all');
+
+  useEffect(() => {
+    fetch('/posts/index.json')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load posts');
+        return res.json();
+      })
+      .then(data => {
+        // Sort by date descending
+        data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setPosts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error loading posts:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  // Get unique tags from all posts
+  const allTags = [...new Set(posts.flatMap(p => p.tags))].sort();
+
+  // Filter posts by active tag
+  const filteredPosts = activeTag === 'all'
+    ? posts
+    : posts.filter(p => p.tags.includes(activeTag));
+
+  if (loading) {
+    return (
+      <div className="content">
+        <div className="loading">
+          <div className="loading-spinner"></div>
+          <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: 'var(--ink-2)' }}>
+            loading posts...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="content">
+        <div className="empty-state">
+          <div className="empty-state-icon">:(</div>
+          <div className="empty-state-text">failed to load posts</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="content">
+      <h1 className="page-title">writing</h1>
+      <p className="page-subtitle">thoughts on building, startups, and life as an immigrant founder</p>
+
+      {allTags.length > 0 && (
+        <TagFilter
+          tags={allTags}
+          activeTag={activeTag}
+          onTagChange={setActiveTag}
+        />
+      )}
+
+      {filteredPosts.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">:/</div>
+          <div className="empty-state-text">no posts with that tag yet</div>
+        </div>
+      ) : (
+        <div className="post-grid" key={activeTag}>
+          {filteredPosts.map(post => (
+            <PostCard key={post.slug} post={post} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Blog />);
+  </script>
+</body>
+</html>
