@@ -4,6 +4,53 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Loading... — Rohan Pradyumna</title>
+
+<!-- SEO Meta Tags (updated dynamically via JS) -->
+<meta name="description" id="meta-description" content="A blog post by Rohan Pradyumna about startups, AI, and the builder's journey." />
+<meta name="author" content="Rohan Pradyumna" />
+
+<!-- Open Graph / Facebook (updated dynamically via JS) -->
+<meta property="og:type" content="article" />
+<meta property="og:url" id="og-url" content="https://rohanpradyumna.vercel.app/posts/" />
+<meta property="og:title" id="og-title" content="Blog Post — Rohan Pradyumna" />
+<meta property="og:description" id="og-description" content="A blog post by Rohan Pradyumna about startups, AI, and the builder's journey." />
+<meta property="og:image" content="https://rohanpradyumna.vercel.app/assets/rohan-portrait-new.png" />
+<meta property="og:site_name" content="Rohan Pradyumna" />
+<meta property="article:author" content="Rohan Pradyumna" />
+
+<!-- Twitter Card (updated dynamically via JS) -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" id="twitter-url" content="https://rohanpradyumna.vercel.app/posts/" />
+<meta name="twitter:title" id="twitter-title" content="Blog Post — Rohan Pradyumna" />
+<meta name="twitter:description" id="twitter-description" content="A blog post by Rohan Pradyumna about startups, AI, and the builder's journey." />
+<meta name="twitter:image" content="https://rohanpradyumna.vercel.app/assets/rohan-portrait-new.png" />
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="/assets/rohan-portrait-new.png" />
+<link rel="apple-touch-icon" href="/assets/rohan-portrait-new.png" />
+
+<!-- JSON-LD will be injected dynamically -->
+<script id="schema-blogposting" type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Blog Post",
+  "author": {
+    "@type": "Person",
+    "name": "Rohan Pradyumna",
+    "url": "https://rohanpradyumna.vercel.app"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Rohan Pradyumna"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://rohanpradyumna.vercel.app/posts/"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -420,8 +467,8 @@
 
   <div id="root"></div>
 
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.26.0/babel.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -532,6 +579,45 @@ function Post() {
 
         // Update page title
         document.title = `${meta.title || 'Post'} — Rohan Pradyumna`;
+
+        // Update meta tags dynamically for SEO
+        const postUrl = `https://rohanpradyumna.vercel.app/posts/${slug}`;
+        const postDescription = meta.excerpt || `A blog post by Rohan Pradyumna`;
+
+        document.getElementById('meta-description')?.setAttribute('content', postDescription);
+        document.getElementById('og-url')?.setAttribute('content', postUrl);
+        document.getElementById('og-title')?.setAttribute('content', `${meta.title} — Rohan Pradyumna`);
+        document.getElementById('og-description')?.setAttribute('content', postDescription);
+        document.getElementById('twitter-url')?.setAttribute('content', postUrl);
+        document.getElementById('twitter-title')?.setAttribute('content', `${meta.title} — Rohan Pradyumna`);
+        document.getElementById('twitter-description')?.setAttribute('content', postDescription);
+
+        // Update JSON-LD schema
+        const schemaEl = document.getElementById('schema-blogposting');
+        if (schemaEl) {
+          const schema = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": meta.title,
+            "description": postDescription,
+            "datePublished": meta.date,
+            "author": {
+              "@type": "Person",
+              "name": "Rohan Pradyumna",
+              "url": "https://rohanpradyumna.vercel.app"
+            },
+            "publisher": {
+              "@type": "Person",
+              "name": "Rohan Pradyumna"
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": postUrl
+            },
+            "keywords": meta.tags ? meta.tags.join(', ') : ''
+          };
+          schemaEl.textContent = JSON.stringify(schema);
+        }
 
         setLoading(false);
       })
