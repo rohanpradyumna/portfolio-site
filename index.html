@@ -374,9 +374,9 @@ function Sticker({
   const dragRef = useRef({ active: false, moved: false, startX: 0, startY: 0, origX: 0, origY: 0, pointerId: null });
   const elRef = useRef(null);
 
-  // Entrance animation trigger
+  // Entrance animation trigger - wait for delay + animation duration (500ms)
   useEffect(() => {
-    const timer = setTimeout(() => setHasEntered(true), entranceDelay);
+    const timer = setTimeout(() => setHasEntered(true), entranceDelay + 550);
     return () => clearTimeout(timer);
   }, [entranceDelay]);
 
@@ -444,8 +444,8 @@ function Sticker({
         cursor: dragging ? 'grabbing' : 'grab',
         transition: dragging ? 'none' : 'transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
         touchAction: 'none',
-        opacity: 0,
-        animation: `stickerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${entranceDelay}ms forwards`,
+        opacity: hasEntered ? 1 : 0,
+        animation: hasEntered ? 'none' : `stickerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${entranceDelay}ms forwards`,
         ...style,
       }}
       title={title}
@@ -1731,7 +1731,7 @@ function CardStack() {
 // Modal component
 // ============================================================================
 
-function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
+function Modal({ open, onClose, children, title, color = '#1a1a1a', noAnimation = false }) {
   if (!open) return null;
   const isMobileModal = window.innerWidth <= 768;
   return (
@@ -1747,7 +1747,7 @@ function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
         display: 'flex',
         alignItems: isMobileModal ? 'flex-end' : 'center',
         justifyContent: 'center',
-        animation: 'fadeIn 0.2s ease',
+        animation: noAnimation ? 'none' : 'fadeIn 0.2s ease',
         padding: isMobileModal ? 0 : 20,
       }}
     >
@@ -1764,7 +1764,7 @@ function Modal({ open, onClose, children, title, color = '#1a1a1a' }) {
           boxShadow: '0 -10px 40px rgba(20,10,0,0.3), 0 30px 60px rgba(20,10,0,0.4)',
           fontFamily: "'Geist Mono', monospace",
           position: 'relative',
-          animation: isMobileModal ? 'slideUp 0.3s cubic-bezier(0.2,0.8,0.2,1)' : 'pop 0.25s cubic-bezier(0.2,0.8,0.2,1)',
+          animation: noAnimation ? 'none' : (isMobileModal ? 'slideUp 0.3s cubic-bezier(0.2,0.8,0.2,1)' : 'pop 0.25s cubic-bezier(0.2,0.8,0.2,1)'),
           maxHeight: isMobileModal ? '85vh' : 'none',
           overflowY: 'auto',
         }}
@@ -1884,7 +1884,7 @@ const PROJECTS = [
   }
 ];
 
-function ProjectSticker({ project, isExpanded, onToggle, index, shouldAnimate }) {
+function ProjectSticker({ project, isExpanded, onToggle, index }) {
   const isMobile = window.innerWidth <= 768;
 
   return (
@@ -1900,7 +1900,6 @@ function ProjectSticker({ project, isExpanded, onToggle, index, shouldAnimate })
           ? '0 8px 24px rgba(0,0,0,0.15)'
           : '0 3px 12px rgba(0,0,0,0.08)',
         transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-        animation: shouldAnimate ? `projectPop 0.4s ${index * 80}ms cubic-bezier(0.2, 0.8, 0.2, 1) both` : 'none',
         overflow: 'hidden',
       }}
     >
@@ -2015,6 +2014,22 @@ function ProjectSticker({ project, isExpanded, onToggle, index, shouldAnimate })
   );
 }
 
+function WorkModalContent({ expandedProject, setExpandedProject }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: '8px 0' }}>
+      {PROJECTS.map((project, index) => (
+        <ProjectSticker
+          key={project.id}
+          project={project}
+          isExpanded={expandedProject === project.id}
+          onToggle={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
+          index={index}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ============================================================================
 // Main App
 // ============================================================================
@@ -2026,7 +2041,6 @@ function App() {
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [stoicQuote, setStoicQuote] = useState(null);
   const [expandedProject, setExpandedProject] = useState(null);
-  const workModalOpenedRef = React.useRef(false);
 
   const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
   useEffect(() => {
@@ -2359,7 +2373,7 @@ function App() {
       {isMobile && <MobileStickerGrid />}
 
       {/* Modals */}
-      <Modal open={modal==='phone'} onClose={()=>setModal(null)} title="call me" color="#1a1a1a">
+      <Modal open={modal==='phone'} noAnimation={true} onClose={()=>setModal(null)} title="call me" color="#1a1a1a">
         <div style={{ fontSize: 28, fontFamily:"'Geist Mono', monospace", letterSpacing:'0.05em', margin:'8px 0 14px', color:'#f2c230' }}>
           +1 (240) 854-3253
         </div>
@@ -2370,7 +2384,7 @@ function App() {
         }}>dial now →</a>
       </Modal>
 
-      <Modal open={modal==='music'} onClose={()=>{ setModal(null); songAudio.pause(); setMusicPlaying(false); }} title="now playing" color="#1a1a1a">
+      <Modal open={modal==='music'} noAnimation={true} onClose={()=>{ setModal(null); songAudio.pause(); setMusicPlaying(false); }} title="now playing" color="#1a1a1a">
         <div style={{ display:'flex', alignItems:'center', gap: 14, marginBottom: 6 }}>
           <EqBars playing={musicPlaying} />
           <div>
@@ -2387,7 +2401,7 @@ function App() {
         </button>
       </Modal>
 
-      <Modal open={modal==='lego'} onClose={()=>setModal(null)} title="click!" color="#d4584f">
+      <Modal open={modal==='lego'} noAnimation={true} onClose={()=>setModal(null)} title="click!" color="#d4584f">
         <div style={{ fontSize: 14, color:'#f5f2e8', marginBottom: 8 }}>
           you've clicked the brick <b>{legoCount}</b> {legoCount === 1 ? 'time' : 'times'}.
         </div>
@@ -2406,7 +2420,7 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='charminar'} onClose={()=>setModal(null)} title="hyderabad 🍛" color="#a8794a">
+      <Modal open={modal==='charminar'} noAnimation={true} onClose={()=>setModal(null)} title="hyderabad 🍛" color="#a8794a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
           home. my heart lives here even when I don't. the city that never sleeps — and neither did I when I was there.
         </div>
@@ -2415,7 +2429,7 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='dc'} onClose={()=>setModal(null)} title="washington, dc 🏛️" color="#2d6cdf">
+      <Modal open={modal==='dc'} noAnimation={true} onClose={()=>setModal(null)} title="washington, dc 🏛️" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
           current base of operations. UMD brought me here, AI keeps me here, Hyderabad will eventually take me back.
         </div>
@@ -2424,7 +2438,7 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='travel'} onClose={()=>setModal(null)} title="travel vibes ✈️" color="#1a1a1a">
+      <Modal open={modal==='travel'} noAnimation={true} onClose={()=>setModal(null)} title="travel vibes ✈️" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 12 }}>
           hot take: I'd rather go back to a place I love than hunt for somewhere new. once a city clicks, I want to keep going back. they tell me stories.
         </div>
@@ -2436,13 +2450,13 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='beach'} onClose={()=>setModal(null)} title="beach brain" color="#2d6cdf">
+      <Modal open={modal==='beach'} noAnimation={true} onClose={()=>setModal(null)} title="beach brain" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
           my best product ideas happen when I'm 10 feet from the water and nowhere near a laptop. kerala backwaters &gt; boardrooms.
         </div>
       </Modal>
 
-      <Modal open={modal==='pickleball'} onClose={()=>setModal(null)} title="racket sports 🏓" color="#3a7d44">
+      <Modal open={modal==='pickleball'} noAnimation={true} onClose={()=>setModal(null)} title="racket sports 🏓" color="#3a7d44">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
           pickleball, tennis, badminton, TT — I play them all and I'm weirdly decent at each? not pro level, but I'll make you work for it.
         </div>
@@ -2451,13 +2465,13 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='camera'} onClose={()=>setModal(null)} title="photo walks" color="#1a1a1a">
+      <Modal open={modal==='camera'} noAnimation={true} onClose={()=>setModal(null)} title="photo walks" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#f5f2e8' }}>
           mostly street + architecture on a fuji x100v. not for the 'gram — just for me. there's something about noticing that makes me a better PM too.
         </div>
       </Modal>
 
-      <Modal open={modal==='coffee'} onClose={()=>setModal(null)} title="coffee obsession ☕" color="#6b3a1f">
+      <Modal open={modal==='coffee'} noAnimation={true} onClose={()=>setModal(null)} title="coffee obsession ☕" color="#6b3a1f">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef', marginBottom: 10 }}>
           yes, I'm that guy who asks where the beans are from. black, or their specialty if I'm feeling fancy — but always strong.
         </div>
@@ -2469,44 +2483,24 @@ function App() {
         </div>
       </Modal>
 
-      <Modal open={modal==='gym'} onClose={()=>setModal(null)} title="fitness arc 💪" color="#2d6cdf">
+      <Modal open={modal==='gym'} noAnimation={true} onClose={()=>setModal(null)} title="fitness arc 💪" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#faf7ef' }}>
           currently in my "get fit" era. shipping products = sitting all day, so the gym is non-negotiable. compound effect works here too — small reps, big gains. (that's the plan anyway)
         </div>
       </Modal>
 
-      <Modal open={modal==='portrait'} onClose={()=>setModal(null)} title="that's me" color="#1a1a1a">
+      <Modal open={modal==='portrait'} noAnimation={true} onClose={()=>setModal(null)} title="that's me" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color:'#f5f2e8' }}>
           occasionally productive, generally fun, always smiling. the coffee helps.
         </div>
       </Modal>
 
       {/* My Work Modal */}
-      <Modal open={modal==='work'} onClose={()=>{ setModal(null); setExpandedProject(null); }} title="my work" color="#1a1a1a">
-        {(() => {
-          const shouldAnimate = !workModalOpenedRef.current;
-          if (!workModalOpenedRef.current) workModalOpenedRef.current = true;
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: '8px 0' }}>
-              {PROJECTS.map((project, index) => (
-                <ProjectSticker
-                  key={project.id}
-                  project={project}
-                  isExpanded={expandedProject === project.id}
-                  onToggle={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
-                  index={index}
-                  shouldAnimate={shouldAnimate}
-                />
-              ))}
-            </div>
-          );
-        })()}
-        <style>{`
-          @keyframes projectPop {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-          }
-        `}</style>
+      <Modal open={modal==='work'} onClose={()=>{ setModal(null); setExpandedProject(null); }} title="my work" color="#1a1a1a" noAnimation={true}>
+        <WorkModalContent
+          expandedProject={expandedProject}
+          setExpandedProject={setExpandedProject}
+        />
       </Modal>
 
       {/* Stoic Wisdom Modal - Easter Egg */}
