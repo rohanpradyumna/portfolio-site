@@ -1,0 +1,181 @@
+/* ============================================================================
+   DESIGN TOKENS - Portfolio Theme
+   ============================================================================ */
+
+:root {
+  /* Primary Colors */
+  --paper: #faf7ef;
+  --paper-secondary: #f3ecd8;
+  --ink: #1a1a1a;
+  --ink-secondary: #4a4a4a;
+
+  /* Accent Colors */
+  --accent-orange: #e85d3a;
+  --accent-blue: #2d6cdf;
+  --accent-green: #3a7d44;
+  --accent-yellow: #f2c230;
+  --accent-coffee: #6b3a1f;
+
+  /* Card Colors */
+  --card-bg: #1a1a1a;
+  --card-ink: #f5f2e8;
+
+  /* Grid Colors */
+  --grid: rgba(160, 140, 80, 0.14);
+  --grid-strong: rgba(160, 140, 80, 0.22);
+
+  /* Typography */
+  --font-serif: 'Instrument Serif', serif;
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+
+  /* Font Sizes */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+  --text-3xl: 34px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 100px;
+
+  /* Shadows */
+  --shadow-sticker: drop-shadow(0 6px 10px rgba(40,30,10,0.20)) drop-shadow(0 2px 4px rgba(40,30,10,0.16));
+  --shadow-sticker-hover: drop-shadow(0 16px 24px rgba(40,30,10,0.30)) drop-shadow(0 6px 10px rgba(40,30,10,0.22));
+  --shadow-sticker-drag: drop-shadow(0 24px 32px rgba(40,30,10,0.35)) drop-shadow(0 8px 12px rgba(40,30,10,0.25));
+  --shadow-card: 0 25px 50px rgba(20,15,5,0.4), 0 12px 24px rgba(20,15,5,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  --shadow-modal: 0 -10px 40px rgba(20,10,0,0.3), 0 30px 60px rgba(20,10,0,0.4);
+
+  /* Transitions */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+
+  --duration-fast: 0.15s;
+  --duration-base: 0.28s;
+  --duration-slow: 0.45s;
+
+  /* Dynamic Lighting (mouse-tracked) */
+  --light-x: 50%;
+  --light-y: 40%;
+
+  /* Breakpoints (for reference, use in media queries) */
+  --breakpoint-mobile: 380px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1440px;
+  --breakpoint-wide: 1920px;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes stickerPop {
+  0% { opacity: 0; transform: scale(0.3); }
+  60% { opacity: 1; transform: scale(1.08); }
+  80% { transform: scale(0.97); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes musicNote {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-30px) rotate(20deg); opacity: 0; }
+}
+
+@keyframes steam {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-15px) scale(1.3); opacity: 0.5; }
+  100% { transform: translateY(-30px) scale(0.6); opacity: 0; }
+}
+
+@keyframes machineShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-1px) rotate(-0.5deg); }
+  75% { transform: translateX(1px) rotate(0.5deg); }
+}
+
+@keyframes coffeeDrip {
+  0% { height: 0; opacity: 0; }
+  20% { height: 12px; opacity: 1; }
+  80% { height: 12px; opacity: 1; }
+  100% { height: 0; opacity: 0; transform: translateX(-50%) translateY(15px); }
+}
+
+@keyframes brewPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.05); }
+}
+
+@keyframes cardFromBack {
+  0% {
+    transform: translate(-50%, calc(-50% + 50px)) scale(0.88) rotate(-4deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes wisdomAppear {
+  0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* EQ Bar animations */
+@keyframes eq0 { 0% { height: 6px; } 100% { height: 22px; } }
+@keyframes eq1 { 0% { height: 14px; } 100% { height: 28px; } }
+@keyframes eq2 { 0% { height: 8px; } 100% { height: 24px; } }
+@keyframes eq3 { 0% { height: 18px; } 100% { height: 26px; } }
+@keyframes eq4 { 0% { height: 10px; } 100% { height: 20px; } }
+
+/* ============================================================================
+   REDUCED MOTION
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

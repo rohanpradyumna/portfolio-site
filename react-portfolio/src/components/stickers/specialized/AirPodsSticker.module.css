@@ -1,0 +1,20 @@
+.musicNote {
+  position: absolute;
+  font-size: 16px;
+  animation: musicNoteFloat 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes musicNoteFloat {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) rotate(20deg);
+    opacity: 0;
+  }
+}

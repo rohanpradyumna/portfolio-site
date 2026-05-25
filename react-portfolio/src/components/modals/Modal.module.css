@@ -1,0 +1,66 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 15, 5, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100000;
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  color: #f5f2e8;
+  box-shadow: 0 -10px 40px rgba(20, 10, 0, 0.3), 0 30px 60px rgba(20, 10, 0, 0.4);
+  font-family: 'Geist Mono', monospace;
+  position: relative;
+  overflow-y: auto;
+}
+
+.dragHandle {
+  width: 36px;
+  height: 4px;
+  background: rgba(245, 242, 232, 0.3);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.closeButton {
+  position: absolute;
+  background: transparent;
+  border: none;
+  color: rgba(245, 242, 232, 0.6);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: rgba(245, 242, 232, 0.9);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--accent-orange, #e85d3a);
+  outline-offset: 2px;
+}
+
+.title {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  margin-bottom: 12px;
+  padding-right: 40px;
+}
+
+.body {
+  line-height: 1.6;
+  color: rgba(245, 242, 232, 0.9);
+  text-wrap: pretty;
+}
+
+/* Animations are defined in globals.css */

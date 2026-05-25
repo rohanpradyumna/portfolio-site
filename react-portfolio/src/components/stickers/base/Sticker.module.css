@@ -1,0 +1,15 @@
+.sticker {
+  position: absolute;
+  will-change: transform;
+}
+
+.inner {
+  position: relative;
+}
+
+/* Keyboard focus state */
+.sticker:focus-visible {
+  outline: 2px solid var(--accent-orange, #e85d3a);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
