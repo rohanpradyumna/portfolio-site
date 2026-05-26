@@ -15,7 +15,7 @@ export function ImageSticker({
   src,
   size = 86,
   bg = 'transparent',
-  pad = 0,
+  pad = 8,
   radius = 0,
   ...rest
 }: ImageStickerProps) {
