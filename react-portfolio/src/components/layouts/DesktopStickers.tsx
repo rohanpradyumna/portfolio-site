@@ -96,7 +96,7 @@ export function DesktopStickers({
       <ImageSticker
         id="charminar"
         src="/assets/icons/charminar.png"
-        size={s(116)}
+        size={s(120)}
         initial={positions.charminar || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.charminarFact}
@@ -105,7 +105,7 @@ export function DesktopStickers({
       <ImageSticker
         id="dc"
         src="/assets/icons/dc.png"
-        size={s(110)}
+        size={s(120)}
         initial={positions.washingtondc || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.dcFact}
@@ -116,7 +116,7 @@ export function DesktopStickers({
       <ImageSticker
         id="linkedin"
         src="/assets/icons/linkedin.png"
-        size={s(92)}
+        size={s(90)}
         initial={positions.linkedin || { x: 0, y: 0, rot: 0 }}
         zBase={10}
         onClick={handlers.openLinkedIn}
@@ -134,7 +134,7 @@ export function DesktopStickers({
       <ImageSticker
         id="plane"
         src="/assets/icons/plane.png"
-        size={s(104)}
+        size={s(110)}
         initial={positions.plane || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.travelList}
@@ -143,7 +143,7 @@ export function DesktopStickers({
       <ImageSticker
         id="beach"
         src="/assets/icons/beach.png"
-        size={s(98)}
+        size={s(92)}
         initial={positions.beach || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.beachVibes}
@@ -161,7 +161,7 @@ export function DesktopStickers({
       <ImageSticker
         id="coffee"
         src="/assets/icons/coffee.png"
-        size={s(88)}
+        size={s(80)}
         initial={positions.coffee || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.coffeeVibes}

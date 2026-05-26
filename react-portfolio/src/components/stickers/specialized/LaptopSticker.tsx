@@ -10,7 +10,6 @@ export function LaptopSticker(props: Omit<StickerProps, 'children'>) {
         style={{
           width: 100,
           height: 90,
-          padding: 6,
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',

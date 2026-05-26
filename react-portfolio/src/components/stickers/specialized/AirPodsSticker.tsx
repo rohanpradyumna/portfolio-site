@@ -36,7 +36,6 @@ export function AirPodsSticker({ onPlay, ...props }: AirPodsStickerProps) {
         style={{
           width: 90,
           height: 100,
-          padding: 6,
           boxSizing: 'border-box',
           display: 'flex',
           alignItems: 'center',
