@@ -98,7 +98,7 @@ export default function Home() {
       { id: 'tagAI', ...placeOrbital(5, s(75), s(140), s(36), 0, config) },
       { id: 'charminar', ...placeOrbital(-125, s(150), s(120), s(110), 0, config) },
       { id: 'washingtondc', ...placeOrbital(-35, s(145), s(120), s(86), 0, config) },
-      { id: 'portrait', ...placeOrbital(160, s(130), isMobile ? 143 : s(187), isMobile ? 215 : s(281), 0, config) },
+      { id: 'portrait', ...placeOrbital(160, s(130), isMobile ? 164 : s(215), isMobile ? 247 : s(323), 0, config) },
       { id: 'linkedin', ...placeOrbital(185, s(85), s(90), s(90), 0, config) },
       { id: 'pickleball', ...placeOrbital(215, s(100), s(90), s(90), 0, config) },
       { id: 'email', ...placeOrbital(15, s(90), s(100), s(74), 0, config) },
@@ -109,15 +109,15 @@ export default function Home() {
       { id: 'camera', ...placeOrbital(260, s(150), s(96), s(76), 0, config) },
       { id: 'gym', ...placeOrbital(295, s(95), s(96), s(96), 0, config) },
       { id: 'laptop', ...placeOrbital(-60, s(130), s(100), s(90), 0, config) },
-      { id: 'folder', ...placeOrbital(145, s(95), s(100), s(80), 0, config) },
+      { id: 'folder', ...placeOrbital(90, s(95), s(100), s(80), 0, config) },
     ];
 
     const resolved = resolveOverlapsSimple(raw);
     return positionsToObject(resolved);
   }, [dims.w, dims.h, isMobile, scale, s]);
 
-  const portraitW = isMobile ? 143 : Math.round(187 * scale);
-  const portraitH = isMobile ? 215 : Math.round(281 * scale);
+  const portraitW = isMobile ? 164 : Math.round(215 * scale);
+  const portraitH = isMobile ? 247 : Math.round(323 * scale);
 
   // Event handlers
   const handlers = useMemo(
