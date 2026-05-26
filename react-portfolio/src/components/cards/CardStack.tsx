@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, PanInfo } from 'framer-motion';
 import { CARDS } from '@/data/cards';
 import { useResponsive, useCardDimensions } from '@/hooks/useDimensions';
 import { useAudio } from '@/hooks/useAudio';
@@ -23,17 +24,21 @@ function getChevBtnStyle(isMobile: boolean): React.CSSProperties {
     justifyContent: 'center',
     padding: 0,
     lineHeight: 1,
-    transition: 'background 0.15s, transform 0.15s',
     minWidth: 44,
     minHeight: 44,
   };
 }
 
+// Spring config for card animations
+const cardSpring = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 35,
+};
+
 export function CardStack() {
   const [idx, setIdx] = useState(0);
-  const [drag, setDrag] = useState({ active: false, dx: 0, dy: 0 });
   const [shuffling, setShuffling] = useState<'next' | 'prev' | null>(null);
-  const startRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
 
   const { isMobile } = useResponsive();
   const { cardW, cardMinH, cardPadding } = useCardDimensions();
@@ -45,15 +50,14 @@ export function CardStack() {
     cardOrder.push(c);
   }
 
-  const DRAG_THRESHOLD = 60;
-  const DRAG_MIN = 4;
-  const SHUFFLE_MS = 450;
+  const DRAG_THRESHOLD = 80;
+  const SHUFFLE_MS = 350;
 
   const next = useCallback(() => {
     if (shuffling) return;
     playShuffleSound();
     setShuffling('next');
-    setDrag({ active: false, dx: 0, dy: 0 });
+
     setTimeout(() => {
       setIdx((i) => (i + 1) % CARDS.length);
       setShuffling(null);
@@ -63,46 +67,27 @@ export function CardStack() {
   const prev = useCallback(() => {
     if (shuffling) return;
     playShuffleSound();
-    setIdx((i) => (i - 1 + CARDS.length) % CARDS.length);
     setShuffling('prev');
-    setDrag({ active: false, dx: 0, dy: 0 });
+
     setTimeout(() => {
+      setIdx((i) => (i - 1 + CARDS.length) % CARDS.length);
       setShuffling(null);
     }, SHUFFLE_MS);
   }, [shuffling, playShuffleSound]);
 
-  const onDown = (e: React.PointerEvent) => {
-    if (e.button && e.button !== 0) return;
-    if ((e.target as HTMLElement).closest('[data-nodrag]')) return;
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (shuffling) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    startRef.current = { x: e.clientX, y: e.clientY, moved: false };
-  };
 
-  const onMove = (e: React.PointerEvent) => {
-    if (!startRef.current || shuffling) return;
-    const dx = e.clientX - startRef.current.x;
-    const dy = e.clientY - startRef.current.y;
-    if (!startRef.current.moved && Math.hypot(dx, dy) < DRAG_MIN) return;
-    startRef.current.moved = true;
-    setDrag({ active: true, dx, dy });
-  };
+    const velocity = info.velocity.x;
+    const offset = info.offset.x;
 
-  const onUp = () => {
-    if (!startRef.current || shuffling) return;
-    const moved = startRef.current.moved;
-    const { dx } = drag;
-    const dist = Math.abs(dx);
-    startRef.current = null;
-    if (moved && dist > DRAG_THRESHOLD) {
-      if (dx > 0) {
-        prev();
-      } else {
-        next();
-      }
-    } else {
-      setDrag({ active: false, dx: 0, dy: 0 });
+    // Swipe detection based on velocity or distance
+    if (offset < -DRAG_THRESHOLD || velocity < -500) {
+      next();
+    } else if (offset > DRAG_THRESHOLD || velocity > 500) {
+      prev();
     }
+    // Card snaps back automatically via dragConstraints
   };
 
   // Keyboard navigation
@@ -116,6 +101,55 @@ export function CardStack() {
   }, [next, prev]);
 
   const stackOffset = isMobile ? 6 : 10;
+
+  // Calculate card transforms for non-dragging states
+  const getCardTransform = (stackPos: number, isTop: boolean) => {
+    if (shuffling === 'next' && isTop) {
+      return {
+        scale: 0.88,
+        rotate: 4,
+        opacity: 0.4,
+        yOffset: 5 * stackOffset,
+      };
+    }
+
+    if (shuffling === 'next' && !isTop) {
+      const newStackPos = Math.max(0, stackPos - 1);
+      return {
+        scale: 1 - newStackPos * 0.03,
+        rotate: 0,
+        opacity: newStackPos === 0 ? 1 : 0.95,
+        yOffset: newStackPos * stackOffset,
+      };
+    }
+
+    if (shuffling === 'prev' && isTop) {
+      return {
+        scale: 1,
+        rotate: -2,
+        opacity: 1,
+        yOffset: 0,
+      };
+    }
+
+    if (shuffling === 'prev' && !isTop) {
+      const newStackPos = stackPos + 1;
+      return {
+        scale: 1 - newStackPos * 0.03,
+        rotate: 0,
+        opacity: 0.7,
+        yOffset: newStackPos * stackOffset,
+      };
+    }
+
+    // Default state
+    return {
+      scale: 1 - stackPos * 0.03,
+      rotate: 0,
+      opacity: isTop ? 1 : stackPos === 1 ? 0.95 : 0.6,
+      yOffset: stackPos * stackOffset,
+    };
+  };
 
   return (
     <div
@@ -137,14 +171,19 @@ export function CardStack() {
     >
       {/* Pile of cards behind */}
       {[5, 4, 3, 2, 1].map((n) => (
-        <div
+        <motion.div
           key={'shadow' + n}
+          animate={{
+            y: shuffling === 'next' ? (n - 1) * stackOffset : n * stackOffset,
+            scale: shuffling === 'next' ? 1 - (n - 1) * 0.018 : 1 - n * 0.018,
+            rotate: shuffling === 'next' ? (n - 1) * 0.3 : n * 0.3,
+          }}
+          transition={cardSpring}
           style={{
             position: 'absolute',
             inset: 0,
             background: n <= 2 ? '#232323' : '#1a1a1a',
             borderRadius: isMobile ? 14 : 18,
-            transform: `translateY(${n * (isMobile ? 6 : 10)}px) scale(${1 - n * 0.018}) rotate(${n * 0.3}deg)`,
             opacity: n <= 2 ? 0.95 : 0.4 - n * 0.06,
             boxShadow: n <= 2 ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
             zIndex: -n,
@@ -155,52 +194,24 @@ export function CardStack() {
       {cardOrder.map((cardIdx, stackPos) => {
         const card = CARDS[cardIdx];
         const isTop = stackPos === 0;
-        const isSecond = stackPos === 1;
-
-        let transform: string;
-        let opacity: number;
-        let zIndex: number;
-
-        if (shuffling === 'next' && isTop) {
-          transform = `translate(-50%, calc(-50% + ${5 * stackOffset}px)) scale(0.88) rotate(4deg)`;
-          opacity = 0.4;
-          zIndex = 90;
-        } else if (shuffling === 'next' && !isTop) {
-          const newStackPos = Math.max(0, stackPos - 1);
-          transform = `translate(-50%, calc(-50% + ${newStackPos * stackOffset}px)) scale(${1 - newStackPos * 0.03})`;
-          opacity = newStackPos === 0 ? 1 : 0.95;
-          zIndex = 100 - newStackPos;
-        } else if (shuffling === 'prev' && isTop) {
-          transform = `translate(-50%, -50%) scale(1) rotate(-2deg)`;
-          opacity = 1;
-          zIndex = 100;
-        } else if (shuffling === 'prev' && !isTop) {
-          const newStackPos = stackPos + 1;
-          transform = `translate(-50%, calc(-50% + ${newStackPos * stackOffset}px)) scale(${1 - newStackPos * 0.03})`;
-          opacity = 0.7;
-          zIndex = 100 - newStackPos;
-        } else if (isTop && drag.active) {
-          transform = `translate(calc(-50% + ${drag.dx}px), calc(-50% + ${drag.dy}px)) rotate(${drag.dx * 0.04}deg)`;
-          opacity = 1;
-          zIndex = 100;
-        } else {
-          transform = `translate(-50%, calc(-50% + ${stackPos * stackOffset}px)) scale(${1 - stackPos * 0.03})`;
-          opacity = isTop ? 1 : isSecond ? 0.95 : 0.6;
-          zIndex = 100 - stackPos;
-        }
+        const transform = getCardTransform(stackPos, isTop);
 
         return (
-          <div
-            key={cardIdx + '-' + stackPos}
-            onPointerDown={isTop ? onDown : undefined}
-            onPointerMove={isTop ? onMove : undefined}
-            onPointerUp={isTop ? onUp : undefined}
-            onPointerCancel={isTop ? onUp : undefined}
-            className={shuffling === 'prev' && isTop ? styles.cardFromBack : ''}
+          <motion.div
+            key={`card-${cardIdx}-${stackPos}`}
+            animate={{
+              scale: transform.scale,
+              rotate: transform.rotate,
+              opacity: transform.opacity,
+              y: transform.yOffset,
+              x: 0,
+            }}
             style={{
               position: 'absolute',
               left: '50%',
               top: '50%',
+              translateX: '-50%',
+              translateY: '-50%',
               width: cardW,
               minHeight: cardMinH,
               background: '#1a1a1a',
@@ -208,27 +219,23 @@ export function CardStack() {
               borderRadius: isMobile ? 14 : 18,
               padding: cardPadding,
               boxSizing: 'border-box',
-              transform,
-              opacity,
-              transition:
-                shuffling === 'prev' && isTop
-                  ? 'none'
-                  : shuffling
-                    ? 'transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.45s ease'
-                    : drag.active && isTop
-                      ? 'none'
-                      : 'transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.3s ease',
-              boxShadow:
-                isTop && !shuffling
-                  ? '0 25px 50px rgba(20,15,5,0.4), 0 12px 24px rgba(20,15,5,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset'
-                  : '0 10px 20px rgba(20,15,5,0.25)',
-              zIndex,
-              cursor: isTop && !shuffling ? (drag.active ? 'grabbing' : 'grab') : 'default',
+              boxShadow: isTop && !shuffling
+                ? '0 25px 50px rgba(20,15,5,0.4), 0 12px 24px rgba(20,15,5,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset'
+                : '0 10px 20px rgba(20,15,5,0.25)',
+              zIndex: 100 - stackPos,
+              cursor: isTop && !shuffling ? 'grab' : 'default',
               touchAction: 'none',
               display: 'flex',
               flexDirection: 'column',
               pointerEvents: isTop && !shuffling ? 'auto' : 'none',
             }}
+            transition={cardSpring}
+            drag={isTop && !shuffling ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.9}
+            dragMomentum={false}
+            onDragEnd={handleDragEnd}
+            whileDrag={{ scale: 1.02, cursor: 'grabbing' }}
             role="group"
             aria-roledescription="slide"
             aria-label={`Card ${cardIdx + 1} of ${CARDS.length}`}
@@ -247,40 +254,40 @@ export function CardStack() {
                 whiteSpace: 'nowrap',
               }}
             >
-              <button
-                data-nodrag
-                onPointerDown={(e) => e.stopPropagation()}
+              <motion.button
                 onClick={(e) => {
                   e.stopPropagation();
                   prev();
                 }}
                 style={getChevBtnStyle(isMobile)}
+                whileHover={{ scale: 1.1, background: 'rgba(245,242,232,0.15)' }}
+                whileTap={{ scale: 0.95 }}
                 aria-label="Previous card"
               >
                 ‹
-              </button>
+              </motion.button>
               <span
                 style={{ whiteSpace: 'nowrap', minWidth: 56, textAlign: 'center', display: 'inline-block' }}
                 aria-live="polite"
               >
                 {String(cardIdx + 1).padStart(2, '0')}&nbsp;/&nbsp;{String(CARDS.length).padStart(2, '0')}
               </span>
-              <button
-                data-nodrag
-                onPointerDown={(e) => e.stopPropagation()}
+              <motion.button
                 onClick={(e) => {
                   e.stopPropagation();
                   next();
                 }}
                 style={getChevBtnStyle(isMobile)}
+                whileHover={{ scale: 1.1, background: 'rgba(245,242,232,0.15)' }}
+                whileTap={{ scale: 0.95 }}
                 aria-label="Next card"
               >
                 ›
-              </button>
+              </motion.button>
             </div>
 
             <CardBody card={card} isMobile={isMobile} />
-          </div>
+          </motion.div>
         );
       })}
     </div>

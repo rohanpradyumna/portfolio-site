@@ -14,9 +14,9 @@ export interface ImageStickerProps extends Omit<StickerProps, 'children'> {
 export function ImageSticker({
   src,
   size = 86,
-  bg = '#ffffff',
-  pad = 8,
-  radius = 18,
+  bg = 'transparent',
+  pad = 0,
+  radius = 0,
   ...rest
 }: ImageStickerProps) {
   return (

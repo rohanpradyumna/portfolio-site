@@ -1,9 +1,24 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useRef } from 'react';
+import { motion, PanInfo, useMotionValue, animate } from 'framer-motion';
 import { useAudio } from '@/hooks/useAudio';
-import { Position, DragRef } from '@/types';
+import { Position } from '@/types';
 import styles from './Sticker.module.css';
+
+// Magnetic snap configuration
+const GRID_SIZE = 140; // Major grid lines (matches globals.css)
+const SNAP_THRESHOLD = 35; // Distance in px to trigger snap
+
+// Find nearest snap point if within threshold
+const findSnapPoint = (value: number): number | null => {
+  const nearestGrid = Math.round(value / GRID_SIZE) * GRID_SIZE;
+  const distance = Math.abs(value - nearestGrid);
+  return distance <= SNAP_THRESHOLD ? nearestGrid : null;
+};
+
+// Simple hover animation - no jumping or complex movements
+const simpleHoverAnimation = { scale: 1.05 };
 
 export interface StickerProps {
   id: string;
@@ -33,129 +48,113 @@ export function Sticker({
   style = {},
   entranceDelay = 0,
 }: StickerProps) {
-  const [pos, setPos] = useState<Position>({ x: initial.x, y: initial.y, rot: initial.rot || 0 });
-  const [dragging, setDragging] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [z, setZ] = useState(zBase);
-  const [hasDragged, setHasDragged] = useState(false);
-  const [hasEntered, setHasEntered] = useState(false);
+  // Use refs instead of state to avoid re-renders during drag
+  const hasMoved = useRef(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const zIndexRef = useRef(zBase);
 
-  const dragRef = useRef<DragRef>({
-    active: false,
-    moved: false,
-    startX: 0,
-    startY: 0,
-    origX: 0,
-    origY: 0,
-    pointerId: null,
-  });
-  const elRef = useRef<HTMLDivElement>(null);
+  // Motion values for magnetic snap
+  const x = useMotionValue(initial.x);
+  const y = useMotionValue(initial.y);
 
   const { playTapSound, triggerHaptic } = useAudio();
 
-  // Entrance animation trigger - wait for delay + animation duration (500ms)
-  useEffect(() => {
-    const timer = setTimeout(() => setHasEntered(true), entranceDelay + 550);
-    return () => clearTimeout(timer);
-  }, [entranceDelay]);
-
-  // Update position when initial changes (window resize) - but only if user hasn't dragged
-  useEffect(() => {
-    if (!hasDragged) {
-      setPos({ x: initial.x, y: initial.y, rot: initial.rot || 0 });
+  const handleDragStart = () => {
+    playTapSound();
+    triggerHaptic(10);
+    hasMoved.current = false;
+    // Update z-index directly via DOM to avoid re-render
+    if (elementRef.current) {
+      elementRef.current.style.zIndex = '9999';
     }
-  }, [initial.x, initial.y, initial.rot, hasDragged]);
+    onDragStart?.(id);
+  };
 
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      if (e.button && e.button !== 0) return;
+  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (Math.abs(info.offset.x) + Math.abs(info.offset.y) > 5) {
+      hasMoved.current = true;
+    }
+  };
+
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, _info: PanInfo) => {
+    if (hasMoved.current) {
+      zIndexRef.current = zBase + 10;
+
+      // Check for magnetic snap after momentum settles
+      setTimeout(() => {
+        const currentX = x.get();
+        const currentY = y.get();
+        const snapX = findSnapPoint(currentX);
+        const snapY = findSnapPoint(currentY);
+
+        // Only snap if both axes are near grid lines (creates satisfying corner snaps)
+        if (snapX !== null && snapY !== null) {
+          animate(x, snapX, { type: 'spring', stiffness: 500, damping: 30 });
+          animate(y, snapY, { type: 'spring', stiffness: 500, damping: 30 });
+          triggerHaptic(5); // Subtle haptic for snap
+        }
+      }, 300); // Wait for momentum to settle
+    } else {
+      zIndexRef.current = zBase;
+    }
+    // Update z-index directly via DOM
+    if (elementRef.current) {
+      elementRef.current.style.zIndex = String(zIndexRef.current);
+    }
+    onDragEnd?.(id);
+  };
+
+  // Handle tap/click - only fires if not dragging
+  const handleTap = (event: MouseEvent | TouchEvent | PointerEvent) => {
+    if (!hasMoved.current) {
       playTapSound();
       triggerHaptic(10);
-
-      elRef.current?.setPointerCapture(e.pointerId);
-      dragRef.current = {
-        active: true,
-        moved: false,
-        startX: e.clientX,
-        startY: e.clientY,
-        origX: pos.x,
-        origY: pos.y,
-        pointerId: e.pointerId,
-      };
-      setDragging(true);
-      setZ(9999);
-      onDragStart?.(id);
-      e.stopPropagation();
-    },
-    [id, onDragStart, playTapSound, triggerHaptic, pos.x, pos.y]
-  );
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragRef.current.active) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    if (Math.abs(dx) + Math.abs(dy) > 3) dragRef.current.moved = true;
-    setPos((p) => ({ ...p, x: dragRef.current.origX + dx, y: dragRef.current.origY + dy }));
-  }, []);
-
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragRef.current.active) return;
-      const wasMove = dragRef.current.moved;
-      dragRef.current.active = false;
-      setDragging(false);
-      setZ(zBase + (wasMove ? 10 : 0));
-      if (wasMove) setHasDragged(true);
-
-      try {
-        elRef.current?.releasePointerCapture(e.pointerId);
-      } catch {
-        // Ignore errors from releasing capture
-      }
-
-      onDragEnd?.(id);
-      if (!wasMove && onClick) {
-        onClick(e);
-      }
-    },
-    [id, onClick, onDragEnd, zBase]
-  );
-
-  const peelLift = hovered && !dragging;
-  const scale = dragging ? 1.08 : hovered ? 1.05 : 1;
-
-  const filterStyle = dragging
-    ? 'drop-shadow(0 24px 32px rgba(40,30,10,0.35)) drop-shadow(0 8px 12px rgba(40,30,10,0.25))'
-    : hovered
-      ? 'drop-shadow(0 16px 24px rgba(40,30,10,0.30)) drop-shadow(0 6px 10px rgba(40,30,10,0.22))'
-      : 'drop-shadow(0 6px 10px rgba(40,30,10,0.20)) drop-shadow(0 2px 4px rgba(40,30,10,0.16))';
+      onClick?.(event as unknown as React.PointerEvent);
+    }
+  };
 
   return (
-    <div
-      ref={elRef}
+    <motion.div
+      ref={elementRef}
       className={`${styles.sticker} ${className}`}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        opacity: { delay: entranceDelay / 1000, duration: 0.3, ease: 'easeOut' },
+        scale: {
+          delay: entranceDelay / 1000,
+          type: 'spring',
+          stiffness: 300,
+          damping: 25,
+        },
+      }}
       style={{
         position: 'absolute',
-        left: pos.x,
-        top: pos.y,
-        transform: `scale(${scale})`,
-        zIndex: z,
-        cursor: dragging ? 'grabbing' : 'grab',
-        transition: dragging ? 'none' : 'transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        left: 0,
+        top: 0,
+        x,
+        y,
+        rotate: initial.rot || 0,
+        zIndex: zBase,
+        cursor: 'grab',
         touchAction: 'none',
-        opacity: hasEntered ? 1 : 0,
-        animation: hasEntered
-          ? 'none'
-          : `stickerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${entranceDelay}ms forwards`,
         ...style,
       }}
+      drag
+      dragMomentum={true}
+      dragElastic={0.12}
+      dragTransition={{
+        power: 0.15,
+        timeConstant: 250,
+      }}
+      whileHover={simpleHoverAnimation}
+      whileDrag={{ scale: 1.08, cursor: 'grabbing' }}
+      whileTap={{ scale: 1.08 }}
+      onDragStart={handleDragStart}
+      onDrag={handleDrag}
+      onDragEnd={handleDragEnd}
+      onTap={handleTap}
       title={title}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       role="button"
       tabIndex={0}
       aria-label={title || `Sticker ${id}`}
@@ -166,16 +165,9 @@ export function Sticker({
         }
       }}
     >
-      <div
-        className={styles.inner}
-        style={{
-          filter: filterStyle,
-          transition: 'filter 0.28s, transform 0.28s',
-          transform: peelLift ? 'translateY(-4px)' : 'none',
-        }}
-      >
+      <div className={styles.inner}>
         {children}
       </div>
-    </div>
+    </motion.div>
   );
 }

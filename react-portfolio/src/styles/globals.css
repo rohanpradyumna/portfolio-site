@@ -1,6 +1,12 @@
 @import './theme.css';
 
 /* ============================================================================
+   FONT IMPORTS - Variable Fonts
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ============================================================================
    GLOBAL RESET & BASE
    ============================================================================ */
 
@@ -37,14 +43,14 @@ body {
   inset: 0;
   background-color: var(--paper);
   background-image:
-    /* Thin minor lines */
+    /* Thin minor lines - subtle */
     linear-gradient(to right, var(--grid) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
-    /* Stronger major every 5 */
+    /* Stronger major every 5 - refined */
     linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
-    /* Warm vignette / gold wash */
-    radial-gradient(ellipse at 50% 40%, #fffbef 0%, #faf5e4 55%, #f2e9cf 100%);
+    /* Warm artisanal vignette - ivory to cream */
+    radial-gradient(ellipse 120% 100% at 50% 35%, #fffdf8 0%, #faf6ec 40%, #f5ede0 70%, #ebe3d5 100%);
   background-size:
     28px 28px,
     28px 28px,
@@ -75,17 +81,28 @@ body {
   pointer-events: none;
 }
 
-/* Dynamic lighting overlay (tracks mouse) */
+/* Dynamic lighting overlay (tracks mouse) - Enhanced multi-layer */
 .board-light {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at var(--light-x) var(--light-y),
-    rgba(255, 251, 239, 0.3),
-    transparent 60%
-  );
   pointer-events: none;
-  transition: background 0.3s ease;
+  mix-blend-mode: soft-light;
+  opacity: 0.7;
+  background:
+    /* Primary spotlight - warm golden */
+    radial-gradient(
+      ellipse 800px 600px at var(--light-x) var(--light-y),
+      rgba(255, 248, 230, 0.5) 0%,
+      rgba(255, 243, 220, 0.25) 30%,
+      transparent 70%
+    ),
+    /* Subtle ambient glow from opposite corner */
+    radial-gradient(
+      ellipse 600px 500px at calc(100% - var(--light-x)) calc(100% - var(--light-y)),
+      rgba(242, 235, 220, 0.15) 0%,
+      transparent 60%
+    );
+  transition: background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* ============================================================================

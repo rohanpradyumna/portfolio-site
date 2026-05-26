@@ -7,6 +7,83 @@ interface OrbitalConfig {
   cardH: number;
 }
 
+interface ZoneConfig {
+  screenW: number;
+  screenH: number;
+  cardW: number;
+  cardH: number;
+}
+
+type Zone = 'top-left' | 'top' | 'top-right' | 'right' | 'bottom-right' | 'bottom-left' | 'left' | 'far-left';
+
+/**
+ * Place a sticker in a zone with natural variation
+ * Creates organic, hand-placed feeling layouts
+ */
+export function placeInZone(
+  zone: Zone,
+  offsetX: number,
+  offsetY: number,
+  w: number,
+  h: number,
+  rot: number,
+  config: ZoneConfig
+): StickerPosition {
+  const { screenW, screenH, cardW, cardH } = config;
+  const cx = screenW / 2;
+  const cy = screenH / 2;
+
+  // Card boundaries with padding
+  const cardLeft = cx - cardW / 2 - 60;
+  const cardRight = cx + cardW / 2 + 60;
+  const cardTop = cy - cardH / 2 - 60;
+  const cardBottom = cy + cardH / 2 + 60;
+
+  let baseX = 0;
+  let baseY = 0;
+
+  switch (zone) {
+    case 'top-left':
+      baseX = cardLeft * 0.4;
+      baseY = cardTop * 0.5;
+      break;
+    case 'top':
+      baseX = cx;
+      baseY = cardTop * 0.4;
+      break;
+    case 'top-right':
+      baseX = cardRight + (screenW - cardRight) * 0.4;
+      baseY = cardTop * 0.5;
+      break;
+    case 'right':
+      baseX = cardRight + (screenW - cardRight) * 0.5;
+      baseY = cy;
+      break;
+    case 'bottom-right':
+      baseX = cardRight + (screenW - cardRight) * 0.4;
+      baseY = cardBottom + (screenH - cardBottom) * 0.4;
+      break;
+    case 'bottom-left':
+      baseX = cardLeft * 0.5;
+      baseY = cardBottom + (screenH - cardBottom) * 0.4;
+      break;
+    case 'left':
+      baseX = cardLeft * 0.5;
+      baseY = cy;
+      break;
+    case 'far-left':
+      baseX = cardLeft * 0.25;
+      baseY = cy;
+      break;
+  }
+
+  // Apply offsets (scaled to screen size for responsiveness)
+  const x = baseX + offsetX - w / 2;
+  const y = baseY + offsetY - h / 2;
+
+  return { x, y, w, h, rot };
+}
+
 /**
  * Place a sticker at an orbital position around the center card
  * @param angleDeg - Angle in degrees (0 = right, 90 = bottom, 180 = left, 270 = top)

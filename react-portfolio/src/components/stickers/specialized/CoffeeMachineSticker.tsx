@@ -53,10 +53,6 @@ export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerP
           style={{
             width: 100,
             height: 110,
-            background: '#fff',
-            borderRadius: 14,
-            padding: 6,
-            boxSizing: 'border-box',
           }}
         >
           <img

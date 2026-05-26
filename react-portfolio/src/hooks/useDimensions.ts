@@ -5,11 +5,20 @@ import { Dimensions } from '@/types';
 
 const DEBOUNCE_MS = 150;
 
+// Default dimensions for SSR - will be updated on client mount
+const DEFAULT_DIMS: Dimensions = { w: 1440, h: 900 };
+
 export function useDimensions(): Dimensions {
-  const [dims, setDims] = useState<Dimensions>({ w: 0, h: 0 });
+  // Initialize with actual window dimensions if available, otherwise default
+  const [dims, setDims] = useState<Dimensions>(() => {
+    if (typeof window !== 'undefined') {
+      return { w: window.innerWidth, h: window.innerHeight };
+    }
+    return DEFAULT_DIMS;
+  });
 
   useEffect(() => {
-    // Set initial dimensions
+    // Ensure we have correct dimensions on mount
     setDims({ w: window.innerWidth, h: window.innerHeight });
 
     let timeoutId: NodeJS.Timeout;

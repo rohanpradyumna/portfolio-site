@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "why-i-build",
+    "title": "Why I Build",
+    "date": "2024-04-25",
+    "tags": ["philosophy", "startups"],
+    "excerpt": "The world is messy, there's too much to fix, and I can't stop building things. It's a problem, honestly."
+  },
+  {
+    "slug": "vibe-coding-and-the-future",
+    "title": "Vibe Coding and the Future of Software",
+    "date": "2024-04-20",
+    "tags": ["ai", "startups"],
+    "excerpt": "What happens when writing code feels more like having a conversation? We're living through a fundamental shift in how software gets made."
+  },
+  {
+    "slug": "immigrant-founder-visa-math",
+    "title": "Immigrant Founder Visa Math",
+    "date": "2024-04-15",
+    "tags": ["startups", "life"],
+    "excerpt": "Nobody tells you about the spreadsheet you'll build to track your days, your status, your options. Here's what I learned."
+  }
+]

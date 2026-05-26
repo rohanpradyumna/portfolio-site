@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useResponsive } from '@/hooks/useDimensions';
 import { useSongAudio } from '@/hooks/useAudio';
 import { CardStack } from '@/components/cards';
-import { Modal, StoicWisdomModal, ProjectSticker } from '@/components/modals';
+import { Modal, StoicWisdomModal, WorkCardStack, AIShowcaseModal } from '@/components/modals';
 import { EqBars } from '@/components/ui/EqBars';
 import { DesktopStickers } from '@/components/layouts/DesktopStickers';
 import { MobileStickerGrid } from '@/components/layouts/MobileStickerGrid';
@@ -36,7 +36,8 @@ export default function Home() {
   const [legoCount, setLegoCount] = useState(0);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [stoicQuote, setStoicQuote] = useState<StoicQuote | null>(null);
-  const [expandedProject, setExpandedProject] = useState<string | null>(null);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [keySequence, setKeySequence] = useState('');
 
   // Responsive state
   const { dims, isMobile, scale, s } = useResponsive();
@@ -58,6 +59,25 @@ export default function Home() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  // Easter egg: type "ai" to show AI showcase modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if in input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      const newSequence = (keySequence + e.key.toLowerCase()).slice(-2);
+      setKeySequence(newSequence);
+
+      if (newSequence === 'ai') {
+        setAiModalOpen(true);
+        setKeySequence('');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [keySequence]);
 
   // Calculate orbital positions for desktop layout
   const positions = useMemo(() => {
@@ -139,9 +159,6 @@ export default function Home() {
       stop();
       setMusicPlaying(false);
     }
-    if (modal === 'work') {
-      setExpandedProject(null);
-    }
   }, [modal, stop]);
 
   return (
@@ -173,10 +190,11 @@ export default function Home() {
       <div className="hint">drag stickers · tap to interact · swipe cards</div>
 
       {/* Main content */}
-      <main>
+      <main suppressHydrationWarning>
         {/* Desktop: orbital stickers */}
         {!isMobile && (
           <DesktopStickers
+            key={`desktop-${Math.floor(dims.w / 100)}-${Math.floor(dims.h / 100)}`}
             positions={positions}
             portraitW={portraitW}
             portraitH={portraitH}
@@ -383,21 +401,14 @@ export default function Home() {
 
       {/* My Work Modal */}
       <Modal open={modal === 'work'} onClose={closeModal} title="my work" color="#1a1a1a" noAnimation={true}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: '8px 0' }}>
-          {PROJECTS.map((project, index) => (
-            <ProjectSticker
-              key={project.id}
-              project={project}
-              isExpanded={expandedProject === project.id}
-              onToggle={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
-              index={index}
-            />
-          ))}
-        </div>
+        <WorkCardStack projects={PROJECTS} />
       </Modal>
 
       {/* Stoic Wisdom Modal */}
       <StoicWisdomModal open={modal === 'stoic'} onClose={closeModal} quote={stoicQuote} />
+
+      {/* AI Showcase Easter Egg Modal */}
+      <AIShowcaseModal open={aiModalOpen} onClose={() => setAiModalOpen(false)} />
     </>
   );
 }

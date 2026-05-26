@@ -3,31 +3,38 @@
    ============================================================================ */
 
 :root {
-  /* Primary Colors */
-  --paper: #faf7ef;
-  --paper-secondary: #f3ecd8;
-  --ink: #1a1a1a;
-  --ink-secondary: #4a4a4a;
+  /* Primary Colors - Warm Artisanal Palette */
+  --paper: #fdfbf7;
+  --paper-secondary: #f4ede3;
+  --paper-depth: #ebe3d5;
+  --ink: #2a251f;
+  --ink-secondary: #6b5d52;
+  --ink-muted: #8a7d70;
 
-  /* Accent Colors */
-  --accent-orange: #e85d3a;
-  --accent-blue: #2d6cdf;
-  --accent-green: #3a7d44;
-  --accent-yellow: #f2c230;
-  --accent-coffee: #6b3a1f;
+  /* Accent Colors - Elevated & Sophisticated */
+  --accent-orange: #d95f3e;
+  --accent-orange-soft: rgba(217, 95, 62, 0.15);
+  --accent-blue: #3d6fa8;
+  --accent-blue-soft: rgba(61, 111, 168, 0.15);
+  --accent-green: #4a8b54;
+  --accent-yellow: #e6b32a;
+  --accent-coffee: #8b6b4a;
+  --accent-taupe: #8b7355;
 
   /* Card Colors */
-  --card-bg: #1a1a1a;
+  --card-bg: #1a1816;
+  --card-bg-elevated: #252220;
   --card-ink: #f5f2e8;
+  --card-ink-secondary: #aca89d;
 
-  /* Grid Colors */
-  --grid: rgba(160, 140, 80, 0.14);
-  --grid-strong: rgba(160, 140, 80, 0.22);
+  /* Grid Colors - Subtle & Refined */
+  --grid: rgba(140, 120, 80, 0.10);
+  --grid-strong: rgba(140, 120, 80, 0.18);
 
-  /* Typography */
-  --font-serif: 'Instrument Serif', serif;
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Geist Mono', monospace;
+  /* Typography - Variable Fonts */
+  --font-serif: 'Fraunces', 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', 'SF Mono', monospace;
 
   /* Font Sizes */
   --text-xs: 10px;
