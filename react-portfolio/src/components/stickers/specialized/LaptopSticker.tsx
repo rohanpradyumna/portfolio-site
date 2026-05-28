@@ -2,14 +2,17 @@
 
 import React from 'react';
 import { Sticker, StickerProps } from '../base/Sticker';
+import { useResponsive } from '@/hooks/useDimensions';
 
 export function LaptopSticker(props: Omit<StickerProps, 'children'>) {
+  const { s } = useResponsive();
+
   return (
     <Sticker {...props}>
       <div
         style={{
-          width: 100,
-          height: 90,
+          width: s(100),
+          height: s(90),
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -38,10 +41,10 @@ export function LaptopSticker(props: Omit<StickerProps, 'children'>) {
             background: '#1a1a1a',
             color: '#faf7ef',
             fontFamily: "'Geist Mono', monospace",
-            fontSize: 8,
+            fontSize: s(8),
             fontWeight: 700,
-            padding: '3px 8px',
-            borderRadius: 4,
+            padding: `${s(3)}px ${s(8)}px`,
+            borderRadius: s(4),
             letterSpacing: '0.05em',
             whiteSpace: 'nowrap',
             border: '2px solid #fff',

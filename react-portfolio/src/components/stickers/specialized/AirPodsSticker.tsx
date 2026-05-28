@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sticker, StickerProps } from '../base/Sticker';
 import { useAudio } from '@/hooks/useAudio';
+import { useResponsive } from '@/hooks/useDimensions';
 import styles from './AirPodsSticker.module.css';
 
 export interface AirPodsStickerProps extends Omit<StickerProps, 'children' | 'onClick'> {
@@ -13,6 +14,7 @@ export function AirPodsSticker({ onPlay, ...props }: AirPodsStickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const { playOpenSound } = useAudio();
+  const { s } = useResponsive();
 
   const handleClick = () => {
     if (isAnimating) return;
@@ -34,8 +36,8 @@ export function AirPodsSticker({ onPlay, ...props }: AirPodsStickerProps) {
     <Sticker {...props} onClick={handleClick}>
       <div
         style={{
-          width: 90,
-          height: 100,
+          width: s(90),
+          height: s(100),
           boxSizing: 'border-box',
           display: 'flex',
           alignItems: 'center',

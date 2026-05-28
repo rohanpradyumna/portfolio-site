@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sticker, StickerProps } from '../base/Sticker';
 import { useAudio } from '@/hooks/useAudio';
+import { useResponsive } from '@/hooks/useDimensions';
 import styles from './CoffeeMachineSticker.module.css';
 
 export interface CoffeeMachineStickerProps extends Omit<StickerProps, 'children' | 'onClick'> {
@@ -12,6 +13,7 @@ export interface CoffeeMachineStickerProps extends Omit<StickerProps, 'children'
 export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerProps) {
   const [brewing, setBrewing] = useState(false);
   const { playBrewSound } = useAudio();
+  const { s } = useResponsive();
 
   const handleClick = () => {
     if (brewing) return;
@@ -26,7 +28,7 @@ export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerP
 
   return (
     <Sticker {...props} onClick={handleClick}>
-      <div style={{ position: 'relative', width: 100, height: 130 }}>
+      <div style={{ position: 'relative', width: s(100), height: s(130) }}>
         {/* Steam particles - only visible when brewing */}
         <div
           className={styles.steamContainer}
@@ -39,7 +41,7 @@ export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerP
               key={i}
               className={brewing ? styles.steam : ''}
               style={{
-                left: 10 + i * 10,
+                left: s(10 + i * 10),
                 animationDelay: `${i * 0.12}s`,
                 animationDuration: `${0.8 + i * 0.15}s`,
               }}
@@ -51,8 +53,8 @@ export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerP
         <div
           className={brewing ? styles.machineShake : ''}
           style={{
-            width: 100,
-            height: 110,
+            width: s(100),
+            height: s(110),
             boxSizing: 'border-box',
           }}
         >
@@ -83,10 +85,10 @@ export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerP
             background: brewing ? '#8B4513' : '#6b3a1f',
             color: '#faf7ef',
             fontFamily: "'Geist Mono', monospace",
-            fontSize: 9,
+            fontSize: s(9),
             fontWeight: 700,
-            padding: '4px 10px',
-            borderRadius: 6,
+            padding: `${s(4)}px ${s(10)}px`,
+            borderRadius: s(6),
             letterSpacing: '0.08em',
             whiteSpace: 'nowrap',
             border: '2px solid #fff',

@@ -2,19 +2,22 @@
 
 import React from 'react';
 import { Sticker, StickerProps } from '../base/Sticker';
+import { useResponsive } from '@/hooks/useDimensions';
 
 export function FolderSticker(props: Omit<StickerProps, 'children'>) {
+  const { s } = useResponsive();
+
   return (
     <Sticker {...props}>
       <div
         style={{
-          width: 100,
-          height: 80,
+          width: s(100),
+          height: s(80),
           position: 'relative',
         }}
       >
         {/* Folder body */}
-        <svg width="100" height="80" viewBox="0 0 100 80" style={{ overflow: 'visible' }}>
+        <svg width={s(100)} height={s(80)} viewBox="0 0 100 80" style={{ overflow: 'visible' }}>
           {/* Back of folder */}
           <path
             d="M 8 20 L 8 70 Q 8 76 14 76 L 86 76 Q 92 76 92 70 L 92 20 Z"
@@ -39,16 +42,16 @@ export function FolderSticker(props: Omit<StickerProps, 'children'>) {
         <div
           style={{
             position: 'absolute',
-            bottom: 6,
+            bottom: s(6),
             left: '50%',
             transform: 'translateX(-50%)',
             background: '#1a1a1a',
             color: '#faf7ef',
             fontFamily: "'Geist Mono', monospace",
-            fontSize: 8,
+            fontSize: s(8),
             fontWeight: 700,
-            padding: '3px 8px',
-            borderRadius: 4,
+            padding: `${s(3)}px ${s(8)}px`,
+            borderRadius: s(4),
             letterSpacing: '0.08em',
             whiteSpace: 'nowrap',
             border: '2px solid #fff',

@@ -2,11 +2,14 @@
 
 import React from 'react';
 import { Sticker, StickerProps } from '../base/Sticker';
+import { useResponsive } from '@/hooks/useDimensions';
 
 export function EmailSticker(props: Omit<StickerProps, 'children'>) {
+  const { s } = useResponsive();
+
   return (
     <Sticker {...props}>
-      <svg width="100" height="74" viewBox="0 0 120 90" style={{ overflow: 'visible' }}>
+      <svg width={s(100)} height={s(74)} viewBox="0 0 120 90" style={{ overflow: 'visible' }}>
         <rect x="6" y="10" width="108" height="70" rx="8" fill="#faf7ef" stroke="#fff" strokeWidth="6" />
         <rect x="6" y="10" width="108" height="70" rx="8" fill="#faf7ef" stroke="#1a1a1a" strokeWidth="3" />
         <path

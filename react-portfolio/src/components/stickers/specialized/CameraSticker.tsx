@@ -2,11 +2,14 @@
 
 import React from 'react';
 import { Sticker, StickerProps } from '../base/Sticker';
+import { useResponsive } from '@/hooks/useDimensions';
 
 export function CameraSticker(props: Omit<StickerProps, 'children'>) {
+  const { s } = useResponsive();
+
   return (
     <Sticker {...props}>
-      <svg width="96" height="76" viewBox="0 0 100 80" style={{ overflow: 'visible' }}>
+      <svg width={s(96)} height={s(76)} viewBox="0 0 100 80" style={{ overflow: 'visible' }}>
         <rect x="6" y="20" width="88" height="54" rx="8" fill="#1a1a1a" stroke="#fff" strokeWidth="5" />
         <rect x="32" y="8" width="30" height="16" rx="4" fill="#1a1a1a" stroke="#fff" strokeWidth="4" />
         <circle cx="50" cy="48" r="18" fill="#3a3a3a" stroke="#fff" strokeWidth="3" />

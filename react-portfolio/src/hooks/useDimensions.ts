@@ -54,9 +54,9 @@ export function useResponsive() {
   const isTablet = dims.w > 768 && dims.w <= 1024;
   const isDesktop = dims.w > 1024;
 
-  // Scale factor for larger screens
+  // Scale factor for larger screens - scales proportionally with no upper cap
   const baseWidth = 1440;
-  const scale = isMobile ? 1 : Math.max(1, Math.min(1.5, dims.w / baseWidth));
+  const scale = isMobile ? 1 : Math.max(1, dims.w / baseWidth);
 
   // Helper to scale sizes
   const s = useCallback((size: number) => Math.round(size * scale), [scale]);
