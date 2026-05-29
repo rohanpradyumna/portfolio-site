@@ -61,6 +61,23 @@
   line-height: 1.6;
   color: rgba(245, 242, 232, 0.9);
   text-wrap: pretty;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Trim the mobile blur cost (cheaper than desktop) and supply a solid fallback
+   for browsers without backdrop-filter support. */
+@media (max-width: 768px) {
+  .overlay {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .overlay {
+    background: rgba(20, 15, 5, 0.7);
+  }
 }
 
 /* Animations are defined in globals.css */

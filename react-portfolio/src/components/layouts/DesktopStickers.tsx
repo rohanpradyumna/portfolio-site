@@ -17,10 +17,34 @@ import {
   CoffeeMachineSticker,
 } from '@/components/stickers';
 
+// First-visit wake-up wave: content stickers breathe once in a gentle stagger,
+// top→bottom of the cluster. Starts after the entrance stagger (last sticker is
+// the coffee machine at 1200ms) settles, spanning ~0.8s.
+const WAKE_BASE = 1100;
+const WAKE_STAGGER = 60;
+const WAKE_ORDER = [
+  'portrait',
+  'charminar',
+  'dc',
+  'linkedin',
+  'email',
+  'plane',
+  'laptop',
+  'folder',
+  'airpods',
+  'beach',
+  'camera',
+  'gym',
+  'pickleball',
+  'lego',
+];
+const wakeDelayFor = (id: string) => WAKE_BASE + Math.max(0, WAKE_ORDER.indexOf(id)) * WAKE_STAGGER;
+
 interface DesktopStickersProps {
   positions: Record<string, Position>;
   portraitW: number;
   portraitH: number;
+  wake?: boolean;
   handlers: {
     openLinkedIn: () => void;
     openEmail: () => void;
@@ -45,6 +69,7 @@ export function DesktopStickers({
   positions,
   portraitW,
   portraitH,
+  wake = false,
   handlers,
 }: DesktopStickersProps) {
   const { s } = useResponsive();
@@ -88,6 +113,9 @@ export function DesktopStickers({
         noBorder={true}
         onClick={handlers.portraitClick}
         entranceDelay={50}
+        peekLabel="that's me"
+        wake={wake}
+        wakeDelay={wakeDelayFor('portrait')}
       />
 
       {/* Location stickers */}
@@ -99,6 +127,9 @@ export function DesktopStickers({
         zBase={8}
         onClick={handlers.charminarFact}
         entranceDelay={200}
+        peekLabel="hyderabad"
+        wake={wake}
+        wakeDelay={wakeDelayFor('charminar')}
       />
       <ImageSticker
         id="dc"
@@ -108,6 +139,9 @@ export function DesktopStickers({
         zBase={8}
         onClick={handlers.dcFact}
         entranceDelay={250}
+        peekLabel="now in d.c."
+        wake={wake}
+        wakeDelay={wakeDelayFor('dc')}
       />
 
       {/* Communication */}
@@ -119,6 +153,9 @@ export function DesktopStickers({
         zBase={10}
         onClick={handlers.openLinkedIn}
         entranceDelay={300}
+        peekLabel="linkedin ↗"
+        wake={wake}
+        wakeDelay={wakeDelayFor('linkedin')}
       />
       <EmailSticker
         id="email"
@@ -126,6 +163,9 @@ export function DesktopStickers({
         zBase={10}
         onClick={handlers.openEmail}
         entranceDelay={350}
+        peekLabel="say hi"
+        wake={wake}
+        wakeDelay={wakeDelayFor('email')}
       />
 
       {/* Travel */}
@@ -137,6 +177,9 @@ export function DesktopStickers({
         zBase={7}
         onClick={handlers.travelList}
         entranceDelay={500}
+        peekLabel="where i've been"
+        wake={wake}
+        wakeDelay={wakeDelayFor('plane')}
       />
       <ImageSticker
         id="beach"
@@ -146,6 +189,9 @@ export function DesktopStickers({
         zBase={7}
         onClick={handlers.beachVibes}
         entranceDelay={550}
+        peekLabel="beach brain"
+        wake={wake}
+        wakeDelay={wakeDelayFor('beach')}
       />
 
       {/* Hobbies / lifestyle */}
@@ -155,6 +201,9 @@ export function DesktopStickers({
         zBase={7}
         onPlay={handlers.toggleMusic}
         entranceDelay={600}
+        peekLabel="press play"
+        wake={wake}
+        wakeDelay={wakeDelayFor('airpods')}
       />
       <ImageSticker
         id="coffee"
@@ -164,6 +213,9 @@ export function DesktopStickers({
         zBase={7}
         onClick={handlers.coffeeVibes}
         entranceDelay={650}
+        peekLabel="coffee talk"
+        wake={wake}
+        wakeDelay={wakeDelayFor('coffee')}
       />
       <CameraSticker
         id="camera"
@@ -171,6 +223,9 @@ export function DesktopStickers({
         zBase={7}
         onClick={handlers.cameraVibes}
         entranceDelay={700}
+        peekLabel="street photos"
+        wake={wake}
+        wakeDelay={wakeDelayFor('camera')}
       />
       <ImageSticker
         id="gym"
@@ -180,6 +235,9 @@ export function DesktopStickers({
         zBase={7}
         onClick={handlers.gymVibes}
         entranceDelay={750}
+        peekLabel="the grind"
+        wake={wake}
+        wakeDelay={wakeDelayFor('gym')}
       />
       <PickleballSticker
         id="pickleball"
@@ -187,6 +245,9 @@ export function DesktopStickers({
         zBase={7}
         onClick={handlers.pickleballVibes}
         entranceDelay={800}
+        peekLabel="racket sports"
+        wake={wake}
+        wakeDelay={wakeDelayFor('pickleball')}
       />
       <LegoSticker
         id="lego"
@@ -194,6 +255,9 @@ export function DesktopStickers({
         zBase={7}
         onClick={handlers.bumpLego}
         entranceDelay={850}
+        peekLabel="tap me"
+        wake={wake}
+        wakeDelay={wakeDelayFor('lego')}
       />
 
       {/* My Work - Laptop sticker */}
@@ -203,6 +267,8 @@ export function DesktopStickers({
         zBase={8}
         onClick={handlers.openWork}
         entranceDelay={900}
+        wake={wake}
+        wakeDelay={wakeDelayFor('laptop')}
       />
 
       {/* Writing - Folder sticker */}
@@ -212,6 +278,8 @@ export function DesktopStickers({
         zBase={8}
         onClick={handlers.openWriting}
         entranceDelay={950}
+        wake={wake}
+        wakeDelay={wakeDelayFor('folder')}
       />
 
       {/* Easter Egg: Coffee Machine — tucked into the bottom-left corner */}

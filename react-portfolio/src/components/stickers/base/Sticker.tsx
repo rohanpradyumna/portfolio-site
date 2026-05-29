@@ -33,6 +33,16 @@ export interface StickerProps {
   style?: React.CSSProperties;
   entranceDelay?: number;
   scale?: number;
+  /** Bounds the drag so the sticker can't be flung out of its container (mobile canvas). */
+  dragConstraints?: React.RefObject<Element | null>;
+  /** Skip the 140px magnetic grid snap — the desktop grid feels wrong in a small canvas. */
+  disableSnap?: boolean;
+  /** Quiet mono chip naming what's inside; revealed on hover (real pointers only). */
+  peekLabel?: string;
+  /** One-shot "breathe" on first visit to invite exploration. */
+  wake?: boolean;
+  /** Delay (ms) before this sticker's wake breathe fires — used to stagger the wave. */
+  wakeDelay?: number;
 }
 
 export function Sticker({
@@ -47,6 +57,11 @@ export function Sticker({
   className = '',
   style = {},
   entranceDelay = 0,
+  dragConstraints,
+  disableSnap = false,
+  peekLabel,
+  wake = false,
+  wakeDelay = 0,
 }: StickerProps) {
   // Use refs instead of state to avoid re-renders during drag
   const hasMoved = useRef(false);
@@ -80,8 +95,9 @@ export function Sticker({
     if (hasMoved.current) {
       zIndexRef.current = zBase + 10;
 
-      // Check for magnetic snap after momentum settles
-      setTimeout(() => {
+      // Check for magnetic snap after momentum settles (skipped on mobile canvas
+      // where the 140px desktop grid would feel wrong in a ~360px space).
+      if (!disableSnap) setTimeout(() => {
         const currentX = x.get();
         const currentY = y.get();
         const snapX = findSnapPoint(currentX);
@@ -142,6 +158,7 @@ export function Sticker({
         ...style,
       }}
       drag
+      dragConstraints={dragConstraints}
       dragMomentum={true}
       dragElastic={0.12}
       dragTransition={{
@@ -166,8 +183,21 @@ export function Sticker({
         }
       }}
     >
-      <div className={styles.inner}>
+      {/* Inner layer runs the one-shot wake "breathe" as a CSS animation, on a
+          transform separate from the outer drag/hover transform so it never
+          fights the x/y motion values or whileHover. The animation plays once
+          when the .wake class lands (delayed per-sticker to stagger the wave)
+          and settles back to scale 1. No wake = plain static div. */}
+      <div
+        className={`${styles.inner} ${wake ? styles.wake : ''}`}
+        style={wake ? { animationDelay: `${wakeDelay}ms` } : undefined}
+      >
         {children}
+        {peekLabel && (
+          <span className={styles.peekLabel} aria-hidden="true">
+            {peekLabel}
+          </span>
+        )}
       </div>
     </motion.div>
   );

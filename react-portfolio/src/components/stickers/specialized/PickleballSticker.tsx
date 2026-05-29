@@ -13,6 +13,7 @@ export function PickleballSticker(props: Omit<StickerProps, 'children'>) {
         src="/assets/icons/racket.png"
         alt="Pickleball"
         draggable="false"
+        loading="lazy"
         style={{
           width: s(90),
           height: s(90),

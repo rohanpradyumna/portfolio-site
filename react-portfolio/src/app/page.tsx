@@ -6,8 +6,7 @@ import { useSongAudio } from '@/hooks/useAudio';
 import { CardStack } from '@/components/cards';
 import { Modal, StoicWisdomModal, WorkCardStack, AIShowcaseModal } from '@/components/modals';
 import { EqBars } from '@/components/ui/EqBars';
-import { DesktopStickers, Stage } from '@/components/layouts';
-import { MobileStickerGrid } from '@/components/layouts/MobileStickerGrid';
+import { DesktopStickers, Stage, MobileDragCanvas } from '@/components/layouts';
 import { PROJECTS } from '@/data/projects';
 import { STOIC_QUOTES } from '@/data/quotes';
 import { StoicQuote } from '@/types';
@@ -43,6 +42,20 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // First-visit "wake-up wave": content stickers breathe once to invite
+  // exploration. Gated to once per visitor (localStorage) and skipped under
+  // reduced motion. Independent of the async useMotion state for robustness.
+  const [wake, setWake] = useState(false);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try {
+      if (!localStorage.getItem('pf_wake_seen')) {
+        setWake(true);
+        localStorage.setItem('pf_wake_seen', '1');
+      }
+    } catch {}
   }, []);
 
   // Responsive state
@@ -275,10 +288,41 @@ export default function Home() {
       <main suppressHydrationWarning>
         {isMobile ? (
           <>
+            {/* Hero hook above the cards */}
+            <div
+              style={{
+                marginTop: 'calc(64px + env(safe-area-inset-top))',
+                padding: '0 24px',
+                textAlign: 'center',
+                fontFamily: "'Geist Mono', monospace",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: 'var(--ink)',
+                }}
+              >
+                founder · ai strategist · building yottaflex
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  letterSpacing: '0.06em',
+                  color: 'var(--ink-secondary)',
+                  marginTop: 6,
+                  opacity: 0.7,
+                }}
+              >
+                swipe to explore ›
+              </div>
+            </div>
             {/* Center card stack */}
             <CardStack />
-            {/* Mobile: sticker grid below card */}
-            <MobileStickerGrid handlers={handlers} />
+            {/* Mobile: draggable pocket canvas below card */}
+            <MobileDragCanvas handlers={handlers} wake={wake} />
           </>
         ) : (
           // Desktop: fixed design canvas, uniformly scaled to fit the viewport
@@ -288,6 +332,7 @@ export default function Home() {
               portraitW={portraitW}
               portraitH={portraitH}
               handlers={handlers}
+              wake={wake}
             />
             <CardStack />
           </Stage>

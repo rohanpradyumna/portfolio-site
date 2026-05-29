@@ -62,6 +62,7 @@ export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerP
             src="/assets/icons/coffee-machine.png"
             alt="Coffee Machine"
             draggable="false"
+            loading="lazy"
             style={{
               width: '100%',
               height: '100%',

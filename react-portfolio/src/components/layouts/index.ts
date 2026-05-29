@@ -1,3 +1,3 @@
 export { DesktopStickers } from './DesktopStickers';
-export { MobileStickerGrid } from './MobileStickerGrid';
+export { MobileDragCanvas } from './MobileDragCanvas';
 export { Stage } from './Stage';

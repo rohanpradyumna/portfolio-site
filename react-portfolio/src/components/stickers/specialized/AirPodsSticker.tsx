@@ -50,6 +50,7 @@ export function AirPodsSticker({ onPlay, ...props }: AirPodsStickerProps) {
           src="/assets/icons/earphone.png"
           alt="AirPods"
           draggable="false"
+          loading="lazy"
           style={{
             width: '100%',
             height: '100%',

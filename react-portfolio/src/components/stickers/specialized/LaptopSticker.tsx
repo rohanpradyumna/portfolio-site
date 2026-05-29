@@ -25,6 +25,7 @@ export function LaptopSticker(props: Omit<StickerProps, 'children'>) {
           src="/assets/icons/programming.png"
           alt="My Work"
           draggable="false"
+          loading="lazy"
           style={{
             width: '100%',
             height: '100%',

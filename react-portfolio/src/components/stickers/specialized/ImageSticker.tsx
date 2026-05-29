@@ -38,6 +38,7 @@ export function ImageSticker({
           src={src}
           alt=""
           draggable="false"
+          loading="lazy"
           style={{
             width: '100%',
             height: '100%',

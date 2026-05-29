@@ -103,7 +103,7 @@ export function Modal({ open, onClose, children, title, color = '#1a1a1a', noAni
           </div>
         )}
 
-        <div className={styles.body} style={{ fontSize: isMobile ? 13 : 14 }}>
+        <div className={styles.body} style={{ fontSize: 14 }}>
           {children}
         </div>
       </div>

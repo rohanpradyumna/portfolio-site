@@ -5,6 +5,7 @@ import { motion, PanInfo } from 'framer-motion';
 import { CARDS } from '@/data/cards';
 import { useResponsive, useCardDimensions } from '@/hooks/useDimensions';
 import { useAudio } from '@/hooks/useAudio';
+import { useMotion } from '@/hooks/useMotion';
 import { CardBody } from './CardBody';
 import styles from './CardStack.module.css';
 
@@ -42,7 +43,20 @@ export function CardStack() {
 
   const { isMobile } = useResponsive();
   const { cardW, cardH, cardMinH, cardPadding } = useCardDimensions();
-  const { playShuffleSound } = useAudio();
+  const { playShuffleSound, triggerHaptic } = useAudio();
+  const { reducedMotion } = useMotion();
+
+  // First-visit swipe hint (mobile only, once ever, respects reduced motion).
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
+  useEffect(() => {
+    if (!isMobile || reducedMotion) return;
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem('pf_card_hint')) return;
+    setShowSwipeHint(true);
+    localStorage.setItem('pf_card_hint', '1');
+    const t = setTimeout(() => setShowSwipeHint(false), 1900);
+    return () => clearTimeout(t);
+  }, [isMobile, reducedMotion]);
 
   const cardOrder: number[] = [];
   for (let i = 0; i < 3; i++) {
@@ -56,24 +70,26 @@ export function CardStack() {
   const next = useCallback(() => {
     if (shuffling) return;
     playShuffleSound();
+    if (isMobile) triggerHaptic(15);
     setShuffling('next');
 
     setTimeout(() => {
       setIdx((i) => (i + 1) % CARDS.length);
       setShuffling(null);
     }, SHUFFLE_MS);
-  }, [shuffling, playShuffleSound]);
+  }, [shuffling, playShuffleSound, isMobile, triggerHaptic]);
 
   const prev = useCallback(() => {
     if (shuffling) return;
     playShuffleSound();
+    if (isMobile) triggerHaptic(15);
     setShuffling('prev');
 
     setTimeout(() => {
       setIdx((i) => (i - 1 + CARDS.length) % CARDS.length);
       setShuffling(null);
     }, SHUFFLE_MS);
-  }, [shuffling, playShuffleSound]);
+  }, [shuffling, playShuffleSound, isMobile, triggerHaptic]);
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (shuffling) return;
@@ -151,19 +167,24 @@ export function CardStack() {
     };
   };
 
+  const animateEntrance = isMobile && !reducedMotion;
+
   return (
-    <div
+    <motion.div
       className={styles.container}
+      initial={animateEntrance ? { opacity: 0, y: 24 } : false}
+      animate={animateEntrance ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
       style={{
         position: isMobile ? 'relative' : 'absolute',
         left: isMobile ? 'auto' : '50%',
         top: isMobile ? 'auto' : '50%',
-        transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+        transform: isMobile ? undefined : 'translate(-50%, -50%)',
         width: cardW,
         height: cardH,
         minHeight: cardMinH,
         zIndex: 500,
-        margin: isMobile ? '80px auto 0' : 0,
+        margin: isMobile ? '28px auto 0' : 0,
       }}
       role="region"
       aria-label="Card stack"
@@ -267,10 +288,26 @@ export function CardStack() {
                 ‹
               </motion.button>
               <span
-                style={{ whiteSpace: 'nowrap', minWidth: 56, textAlign: 'center', display: 'inline-block' }}
+                style={{
+                  whiteSpace: 'nowrap',
+                  textAlign: 'center',
+                  display: 'inline-block',
+                  background: 'rgba(245,242,232,0.12)',
+                  border: '1px solid rgba(245,242,232,0.24)',
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  letterSpacing: '0.04em',
+                }}
                 aria-live="polite"
               >
-                {String(cardIdx + 1).padStart(2, '0')}&nbsp;/&nbsp;{String(CARDS.length).padStart(2, '0')}
+                <span style={{ color: '#f2c230', fontWeight: 600 }}>
+                  {String(cardIdx + 1).padStart(2, '0')}
+                </span>
+                <span style={{ color: 'rgba(245,242,232,0.4)' }}>
+                  &nbsp;/&nbsp;{String(CARDS.length).padStart(2, '0')}
+                </span>
               </span>
               <motion.button
                 onClick={(e) => {
@@ -290,6 +327,30 @@ export function CardStack() {
           </motion.div>
         );
       })}
-    </div>
+
+      {/* First-visit swipe hint: a chevron that sweeps left once, then never again */}
+      {showSwipeHint && (
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: [0, 0.9, 0.9, 0], x: [30, -30, -30, -70] }}
+          transition={{ duration: 1.6, ease: 'easeInOut', times: [0, 0.2, 0.7, 1] }}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: 16,
+            transform: 'translateY(-50%)',
+            fontSize: 32,
+            color: '#f2c230',
+            fontFamily: 'serif',
+            pointerEvents: 'none',
+            zIndex: 600,
+            textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+          }}
+          aria-hidden="true"
+        >
+          ‹‹
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
