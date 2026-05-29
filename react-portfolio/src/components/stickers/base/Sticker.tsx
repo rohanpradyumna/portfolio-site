@@ -128,6 +128,7 @@ export function Sticker({
           damping: 25,
         },
       }}
+      suppressHydrationWarning
       style={{
         position: 'absolute',
         left: 0,

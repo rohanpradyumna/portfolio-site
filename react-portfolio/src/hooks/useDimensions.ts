@@ -8,17 +8,24 @@ const DEBOUNCE_MS = 150;
 // Default dimensions for SSR - will be updated on client mount
 const DEFAULT_DIMS: Dimensions = { w: 1440, h: 900 };
 
+// Fixed design canvas the desktop board is laid out in. Everything is positioned
+// once at this size, then the whole stage is uniformly scaled to fit the viewport
+// (see Stage.tsx, which fits the measured content bounding box).
+export const DESIGN_W = 1440;
+export const DESIGN_H = 900;
+
 export function useDimensions(): Dimensions {
-  // Initialize with actual window dimensions if available, otherwise default
-  const [dims, setDims] = useState<Dimensions>(() => {
-    if (typeof window !== 'undefined') {
-      return { w: window.innerWidth, h: window.innerHeight };
-    }
-    return DEFAULT_DIMS;
-  });
+  // Always start from the SSR default so the server HTML and the client's first
+  // render agree (no hydration mismatch). Reading window here instead would make
+  // the client's first render differ from the server markup; combined with the
+  // Stage's suppressHydrationWarning, React would keep the stale server transform
+  // in the DOM and the post-mount update would be a no-op patch — leaving the
+  // board scaled for 1440x900 until the user happened to resize. Updating in the
+  // effect below guarantees a real state change that forces React to repaint.
+  const [dims, setDims] = useState<Dimensions>(DEFAULT_DIMS);
 
   useEffect(() => {
-    // Ensure we have correct dimensions on mount
+    // Snap to the real viewport size on mount (changes DEFAULT_DIMS -> actual).
     setDims({ w: window.innerWidth, h: window.innerHeight });
 
     let timeoutId: NodeJS.Timeout;
@@ -54,15 +61,14 @@ export function useResponsive() {
   const isTablet = dims.w > 768 && dims.w <= 1024;
   const isDesktop = dims.w > 1024;
 
-  // Scale factor for larger screens with progressive boost for perception
-  // Base: 1.0 at 1440px, applies 20% boost to compensate for perception gap on large screens
-  const baseWidth = 1440;
-  const rawScale = dims.w / baseWidth;
-  const boost = rawScale > 1 ? 1 + (rawScale - 1) * 0.4 : 1;
-  const scale = isMobile ? 1 : Math.max(1, rawScale * boost);
+  // Desktop is laid out at a fixed design size and uniformly scaled by the Stage,
+  // so element-level scaling is now identity. This removes the old width-only
+  // scaling that distorted the layout on large screens.
+  const scale = 1;
 
-  // Helper to scale sizes
+  // Single scale function for both sizes and distances (matches vanilla)
   const s = useCallback((size: number) => Math.round(size * scale), [scale]);
+  const d = useCallback((dist: number) => Math.round(dist * scale), [scale]);
 
   // Mobile scale factor
   const mobileScale = isSmallMobile ? 0.75 : 0.85;
@@ -79,16 +85,17 @@ export function useResponsive() {
       isDesktop,
       scale,
       s,
+      d,
       mobileScale,
       layoutKey,
     }),
-    [dims, isMobile, isSmallMobile, isTablet, isDesktop, scale, s, mobileScale, layoutKey]
+    [dims, isMobile, isSmallMobile, isTablet, isDesktop, scale, s, d, mobileScale, layoutKey]
   );
 }
 
 // Card dimensions hook
 export function useCardDimensions() {
-  const { dims, isMobile, scale, s } = useResponsive();
+  const { dims, isMobile, scale } = useResponsive();
 
   return useMemo(() => {
     const cardW = isMobile ? Math.min(dims.w - 32, 400) : Math.round(440 * scale);
@@ -104,5 +111,5 @@ export function useCardDimensions() {
       cardMinH,
       cardPadding,
     };
-  }, [dims.w, isMobile, scale, s]);
+  }, [dims.w, isMobile, scale]);
 }

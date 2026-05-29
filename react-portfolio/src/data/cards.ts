@@ -1,78 +1,79 @@
 import { Card } from '@/types';
 
 export const CARDS: Card[] = [
-  // HOOK: Lead with intrigue and impact, not just identity
   {
     kind: 'intro',
-    body: "I help teams ship AI products that actually work. Along the way, I've built tools used by 50+ dev teams and helped 15K travelers find their next adventure.",
-    foot: 'rohan · ai builder · dc via hyderabad',
+    body: "Yo, I'm Rohan. The world is messy, there's too much to fix, and I can't stop building things. It's a problem, honestly.",
+    foot: 'founder · ai nerd · professional curious person',
   },
-  // WHAT: Clear value proposition
   {
     kind: 'bullets',
-    title: 'what I actually do',
+    title: 'what I do',
     items: [
-      'Turn "we should use AI" → working product in weeks',
-      'Build YottaBuilder — AI-powered SDLC for dev teams',
+      "Build AI products at Yottaflex.ai (it's cool, trust me)",
+      'Help teams go from "we should use AI" to actually shipping',
+      'Turn messy requirements → working code',
       'Make engineers reviewers, not typers',
-      'Ship messy first, polish later (it works)',
     ],
   },
-  // PROOF: Show the receipts
   {
     kind: 'bullets',
-    title: 'things I built',
+    title: 'currently',
     items: [
-      'YottaBuilder — AI dev tools, 50+ teams shipping faster',
-      'Intripid — AI travel planning, 15K users, Antler-backed',
-      'Flock — social events platform (they pivoted to AI too)',
-      'This portfolio — yes, it counts',
+      'Building YottaBuilder — think AI-powered SDLC on steroids',
+      'Turning Yottaflex from dev shop → AI company',
+      'Living in DC · dreaming of Hyderabad biryani',
     ],
   },
-  // WISDOM: Create a pause, build credibility
+  {
+    kind: 'bullets',
+    title: 'lore',
+    items: [
+      'Founded Intripid — AI travel app, 15K users, Antler gang',
+      "Built \"What's Next\" — still think it's a billion dollar idea",
+      'First startup gig at Flock (now an AI company too, hmm)',
+      'UMD grad — go Terps!',
+    ],
+  },
   {
     kind: 'quote',
-    body: '"Ship the ugly version. Your users\' problems matter more than your clever solution."',
-    foot: '— learned this the expensive way',
+    body: '"Ship the ugly version. Seriously. Do it. Stop overthinking."',
+    foot: '— me, to myself, daily',
   },
-  // DEPTH: Now they want to know more
   {
     kind: 'bullets',
-    title: 'hard-won lessons',
+    title: 'things I learned the hard way',
     items: [
       'Nobody cares how you built it, only that it works',
-      'Immigrant founder visa math is its own startup',
-      'The compound effect is annoyingly real',
-      'DC is underrated for building things',
+      "Your users' problems > your clever solution",
+      'Immigrant founder visa math is... a lot',
+      'The compound effect is real (annoyingly so)',
     ],
   },
-  // HUMAN: Show personality
   {
     kind: 'bullets',
-    title: 'when not shipping',
+    title: 'when not working',
     items: [
-      'Losing gracefully at pickleball, tennis, and TT',
-      'Researching coffee origins like a thesis defense',
-      'Reading stoic philosophy, applying it nowhere',
-      'Driving to Annapolis for the 12th time',
+      'Losing at pickleball, tennis, badminton, TT (still fun tho)',
+      "Researching coffee origins like it's my thesis",
+      'Reading philosophy, connecting it to everything',
+      'Driving to Annapolis for the 11th time',
     ],
   },
-  // VALUES: What drives me
   {
     kind: 'bullets',
-    title: 'what I believe',
+    title: 'vibes',
     items: [
-      'Knowledge is freedom',
-      'Small steps compound into mountains',
-      'You can build great things from anywhere',
-      'Someday: go home, ship products, eat biryani daily',
+      "Knowledge is freedom — empty mind = devil's workshop",
+      'Small steps compound into big things (gym, startups, life)',
+      "Silicon Valley isn't the only place to build anymore",
+      'Someday: go home, build things, eat biryani daily',
     ],
   },
-  // CTA: End with momentum
   {
     kind: 'cta',
-    title: 'say hello',
-    body: "Building with AI? Navigating founder chaos? Want to debate coffee origins or why Marcus Aurelius was onto something? The stickers around here actually work.",
+    title: "let's talk",
+    body: "Building with AI? Navigating the immigrant founder chaos? Want to debate coffee origins or stoic philosophy? I'm down. The stickers around here actually work — pick your weapon.",
     foot: 'pradyumnarohan@gmail.com',
   },
 ];

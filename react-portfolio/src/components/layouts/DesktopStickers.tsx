@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Position } from '@/types';
-import { useResponsive } from '@/hooks/useDimensions';
+import { useResponsive, DESIGN_H } from '@/hooks/useDimensions';
 import {
   PhotoSticker,
   ImageSticker,
@@ -21,7 +21,6 @@ interface DesktopStickersProps {
   positions: Record<string, Position>;
   portraitW: number;
   portraitH: number;
-  dims: { w: number; h: number };
   handlers: {
     openLinkedIn: () => void;
     openEmail: () => void;
@@ -46,7 +45,6 @@ export function DesktopStickers({
   positions,
   portraitW,
   portraitH,
-  dims,
   handlers,
 }: DesktopStickersProps) {
   const { s } = useResponsive();
@@ -61,9 +59,9 @@ export function DesktopStickers({
         zBase={5}
         bg="#1a1a1a"
         fg="#faf7ef"
-        fontSize={13}
-        padX={14}
-        padY={7}
+        fontSize={s(13)}
+        padX={s(14)}
+        padY={s(7)}
         entranceDelay={100}
       />
       <WordSticker
@@ -73,9 +71,9 @@ export function DesktopStickers({
         zBase={5}
         bg="#e85d3a"
         fg="#faf7ef"
-        fontSize={13}
-        padX={14}
-        padY={7}
+        fontSize={s(13)}
+        padX={s(14)}
+        padY={s(7)}
         entranceDelay={150}
       />
 
@@ -96,7 +94,7 @@ export function DesktopStickers({
       <ImageSticker
         id="charminar"
         src="/assets/icons/charminar.png"
-        size={s(120)}
+        size={s(116)}
         initial={positions.charminar || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.charminarFact}
@@ -105,7 +103,7 @@ export function DesktopStickers({
       <ImageSticker
         id="dc"
         src="/assets/icons/dc.png"
-        size={s(120)}
+        size={s(110)}
         initial={positions.washingtondc || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.dcFact}
@@ -116,7 +114,7 @@ export function DesktopStickers({
       <ImageSticker
         id="linkedin"
         src="/assets/icons/linkedin.png"
-        size={s(90)}
+        size={s(92)}
         initial={positions.linkedin || { x: 0, y: 0, rot: 0 }}
         zBase={10}
         onClick={handlers.openLinkedIn}
@@ -134,7 +132,7 @@ export function DesktopStickers({
       <ImageSticker
         id="plane"
         src="/assets/icons/plane.png"
-        size={s(110)}
+        size={s(104)}
         initial={positions.plane || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.travelList}
@@ -143,7 +141,7 @@ export function DesktopStickers({
       <ImageSticker
         id="beach"
         src="/assets/icons/beach.png"
-        size={s(92)}
+        size={s(98)}
         initial={positions.beach || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.beachVibes}
@@ -161,7 +159,7 @@ export function DesktopStickers({
       <ImageSticker
         id="coffee"
         src="/assets/icons/coffee.png"
-        size={s(80)}
+        size={s(88)}
         initial={positions.coffee || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.coffeeVibes}
@@ -216,10 +214,10 @@ export function DesktopStickers({
         entranceDelay={950}
       />
 
-      {/* Easter Egg: Coffee Machine */}
+      {/* Easter Egg: Coffee Machine — tucked into the bottom-left corner */}
       <CoffeeMachineSticker
         id="coffeeMachine"
-        initial={{ x: 40, y: dims.h - 180, rot: -3 }}
+        initial={{ x: 6, y: DESIGN_H - 180, rot: -3 }}
         zBase={6}
         onBrew={handlers.brewCoffee}
         entranceDelay={1200}

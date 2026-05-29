@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { useResponsive } from '@/hooks/useDimensions';
+import { useResponsive, DESIGN_W, DESIGN_H } from '@/hooks/useDimensions';
 import { useSongAudio } from '@/hooks/useAudio';
 import { CardStack } from '@/components/cards';
 import { Modal, StoicWisdomModal, WorkCardStack, AIShowcaseModal } from '@/components/modals';
 import { EqBars } from '@/components/ui/EqBars';
-import { DesktopStickers } from '@/components/layouts/DesktopStickers';
+import { DesktopStickers, Stage } from '@/components/layouts';
 import { MobileStickerGrid } from '@/components/layouts/MobileStickerGrid';
 import { PROJECTS } from '@/data/projects';
 import { STOIC_QUOTES } from '@/data/quotes';
 import { StoicQuote } from '@/types';
-import { placeOrbital, resolveOverlapsSimple, positionsToObject } from '@/utils/layoutEngine';
+import { placeOrbital, resolveCluster, positionsToObject } from '@/utils/layoutEngine';
 
 type ModalType =
   | 'phone'
@@ -39,8 +39,14 @@ export default function Home() {
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [keySequence, setKeySequence] = useState('');
 
+  // Client-side mount detection to avoid SSR/hydration mismatches
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Responsive state
-  const { dims, isMobile, scale, s } = useResponsive();
+  const { isMobile, scale, s, d } = useResponsive();
 
   // Audio
   const { togglePlay, stop } = useSongAudio('/assets/believer.mp3');
@@ -79,45 +85,121 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [keySequence]);
 
-  // Calculate orbital positions for desktop layout
-  const positions = useMemo(() => {
-    if (isMobile) return {};
+  // Portrait sizes (~23% larger than the original 170 x 255 base)
+  const portraitW = isMobile ? 120 : s(210);
+  const portraitH = isMobile ? 150 : s(315);
 
-    const cx = dims.w / 2;
-    const cy = dims.h / 2;
-    const baseCardW = 440;
-    const baseCardH = 320;
-    const cardW = baseCardW * scale;
-    const cardH = baseCardH * scale;
+  // Calculate orbital positions in the fixed design canvas. These are constant —
+  // the Stage handles all viewport scaling, so positions never depend on dims.
+  const { positions, bbox } = useMemo(() => {
+    if (isMobile) return { positions: {}, bbox: null };
+
+    const cx = DESIGN_W / 2;
+    const cy = DESIGN_H / 2;
+    const cardW = Math.round(440 * scale);
+    const cardH = Math.round(320 * scale);
 
     const config = { cx, cy, cardW, cardH };
 
+    // Gentle radial tightening: pull every orbital sticker slightly toward the
+    // card so the cluster reads as one centered group rather than drifting to the
+    // edges. resolveCluster keeps the card/coffee machine immovable (pad 12), so
+    // pulling in can never overlap the card — the nearest stickers just settle at
+    // card-edge + gap.
+    const PULL = 0.88;
+    const od = (dist: number) => d(Math.round(dist * PULL));
+
+    // Orbital home positions. The width/height passed here only shapes the initial
+    // top-left anchor (it matches the long-standing layout); actual collision/bbox
+    // math below uses the true RENDER sizes so spacing is visually correct.
     const raw = [
-      { id: 'plane', ...placeOrbital(-95, s(90), s(110), s(76), 0, config) },
-      { id: 'tagPM', ...placeOrbital(-140, s(85), s(160), s(36), 0, config) },
-      { id: 'tagAI', ...placeOrbital(5, s(75), s(140), s(36), 0, config) },
-      { id: 'charminar', ...placeOrbital(-125, s(150), s(120), s(110), 0, config) },
-      { id: 'washingtondc', ...placeOrbital(-35, s(145), s(120), s(86), 0, config) },
-      { id: 'portrait', ...placeOrbital(160, s(130), isMobile ? 164 : s(215), isMobile ? 247 : s(323), 0, config) },
-      { id: 'linkedin', ...placeOrbital(185, s(85), s(90), s(90), 0, config) },
-      { id: 'pickleball', ...placeOrbital(215, s(100), s(90), s(90), 0, config) },
-      { id: 'email', ...placeOrbital(15, s(90), s(100), s(74), 0, config) },
-      { id: 'beach', ...placeOrbital(55, s(115), s(92), s(92), 0, config) },
-      { id: 'coffee', ...placeOrbital(25, s(220), s(80), s(86), 0, config) },
-      { id: 'lego', ...placeOrbital(60, s(190), s(88), s(76), 0, config) },
-      { id: 'headphones', ...placeOrbital(240, s(85), s(90), s(100), 0, config) },
-      { id: 'camera', ...placeOrbital(260, s(150), s(96), s(76), 0, config) },
-      { id: 'gym', ...placeOrbital(295, s(95), s(96), s(96), 0, config) },
-      { id: 'laptop', ...placeOrbital(-60, s(130), s(100), s(90), 0, config) },
-      { id: 'folder', ...placeOrbital(90, s(95), s(100), s(80), 0, config) },
+      { id: 'plane', ...placeOrbital(-98, od(110), s(110), s(76), 0, config) },
+      { id: 'tagPM', ...placeOrbital(-150, od(95), s(160), s(36), 0, config) },
+      { id: 'tagAI', ...placeOrbital(5, od(80), s(140), s(36), 0, config) },
+      { id: 'charminar', ...placeOrbital(-128, od(160), s(120), s(110), 0, config) },
+      { id: 'washingtondc', ...placeOrbital(-35, od(150), s(120), s(86), 0, config) },
+      { id: 'portrait', ...placeOrbital(162, od(155), s(215), s(323), 0, config) },
+      { id: 'linkedin', ...placeOrbital(200, od(80), s(90), s(90), 0, config) },
+      { id: 'pickleball', ...placeOrbital(224, od(120), s(90), s(90), 0, config) },
+      { id: 'email', ...placeOrbital(18, od(95), s(100), s(74), 0, config) },
+      { id: 'beach', ...placeOrbital(52, od(120), s(92), s(92), 0, config) },
+      { id: 'coffee', ...placeOrbital(22, od(235), s(80), s(86), 0, config) },
+      { id: 'lego', ...placeOrbital(68, od(215), s(88), s(76), 0, config) },
+      { id: 'headphones', ...placeOrbital(244, od(105), s(90), s(100), 0, config) },
+      { id: 'camera', ...placeOrbital(266, od(165), s(96), s(76), 0, config) },
+      { id: 'gym', ...placeOrbital(300, od(115), s(96), s(96), 0, config) },
+      { id: 'laptop', ...placeOrbital(-58, od(150), s(100), s(90), 0, config) },
+      { id: 'folder', ...placeOrbital(138, od(115), s(100), s(80), 0, config) },
     ];
 
-    const resolved = resolveOverlapsSimple(raw);
-    return positionsToObject(resolved);
-  }, [dims.w, dims.h, isMobile, scale, s]);
+    // True on-screen sizes per sticker (some components render a different size
+    // than the anchor width/height above). Used for collision + bounding box.
+    const renderSize: Record<string, [number, number]> = {
+      plane: [s(104), s(104)],
+      tagPM: [s(92), s(39)],
+      tagAI: [s(157), s(39)],
+      charminar: [s(116), s(116)],
+      washingtondc: [s(110), s(110)],
+      portrait: [portraitW, portraitH],
+      linkedin: [s(92), s(92)],
+      pickleball: [s(90), s(94)],
+      email: [s(100), s(79)],
+      beach: [s(98), s(98)],
+      coffee: [s(88), s(88)],
+      lego: [s(88), s(80)],
+      headphones: [s(90), s(100)],
+      camera: [s(96), s(81)],
+      gym: [s(96), s(96)],
+      laptop: [s(100), s(90)],
+      folder: [s(100), s(80)],
+    };
 
-  const portraitW = isMobile ? 164 : Math.round(215 * scale);
-  const portraitH = isMobile ? 247 : Math.round(323 * scale);
+    // Immovable obstacles: the center card and the bottom-left coffee machine
+    // (the latter is placed directly in DesktopStickers, not via placeOrbital).
+    const coffeeMachineBox = { x: 6, y: DESIGN_H - 180, w: s(107), h: s(135) };
+    const obstacles = [
+      { x: cx - cardW / 2, y: cy - cardH / 2, w: cardW, h: cardH },
+      coffeeMachineBox,
+    ];
+
+    // Spread overlapping stickers apart with a breathing gap, keeping each near
+    // its orbital home. Collision uses render sizes anchored at the orbital point.
+    const clusterIn = raw.map((r) => {
+      const [w, h] = renderSize[r.id];
+      return { id: r.id, x: r.x, y: r.y, w, h };
+    });
+    const resolved = resolveCluster(clusterIn, obstacles, { pad: 12 });
+
+    const positionsArr = resolved.map((r) => ({ id: r.id, x: r.x, y: r.y, w: r.w, h: r.h, rot: 0 }));
+
+    // Content bounding box (design space) the Stage uses to scale + center the
+    // cluster to fill the viewport. Built from resolved render boxes + obstacles.
+    const boxes = [...resolved, coffeeMachineBox];
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const b of boxes) {
+      minX = Math.min(minX, b.x);
+      minY = Math.min(minY, b.y);
+      maxX = Math.max(maxX, b.x + b.w);
+      maxY = Math.max(maxY, b.y + b.h);
+    }
+
+    // Center the board on the CARD (the design center), not the raw cluster
+    // center. The sticker mass is heavier on one side (coffee machine + left
+    // stickers), so a raw-bbox center would drift the card off-screen-center
+    // and make everything look left-leaning. We instead build a box that's
+    // symmetric about the card center, sized to the furthest extent on each
+    // axis, so the card sits dead-center and the cluster is balanced.
+    const halfW = Math.max(cx - minX, maxX - cx);
+    const halfH = Math.max(cy - minY, maxY - cy);
+    const contentBox = {
+      w: halfW * 2,
+      h: halfH * 2,
+      cx,
+      cy,
+    };
+
+    return { positions: positionsToObject(positionsArr), bbox: contentBox };
+  }, [isMobile, scale, s, d, portraitW, portraitH]);
 
   // Event handlers
   const handlers = useMemo(
@@ -191,23 +273,25 @@ export default function Home() {
 
       {/* Main content */}
       <main suppressHydrationWarning>
-        {/* Desktop: orbital stickers */}
-        {!isMobile && (
-          <DesktopStickers
-            key={`desktop-${Math.floor(dims.w / 100)}-${Math.floor(dims.h / 100)}`}
-            positions={positions}
-            portraitW={portraitW}
-            portraitH={portraitH}
-            dims={dims}
-            handlers={handlers}
-          />
+        {isMobile ? (
+          <>
+            {/* Center card stack */}
+            <CardStack />
+            {/* Mobile: sticker grid below card */}
+            <MobileStickerGrid handlers={handlers} />
+          </>
+        ) : (
+          // Desktop: fixed design canvas, uniformly scaled to fit the viewport
+          <Stage bbox={bbox}>
+            <DesktopStickers
+              positions={positions}
+              portraitW={portraitW}
+              portraitH={portraitH}
+              handlers={handlers}
+            />
+            <CardStack />
+          </Stage>
         )}
-
-        {/* Center card stack */}
-        <CardStack />
-
-        {/* Mobile: sticker grid below card */}
-        {isMobile && <MobileStickerGrid handlers={handlers} />}
       </main>
 
       {/* Modals */}

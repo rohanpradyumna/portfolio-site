@@ -41,7 +41,7 @@ export function CardStack() {
   const [shuffling, setShuffling] = useState<'next' | 'prev' | null>(null);
 
   const { isMobile } = useResponsive();
-  const { cardW, cardMinH, cardPadding } = useCardDimensions();
+  const { cardW, cardH, cardMinH, cardPadding } = useCardDimensions();
   const { playShuffleSound } = useAudio();
 
   const cardOrder: number[] = [];
@@ -160,7 +160,7 @@ export function CardStack() {
         top: isMobile ? 'auto' : '50%',
         transform: isMobile ? 'none' : 'translate(-50%, -50%)',
         width: cardW,
-        height: isMobile ? 'auto' : 320,
+        height: cardH,
         minHeight: cardMinH,
         zIndex: 500,
         margin: isMobile ? '80px auto 0' : 0,

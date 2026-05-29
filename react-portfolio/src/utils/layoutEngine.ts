@@ -5,6 +5,7 @@ interface OrbitalConfig {
   cy: number;
   cardW: number;
   cardH: number;
+  padding?: number; // Scaled padding from card edge (default 40)
 }
 
 interface ZoneConfig {
@@ -101,12 +102,12 @@ export function placeOrbital(
   rot: number,
   config: OrbitalConfig
 ): StickerPosition {
-  const { cx, cy, cardW, cardH } = config;
+  const { cx, cy, cardW, cardH, padding = 40 } = config;
   const angle = (angleDeg * Math.PI) / 180;
 
   // Elliptical base distance accounts for card dimensions
-  const baseX = cardW / 2 + 40; // card half-width + padding
-  const baseY = cardH / 2 + 40; // card half-height + padding
+  const baseX = cardW / 2 + padding; // card half-width + scaled padding
+  const baseY = cardH / 2 + padding; // card half-height + scaled padding
 
   // Calculate position on ellipse + additional distance
   const radiusX = baseX + distance;
@@ -187,7 +188,7 @@ export function resolveOverlaps(
 }
 
 /**
- * Simple overlap resolution (original algorithm)
+ * Simple overlap resolution with scaled push distance
  */
 export function resolveOverlapsSimple(
   list: (StickerPosition & { id: string })[]
@@ -197,7 +198,11 @@ export function resolveOverlapsSimple(
   for (let i = 0; i < result.length; i++) {
     for (let j = 0; j < i; j++) {
       let tries = 0;
-      while (overlaps(result[i], result[j]) && tries < 30) {
+      // Scale push distance based on average sticker size (larger stickers need bigger pushes)
+      const avgSize = (result[i].w + result[i].h + result[j].w + result[j].h) / 4;
+      const pushDistance = Math.max(10, avgSize * 0.12);
+
+      while (overlaps(result[i], result[j]) && tries < 50) {
         const ax = result[i].x + result[i].w / 2;
         const ay = result[i].y + result[i].h / 2;
         const bx = result[j].x + result[j].w / 2;
@@ -207,14 +212,100 @@ export function resolveOverlapsSimple(
         const dy = ay - by || 0.5;
         const len = Math.hypot(dx, dy) || 1;
 
-        result[i].x += (dx / len) * 10;
-        result[i].y += (dy / len) * 10;
+        result[i].x += (dx / len) * pushDistance;
+        result[i].y += (dy / len) * pushDistance;
         tries++;
       }
     }
   }
 
   return result;
+}
+
+export interface ClusterBox {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface ClusterObstacle {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * Spread an overlapping cluster apart just enough to give every box a breathing
+ * gap, while keeping each box as close to its starting (orbital) home as possible.
+ *
+ * Each overlapping pair is separated along its axis of least penetration (minimal
+ * translation), so stickers slide apart the smallest distance needed rather than
+ * being flung radially — this preserves the hand-placed arrangement. Immovable
+ * obstacles (the center card, the coffee machine) push stickers out but never move.
+ * A weak per-iteration pull back toward home keeps drift small and the layout
+ * recognisable. Operate on RENDER sizes for visual accuracy.
+ */
+export function resolveCluster(
+  items: ClusterBox[],
+  obstacles: ClusterObstacle[] = [],
+  options: { pad?: number; iterations?: number; homePull?: number } = {}
+): ClusterBox[] {
+  const { pad = 12, iterations = 400, homePull = 0.02 } = options;
+  const list = items.map((s) => ({ ...s }));
+  const home = list.map((s) => ({ x: s.x, y: s.y }));
+
+  // Push two boxes apart along their smallest-overlap axis. `bMovable=false`
+  // means b is an immovable obstacle, so a absorbs the full push.
+  const push = (a: ClusterBox, b: ClusterBox | ClusterObstacle, bMovable: boolean): boolean => {
+    const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + pad;
+    const oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y) + pad;
+    if (ox <= 0 || oy <= 0) return false;
+    const aCenterX = a.x + a.w / 2;
+    const bCenterX = b.x + b.w / 2;
+    const aCenterY = a.y + a.h / 2;
+    const bCenterY = b.y + b.h / 2;
+    let dx = 0;
+    let dy = 0;
+    if (ox < oy) dx = (aCenterX < bCenterX ? -1 : 1) * ox;
+    else dy = (aCenterY < bCenterY ? -1 : 1) * oy;
+
+    if (bMovable) {
+      a.x += dx / 2;
+      a.y += dy / 2;
+      (b as ClusterBox).x -= dx / 2;
+      (b as ClusterBox).y -= dy / 2;
+    } else {
+      a.x += dx;
+      a.y += dy;
+    }
+    return true;
+  };
+
+  for (let iter = 0; iter < iterations; iter++) {
+    let collided = false;
+
+    for (let i = 0; i < list.length; i++) {
+      for (let j = i + 1; j < list.length; j++) {
+        if (push(list[i], list[j], true)) collided = true;
+      }
+      for (const ob of obstacles) {
+        if (push(list[i], ob, false)) collided = true;
+      }
+    }
+
+    // Weak spring back toward each box's original orbital home.
+    for (let i = 0; i < list.length; i++) {
+      list[i].x += (home[i].x - list[i].x) * homePull;
+      list[i].y += (home[i].y - list[i].y) * homePull;
+    }
+
+    if (!collided) break;
+  }
+
+  return list;
 }
 
 /**
