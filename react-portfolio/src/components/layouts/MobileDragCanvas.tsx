@@ -118,7 +118,7 @@ export function MobileDragCanvas({ wake = false, handlers }: MobileDragCanvasPro
       >
         <PhotoSticker
           id="portrait-m"
-          src="/assets/rohan-casual.png"
+          src="/assets/rohan-casual.webp"
           w={150}
           h={226}
           initial={pos(LAYOUT[0])}

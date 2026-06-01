@@ -105,7 +105,7 @@ export function DesktopStickers({
       {/* Portrait */}
       <PhotoSticker
         id="portrait"
-        src="/assets/rohan-casual.png"
+        src="/assets/rohan-casual.webp"
         w={portraitW}
         h={portraitH}
         initial={positions.portrait || { x: 0, y: 0, rot: 0 }}

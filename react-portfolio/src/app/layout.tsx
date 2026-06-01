@@ -43,8 +43,8 @@ export const metadata: Metadata = {
     description: "Personal portfolio of Rohan Pradyumna - AI strategist, consultant, and builder of developer tools.",
   },
   icons: {
-    icon: "/assets/icons/Favicon.png",
-    apple: "/assets/icons/Favicon.png",
+    icon: "/assets/icons/favicon-256.png",
+    apple: "/assets/icons/apple-touch-icon.png",
   },
 };
 
