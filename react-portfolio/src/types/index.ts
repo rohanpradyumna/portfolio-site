@@ -129,7 +129,7 @@ export interface Project {
 export type ModalType =
   | 'phone'
   | 'music'
-  | 'lego'
+  | 'terrapin'
   | 'charminar'
   | 'dc'
   | 'travel'

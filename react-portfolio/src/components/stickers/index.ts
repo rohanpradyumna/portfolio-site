@@ -19,7 +19,6 @@ export type { AirPodsStickerProps } from './specialized/AirPodsSticker';
 export { LaptopSticker } from './specialized/LaptopSticker';
 export { CameraSticker } from './specialized/CameraSticker';
 export { PickleballSticker } from './specialized/PickleballSticker';
-export { LegoSticker } from './specialized/LegoSticker';
 export { FolderSticker } from './specialized/FolderSticker';
 export { CoffeeMachineSticker } from './specialized/CoffeeMachineSticker';
 export type { CoffeeMachineStickerProps } from './specialized/CoffeeMachineSticker';

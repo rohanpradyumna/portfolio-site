@@ -15,7 +15,7 @@ import { placeOrbital, resolveCluster, positionsToObject } from '@/utils/layoutE
 type ModalType =
   | 'phone'
   | 'music'
-  | 'lego'
+  | 'terrapin'
   | 'charminar'
   | 'dc'
   | 'travel'
@@ -32,7 +32,6 @@ type ModalType =
 export default function Home() {
   // Modal state
   const [modal, setModal] = useState<ModalType>(null);
-  const [legoCount, setLegoCount] = useState(0);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [stoicQuote, setStoicQuote] = useState<StoicQuote | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
@@ -62,7 +61,7 @@ export default function Home() {
   const { isMobile, scale, s, d } = useResponsive();
 
   // Audio
-  const { togglePlay, stop } = useSongAudio('/assets/believer.mp3');
+  const { togglePlay, stop } = useSongAudio('/assets/believer.m4a');
 
   // Dynamic lighting state
   const [lightPos, setLightPos] = useState({ x: 50, y: 40 });
@@ -137,7 +136,7 @@ export default function Home() {
       { id: 'email', ...placeOrbital(18, od(95), s(100), s(74), 0, config) },
       { id: 'beach', ...placeOrbital(52, od(120), s(92), s(92), 0, config) },
       { id: 'coffee', ...placeOrbital(22, od(235), s(80), s(86), 0, config) },
-      { id: 'lego', ...placeOrbital(68, od(215), s(88), s(76), 0, config) },
+      { id: 'terrapin', ...placeOrbital(68, od(215), s(96), s(96), 0, config) },
       { id: 'headphones', ...placeOrbital(244, od(105), s(90), s(100), 0, config) },
       { id: 'camera', ...placeOrbital(266, od(165), s(96), s(76), 0, config) },
       { id: 'gym', ...placeOrbital(300, od(115), s(96), s(96), 0, config) },
@@ -159,7 +158,7 @@ export default function Home() {
       email: [s(100), s(79)],
       beach: [s(98), s(98)],
       coffee: [s(88), s(88)],
-      lego: [s(88), s(80)],
+      terrapin: [s(96), s(96)],
       headphones: [s(90), s(100)],
       camera: [s(96), s(81)],
       gym: [s(96), s(96)],
@@ -233,10 +232,7 @@ export default function Home() {
         setMusicPlaying(playing);
         setModal('music');
       },
-      bumpLego: () => {
-        setLegoCount((c) => c + 1);
-        setModal('lego');
-      },
+      terrapinFact: () => setModal('terrapin'),
       openWork: () => setModal('work'),
       openWriting: () => (window.location.href = '/blog.html'),
       brewCoffee: () => {
@@ -403,28 +399,14 @@ export default function Home() {
         </button>
       </Modal>
 
-      <Modal open={modal === 'lego'} noAnimation={true} onClose={closeModal} title="click!" color="#d4584f">
-        <div style={{ fontSize: 14, color: '#f5f2e8', marginBottom: 8 }}>
-          you&apos;ve clicked the brick <b>{legoCount}</b> {legoCount === 1 ? 'time' : 'times'}.
+      <Modal open={modal === 'terrapin'} noAnimation={true} onClose={closeModal} title="go terps 🐢" color="#c8102e">
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
+          university of maryland alum. fear the turtle. testudo got me from a campus in college park to building AI in
+          d.c. — and I&apos;d do it all over again.
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>
-          building is the same whether it&apos;s lego or software — you start with one brick, and keep going.
-        </div>
-        <div style={{ marginTop: 16, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {Array.from({ length: Math.min(legoCount, 24) }).map((_, i) => (
-            <span
-              key={i}
-              style={{
-                display: 'inline-block',
-                width: 18,
-                height: 12,
-                background: ['#f2c230', '#2d6cdf', '#3a7d44', '#1a1a1a', '#faf7ef'][i % 5],
-                border: '1px solid rgba(255,255,255,0.3)',
-                borderRadius: 2,
-                animation: `pop 0.3s ease ${i * 0.02}s both`,
-              }}
-            />
-          ))}
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
+          four years of late-night McKeldin sessions, terp basketball, and the kind of friends you keep for life.
+          slow and steady, just like the turtle.
         </div>
       </Modal>
 

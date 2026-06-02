@@ -147,22 +147,23 @@ export function useAudio() {
 export function useSongAudio(src: string) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Tear down only on unmount — we no longer create the element here, so the
+  // ~3.4MB track is never fetched until the visitor actually presses play.
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      audioRef.current = new Audio(src);
-      audioRef.current.loop = true;
-    }
-
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
     };
-  }, [src]);
+  }, []);
 
   const togglePlay = useCallback((): boolean => {
-    if (!audioRef.current) return false;
+    // Lazy-create on first interaction so nothing downloads on page load.
+    if (!audioRef.current) {
+      audioRef.current = new Audio(src);
+      audioRef.current.loop = true;
+    }
 
     if (audioRef.current.paused) {
       audioRef.current.play();
@@ -171,7 +172,7 @@ export function useSongAudio(src: string) {
       audioRef.current.pause();
       return false;
     }
-  }, []);
+  }, [src]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {

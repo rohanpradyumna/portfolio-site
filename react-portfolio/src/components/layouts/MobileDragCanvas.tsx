@@ -12,7 +12,6 @@ import {
   LaptopSticker,
   CameraSticker,
   PickleballSticker,
-  LegoSticker,
   FolderSticker,
   CoffeeMachineSticker,
 } from '@/components/stickers';
@@ -37,7 +36,7 @@ interface MobileDragCanvasProps {
     gymVibes: () => void;
     portraitClick: () => void;
     toggleMusic: () => void;
-    bumpLego: () => void;
+    terrapinFact: () => void;
     openWork: () => void;
     openWriting: () => void;
     brewCoffee: () => void;
@@ -73,7 +72,7 @@ const LAYOUT: LayoutItem[] = [
   { id: 'coffee', xFrac: 0.12, y: 788, w: 84, h: 84 },
   { id: 'gym', xFrac: 0.42, y: 796, w: 88, h: 88 },
   { id: 'pickleball', xFrac: 0.74, y: 784, w: 90, h: 94 },
-  { id: 'lego', xFrac: 0.5, y: 892, w: 88, h: 80 },
+  { id: 'terrapin', xFrac: 0.5, y: 892, w: 96, h: 96 },
   { id: 'coffeeMachine', xFrac: 0.5, y: 980, w: 100, h: 130 },
 ];
 
@@ -322,16 +321,18 @@ export function MobileDragCanvas({ wake = false, handlers }: MobileDragCanvasPro
           wake={wake}
           wakeDelay={wakeDelayFor('pickleball')}
         />
-        <LegoSticker
-          id="lego-m"
+        <ImageSticker
+          id="terrapin-m"
+          src="/assets/icons/terrapin.png"
+          size={96}
           initial={pos(LAYOUT[16])}
           zBase={7}
-          onClick={handlers.bumpLego}
-          entranceDelay={delayFor('lego')}
+          onClick={handlers.terrapinFact}
+          entranceDelay={delayFor('terrapin')}
           dragConstraints={canvasRef}
           disableSnap
           wake={wake}
-          wakeDelay={wakeDelayFor('lego')}
+          wakeDelay={wakeDelayFor('terrapin')}
         />
 
         {/* Easter egg label + coffee machine, tucked at the bottom of the canvas */}

@@ -177,7 +177,7 @@ export function WorkCardStack({ projects }: WorkCardStackProps) {
                     style={{
                       fontSize: isMobile ? 18 : 22,
                       fontWeight: 600,
-                      fontFamily: "'Fraunces', Georgia, serif",
+                      fontFamily: 'var(--font-serif)',
                       letterSpacing: '-0.01em',
                     }}
                   >
@@ -253,7 +253,7 @@ export function WorkCardStack({ projects }: WorkCardStackProps) {
                   fontSize: isMobile ? 13 : 14,
                   color: 'rgba(26,26,26,0.85)',
                   lineHeight: 1.6,
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: 'var(--font-sans)',
                   marginBottom: 16,
                 }}
               >

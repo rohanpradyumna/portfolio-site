@@ -104,7 +104,7 @@ export function AIShowcaseModal({ open, onClose }: AIShowcaseModalProps) {
           <h2
             style={{
               fontSize: isMobile ? 24 : 28,
-              fontFamily: "'Fraunces', Georgia, serif",
+              fontFamily: 'var(--font-serif)',
               color: '#f5f2e8',
               fontWeight: 400,
               margin: 0,

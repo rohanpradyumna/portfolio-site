@@ -12,7 +12,6 @@ import {
   LaptopSticker,
   CameraSticker,
   PickleballSticker,
-  LegoSticker,
   FolderSticker,
   CoffeeMachineSticker,
 } from '@/components/stickers';
@@ -36,7 +35,7 @@ const WAKE_ORDER = [
   'camera',
   'gym',
   'pickleball',
-  'lego',
+  'terrapin',
 ];
 const wakeDelayFor = (id: string) => WAKE_BASE + Math.max(0, WAKE_ORDER.indexOf(id)) * WAKE_STAGGER;
 
@@ -58,7 +57,7 @@ interface DesktopStickersProps {
     gymVibes: () => void;
     portraitClick: () => void;
     toggleMusic: () => void;
-    bumpLego: () => void;
+    terrapinFact: () => void;
     openWork: () => void;
     openWriting: () => void;
     brewCoffee: () => void;
@@ -249,15 +248,17 @@ export function DesktopStickers({
         wake={wake}
         wakeDelay={wakeDelayFor('pickleball')}
       />
-      <LegoSticker
-        id="lego"
-        initial={positions.lego || { x: 0, y: 0, rot: 0 }}
+      <ImageSticker
+        id="terrapin"
+        src="/assets/icons/terrapin.png"
+        size={s(96)}
+        initial={positions.terrapin || { x: 0, y: 0, rot: 0 }}
         zBase={7}
-        onClick={handlers.bumpLego}
+        onClick={handlers.terrapinFact}
         entranceDelay={850}
-        peekLabel="tap me"
+        peekLabel="go terps"
         wake={wake}
-        wakeDelay={wakeDelayFor('lego')}
+        wakeDelay={wakeDelayFor('terrapin')}
       />
 
       {/* My Work - Laptop sticker */}

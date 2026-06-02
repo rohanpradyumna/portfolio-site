@@ -1,32 +1,33 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "@/styles/theme.css";
 import "@/styles/globals.css";
 
-// Instrument Serif - for headings
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
+// Fraunces - serif headings/name (variable, with optical-size axis)
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-instrument-serif",
+  variable: "--font-fraunces",
   display: "swap",
+  axes: ["opsz"],
   style: ["normal", "italic"],
 });
 
-// Geist Sans - body text
-const geistSans = Geist({
-  variable: "--font-geist",
+// Inter - body text (variable)
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
   display: "swap",
 });
 
-// Geist Mono - code/monospace
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// JetBrains Mono - code/mono UI (variable)
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://rohanpradyumna.vercel.app"),
   title: "Rohan Pradyumna | AI Strategist & Consultant",
   description: "Personal portfolio of Rohan Pradyumna - AI strategist, consultant, and builder of developer tools.",
   keywords: ["AI", "strategist", "consultant", "developer tools", "portfolio"],
@@ -36,11 +37,22 @@ export const metadata: Metadata = {
     description: "Personal portfolio of Rohan Pradyumna - AI strategist, consultant, and builder of developer tools.",
     type: "website",
     locale: "en_US",
+    url: "/",
+    siteName: "Rohan Pradyumna",
+    images: [
+      {
+        url: "/assets/og-card.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Rohan Pradyumna — AI Strategist & Consultant",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Rohan Pradyumna | AI Strategist & Consultant",
     description: "Personal portfolio of Rohan Pradyumna - AI strategist, consultant, and builder of developer tools.",
+    images: ["/assets/og-card.jpg"],
   },
   icons: {
     icon: "/assets/icons/favicon-256.png",
@@ -63,12 +75,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${geistSans.variable} ${geistMono.variable}`}
+      className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
       <body>{children}</body>
     </html>
   );
