@@ -405,8 +405,8 @@ export default function Home() {
           and machine learning — the stuff that got me building AI in d.c. fear the turtle.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-          less basketball, more volleyball and good times in the startup shell — plus the wildest parties I could throw
-          along the way. I loved my professors, and I&apos;d run the whole course all over again given the chance.
+          plenty of volleyball and good times in the startup shell — plus the wildest parties I could throw along the
+          way. I loved my professors, and I&apos;d run the whole course all over again given the chance.
         </div>
       </Modal>
 
