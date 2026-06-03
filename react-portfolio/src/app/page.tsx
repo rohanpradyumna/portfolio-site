@@ -154,7 +154,7 @@ export default function Home() {
       { id: 'camera', ...placeOrbital(266, od(165), s(96), s(76), 0, config) },
       { id: 'gym', ...placeOrbital(300, od(115), s(96), s(96), 0, config) },
       { id: 'laptop', ...placeOrbital(-58, od(150), s(100), s(90), 0, config) },
-      { id: 'folder', ...placeOrbital(138, od(115), s(100), s(80), 0, config) },
+      { id: 'folder', ...placeOrbital(122, od(160), s(100), s(80), 0, config) },
     ];
 
     // True on-screen sizes per sticker (some components render a different size

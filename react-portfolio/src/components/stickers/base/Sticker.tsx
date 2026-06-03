@@ -120,6 +120,14 @@ export function Sticker({
     onDragEnd?.(id);
   };
 
+  // Reset the moved flag at the start of every interaction. Without this, the
+  // flag set during a drag would persist (a plain tap never fires onDragStart),
+  // so after moving a sticker the next click would be swallowed by handleTap's
+  // guard — the sticker would only open from its original, un-dragged position.
+  const handlePointerDown = () => {
+    hasMoved.current = false;
+  };
+
   // Handle tap/click - only fires if not dragging
   const handleTap = (event: MouseEvent | TouchEvent | PointerEvent) => {
     if (!hasMoved.current) {
@@ -168,6 +176,7 @@ export function Sticker({
       whileHover={simpleHoverAnimation}
       whileDrag={{ scale: 1.08, cursor: 'grabbing' }}
       whileTap={{ scale: 1.08 }}
+      onPointerDown={handlePointerDown}
       onDragStart={handleDragStart}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
