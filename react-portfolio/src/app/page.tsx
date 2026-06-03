@@ -401,12 +401,12 @@ export default function Home() {
 
       <Modal open={modal === 'terrapin'} noAnimation={true} onClose={closeModal} title="go terps 🐢" color="#c8102e">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
-          university of maryland alum. fear the turtle. testudo got me from a campus in college park to building AI in
-          d.c. — and I&apos;d do it all over again.
+          masters from the robert h. smith school of business. disruptive innovation, digital business transformation,
+          and machine learning — the stuff that got me building AI in d.c. fear the turtle.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-          four years of late-night McKeldin sessions, terp basketball, and the kind of friends you keep for life.
-          slow and steady, just like the turtle.
+          less basketball, more volleyball and good times in the startup shell — plus the wildest parties I could throw
+          along the way. I loved my professors, and I&apos;d run the whole course all over again given the chance.
         </div>
       </Modal>
 
