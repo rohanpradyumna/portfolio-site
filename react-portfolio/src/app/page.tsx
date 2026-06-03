@@ -401,14 +401,12 @@ export default function Home() {
 
       <Modal open={modal === 'terrapin'} noAnimation={true} onClose={closeModal} title="go terps 🐢" color="#c8102e">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
-          I did my master&apos;s at the Robert H. Smith School of Business — disruptive innovation, digital business
-          transformation, and machine learning. that&apos;s the foundation that got me building AI in D.C. fear the
-          turtle.
+          masters from the robert h. smith school of business. disruptive innovation, digital business transformation,
+          and machine learning — the stuff that got me building AI in d.c. fear the turtle.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-          there was less basketball and more volleyball, plenty of good times at the Startup Shell, and the wildest
-          parties I could throw along the way. I loved my professors, and I&apos;d do the whole thing all over again
-          given the chance.
+          less basketball, more volleyball and good times in the startup shell — plus the wildest parties I could throw
+          along the way. I loved my professors, and I&apos;d run the whole course all over again given the chance.
         </div>
       </Modal>
 
