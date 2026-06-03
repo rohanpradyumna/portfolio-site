@@ -24,7 +24,6 @@ const WAKE_STAGGER = 60;
 const WAKE_ORDER = [
   'portrait',
   'charminar',
-  'dc',
   'linkedin',
   'email',
   'plane',
@@ -49,7 +48,6 @@ interface DesktopStickersProps {
     openLinkedIn: () => void;
     openEmail: () => void;
     charminarFact: () => void;
-    dcFact: () => void;
     travelList: () => void;
     beachVibes: () => void;
     pickleballVibes: () => void;
@@ -131,18 +129,6 @@ export function DesktopStickers({
         peekLabel="hyderabad"
         wake={wake}
         wakeDelay={wakeDelayFor('charminar')}
-      />
-      <ImageSticker
-        id="dc"
-        src="/assets/icons/dc.png"
-        size={s(110)}
-        initial={positions.washingtondc || { x: 0, y: 0, rot: 0 }}
-        zBase={8}
-        onClick={handlers.dcFact}
-        entranceDelay={250}
-        peekLabel="now in d.c."
-        wake={wake}
-        wakeDelay={wakeDelayFor('dc')}
       />
 
       {/* Communication */}

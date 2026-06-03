@@ -131,7 +131,6 @@ export type ModalType =
   | 'music'
   | 'terrapin'
   | 'charminar'
-  | 'dc'
   | 'travel'
   | 'beach'
   | 'pickleball'

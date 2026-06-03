@@ -17,7 +17,6 @@ type ModalType =
   | 'music'
   | 'terrapin'
   | 'charminar'
-  | 'dc'
   | 'travel'
   | 'beach'
   | 'pickleball'
@@ -142,7 +141,6 @@ export default function Home() {
       { id: 'tagPM', ...placeOrbital(-150, od(95), s(160), s(36), 0, config) },
       { id: 'tagAI', ...placeOrbital(5, od(80), s(140), s(36), 0, config) },
       { id: 'charminar', ...placeOrbital(-128, od(160), s(120), s(110), 0, config) },
-      { id: 'washingtondc', ...placeOrbital(-35, od(150), s(120), s(86), 0, config) },
       { id: 'portrait', ...placeOrbital(162, od(155), s(215), s(323), 0, config) },
       { id: 'linkedin', ...placeOrbital(200, od(80), s(90), s(90), 0, config) },
       { id: 'pickleball', ...placeOrbital(224, od(120), s(90), s(90), 0, config) },
@@ -164,7 +162,6 @@ export default function Home() {
       tagPM: [s(92), s(39)],
       tagAI: [s(157), s(39)],
       charminar: [s(116), s(116)],
-      washingtondc: [s(110), s(110)],
       portrait: [portraitW, portraitH],
       linkedin: [s(92), s(92)],
       pickleball: [s(90), s(94)],
@@ -232,7 +229,6 @@ export default function Home() {
       openLinkedIn: () => window.open('https://www.linkedin.com/in/rohanpradyumna/', '_blank'),
       openEmail: () => (window.location.href = 'mailto:pradyumnarohan@gmail.com'),
       charminarFact: () => setModal('charminar'),
-      dcFact: () => setModal('dc'),
       travelList: () => setModal('travel'),
       beachVibes: () => setModal('beach'),
       pickleballVibes: () => setModal('pickleball'),
@@ -433,16 +429,6 @@ export default function Home() {
           the biryani hits different. the nightlife hits different. the energy of the city hits different. someday
           I&apos;m going back to build things there. until then, I cope with phone calls home and food that&apos;s never
           quite the same.
-        </div>
-      </Modal>
-
-      <Modal open={modal === 'dc'} noAnimation={true} onClose={closeModal} title="washington, dc 🏛️" color="#2d6cdf">
-        <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
-          current base of operations. UMD brought me here, AI keeps me here, Hyderabad will eventually take me back.
-        </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>
-          solid coffee scene, good energy, and Annapolis is a quick escape when I need water vibes. hit me up if
-          you&apos;re around — I&apos;m always down for a chat.
         </div>
       </Modal>
 

@@ -28,7 +28,6 @@ interface MobileDragCanvasProps {
     openLinkedIn: () => void;
     openEmail: () => void;
     charminarFact: () => void;
-    dcFact: () => void;
     travelList: () => void;
     beachVibes: () => void;
     pickleballVibes: () => void;
@@ -63,7 +62,6 @@ const LAYOUT: LayoutItem[] = [
   { id: 'linkedin', xFrac: 0.16, y: 322, w: 88, h: 88 },
   { id: 'email', xFrac: 0.62, y: 330, w: 100, h: 74 },
   { id: 'charminar', xFrac: 0.08, y: 430, w: 104, h: 104 },
-  { id: 'dc', xFrac: 0.52, y: 422, w: 100, h: 100 },
   { id: 'plane', xFrac: 0.9, y: 470, w: 92, h: 92 },
   { id: 'laptop', xFrac: 0.18, y: 560, w: 100, h: 96 },
   { id: 'folder', xFrac: 0.6, y: 552, w: 100, h: 86 },
@@ -200,23 +198,10 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           wakeDelay={wakeDelayFor('charminar')}
         />
         <ImageSticker
-          id="dc-m"
-          src="/assets/icons/dc.png"
-          size={100}
-          initial={pos(LAYOUT[6])}
-          zBase={8}
-          onClick={handlers.dcFact}
-          entranceDelay={delayFor('dc')}
-          dragConstraints={canvasRef}
-          disableSnap
-          wake={wake}
-          wakeDelay={wakeDelayFor('dc')}
-        />
-        <ImageSticker
           id="plane-m"
           src="/assets/icons/plane.png"
           size={92}
-          initial={pos(LAYOUT[7])}
+          initial={pos(LAYOUT[6])}
           zBase={7}
           onClick={handlers.travelList}
           entranceDelay={delayFor('plane')}
@@ -228,7 +213,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
 
         <LaptopSticker
           id="laptop-m"
-          initial={pos(LAYOUT[8])}
+          initial={pos(LAYOUT[7])}
           zBase={8}
           onClick={handlers.openWork}
           entranceDelay={delayFor('laptop')}
@@ -239,7 +224,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
         />
         <FolderSticker
           id="folder-m"
-          initial={pos(LAYOUT[9])}
+          initial={pos(LAYOUT[8])}
           zBase={8}
           onClick={handlers.openWriting}
           entranceDelay={delayFor('folder')}
@@ -253,7 +238,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
 
         <AirPodsSticker
           id="airpods-m"
-          initial={pos(LAYOUT[10])}
+          initial={pos(LAYOUT[9])}
           zBase={7}
           onPlay={handlers.toggleMusic}
           entranceDelay={delayFor('airpods')}
@@ -266,7 +251,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           id="beach-m"
           src="/assets/icons/beach.png"
           size={92}
-          initial={pos(LAYOUT[11])}
+          initial={pos(LAYOUT[10])}
           zBase={7}
           onClick={handlers.beachVibes}
           entranceDelay={delayFor('beach')}
@@ -277,7 +262,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
         />
         <CameraSticker
           id="camera-m"
-          initial={pos(LAYOUT[12])}
+          initial={pos(LAYOUT[11])}
           zBase={7}
           onClick={handlers.cameraVibes}
           entranceDelay={delayFor('camera')}
@@ -291,7 +276,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           id="coffee-m"
           src="/assets/icons/coffee.png"
           size={84}
-          initial={pos(LAYOUT[13])}
+          initial={pos(LAYOUT[12])}
           zBase={7}
           onClick={handlers.coffeeVibes}
           entranceDelay={delayFor('coffee')}
@@ -304,7 +289,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           id="gym-m"
           src="/assets/icons/gym.png"
           size={88}
-          initial={pos(LAYOUT[14])}
+          initial={pos(LAYOUT[13])}
           zBase={7}
           onClick={handlers.gymVibes}
           entranceDelay={delayFor('gym')}
@@ -315,7 +300,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
         />
         <PickleballSticker
           id="pickleball-m"
-          initial={pos(LAYOUT[15])}
+          initial={pos(LAYOUT[14])}
           zBase={7}
           onClick={handlers.pickleballVibes}
           entranceDelay={delayFor('pickleball')}
@@ -328,7 +313,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           id="terrapin-m"
           src="/assets/icons/terrapin.png"
           size={96}
-          initial={pos(LAYOUT[16])}
+          initial={pos(LAYOUT[15])}
           zBase={7}
           onClick={handlers.terrapinFact}
           entranceDelay={delayFor('terrapin')}
@@ -342,7 +327,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
         <div
           style={{
             position: 'absolute',
-            top: LAYOUT[17].y - 26,
+            top: LAYOUT[16].y - 26,
             left: 0,
             width: '100%',
             textAlign: 'center',
@@ -359,7 +344,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
         </div>
         <CoffeeMachineSticker
           id="coffeeMachine-m"
-          initial={pos(LAYOUT[17])}
+          initial={pos(LAYOUT[16])}
           zBase={6}
           onBrew={handlers.brewCoffee}
           entranceDelay={delayFor('coffeeMachine')}
