@@ -44,6 +44,7 @@ interface DesktopStickersProps {
   portraitW: number;
   portraitH: number;
   wake?: boolean;
+  writingCount?: number;
   handlers: {
     openLinkedIn: () => void;
     openEmail: () => void;
@@ -69,6 +70,7 @@ export function DesktopStickers({
   portraitW,
   portraitH,
   wake = false,
+  writingCount,
   handlers,
 }: DesktopStickersProps) {
   const { s } = useResponsive();
@@ -279,6 +281,9 @@ export function DesktopStickers({
         zBase={8}
         onClick={handlers.openWriting}
         entranceDelay={950}
+        count={writingCount}
+        title={writingCount ? `writing — ${writingCount} posts` : 'writing'}
+        peekLabel={writingCount ? `${writingCount} reads inside →` : 'read my writing →'}
         wake={wake}
         wakeDelay={wakeDelayFor('folder')}
       />

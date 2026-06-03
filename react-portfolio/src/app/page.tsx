@@ -57,6 +57,19 @@ export default function Home() {
     } catch {}
   }, []);
 
+  // Writing count drives the folder's "more to read" badge. Default to a sane
+  // value so the badge renders immediately, then confirm against the live index
+  // (tiny cached JSON) so the count never drifts as posts are added.
+  const [writingCount, setWritingCount] = useState(3);
+  useEffect(() => {
+    fetch('/posts/index.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (Array.isArray(d) && d.length > 0) setWritingCount(d.length);
+      })
+      .catch(() => {});
+  }, []);
+
   // Responsive state
   const { isMobile, scale, s, d } = useResponsive();
 
@@ -318,7 +331,7 @@ export default function Home() {
             {/* Center card stack */}
             <CardStack />
             {/* Mobile: draggable pocket canvas below card */}
-            <MobileDragCanvas handlers={handlers} wake={wake} />
+            <MobileDragCanvas handlers={handlers} wake={wake} writingCount={writingCount} />
           </>
         ) : (
           // Desktop: fixed design canvas, uniformly scaled to fit the viewport
@@ -329,6 +342,7 @@ export default function Home() {
               portraitH={portraitH}
               handlers={handlers}
               wake={wake}
+              writingCount={writingCount}
             />
             <CardStack />
           </Stage>

@@ -23,6 +23,7 @@ const WAKE_STAGGER = 60;
 
 interface MobileDragCanvasProps {
   wake?: boolean;
+  writingCount?: number;
   handlers: {
     openLinkedIn: () => void;
     openEmail: () => void;
@@ -78,7 +79,7 @@ const LAYOUT: LayoutItem[] = [
 
 const CANVAS_MIN_HEIGHT = 1180;
 
-export function MobileDragCanvas({ wake = false, handlers }: MobileDragCanvasProps) {
+export function MobileDragCanvas({ wake = false, writingCount, handlers }: MobileDragCanvasProps) {
   const { dims } = useResponsive();
   const { reducedMotion } = useMotion();
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -242,6 +243,8 @@ export function MobileDragCanvas({ wake = false, handlers }: MobileDragCanvasPro
           zBase={8}
           onClick={handlers.openWriting}
           entranceDelay={delayFor('folder')}
+          count={writingCount}
+          title={writingCount ? `writing — ${writingCount} posts` : 'writing'}
           dragConstraints={canvasRef}
           disableSnap
           wake={wake}

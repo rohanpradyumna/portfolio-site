@@ -4,7 +4,13 @@ import React from 'react';
 import { Sticker, StickerProps } from '../base/Sticker';
 import { useResponsive } from '@/hooks/useDimensions';
 
-export function FolderSticker(props: Omit<StickerProps, 'children'>) {
+interface FolderStickerProps extends Omit<StickerProps, 'children'> {
+  /** Number of writing pieces inside — surfaced as a notification-style count
+      badge so visitors can see at a glance there's more to read. */
+  count?: number;
+}
+
+export function FolderSticker({ count, ...props }: FolderStickerProps) {
   const { s } = useResponsive();
 
   return (
@@ -59,6 +65,38 @@ export function FolderSticker(props: Omit<StickerProps, 'children'>) {
         >
           WRITING
         </div>
+
+        {/* Count badge — the "more to read" affordance. Mirrors the email
+            sticker's accent circle so it reads as a notification badge. Sits
+            outside the folder's top-right corner. */}
+        {count != null && count > 0 && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: s(-6),
+              right: s(-4),
+              minWidth: s(24),
+              height: s(24),
+              padding: `0 ${s(5)}px`,
+              boxSizing: 'border-box',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#e85d3a',
+              color: '#fff',
+              border: '2px solid #fff',
+              borderRadius: s(12),
+              fontFamily: "'Geist Mono', monospace",
+              fontSize: s(12),
+              fontWeight: 800,
+              lineHeight: 1,
+              boxShadow: '0 2px 6px rgba(26,24,22,0.28)',
+            }}
+          >
+            {count}
+          </div>
+        )}
       </div>
     </Sticker>
   );
