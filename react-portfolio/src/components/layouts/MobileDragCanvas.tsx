@@ -17,7 +17,7 @@ import {
 } from '@/components/stickers';
 
 // First-visit wake-up wave timing (mirrors DesktopStickers). On touch this is the
-// primary discoverability cue — there's no hover, so no peek labels.
+// primary discoverability cue: there's no hover, so no peek labels.
 const WAKE_BASE = 1100;
 const WAKE_STAGGER = 60;
 
@@ -99,8 +99,8 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
   return (
     <div style={{ position: 'relative', width: '100%', padding: '0 16px 72px' }}>
       {/* Keyed by canvasW: the base Sticker captures its `initial` position only
-          once (useMotionValue), so when the viewport width changes — including the
-          SSR-default 1440 → real-width correction on first mount — we remount the
+          once (useMotionValue), so when the viewport width changes (including the
+          SSR-default 1440 → real-width correction on first mount) we remount the
           subtree to re-seed every sticker at the correct, responsive coordinates. */}
       <div
         key={canvasW}
@@ -229,7 +229,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           onClick={handlers.openWriting}
           entranceDelay={delayFor('folder')}
           count={writingCount}
-          title={writingCount ? `writing — ${writingCount} posts` : 'writing'}
+          title={writingCount ? `writing · ${writingCount} posts` : 'writing'}
           dragConstraints={canvasRef}
           disableSnap
           wake={wake}

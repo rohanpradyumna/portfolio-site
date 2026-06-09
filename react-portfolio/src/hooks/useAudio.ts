@@ -147,7 +147,7 @@ export function useAudio() {
 export function useSongAudio(src: string) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Tear down only on unmount — we no longer create the element here, so the
+  // Tear down only on unmount. We no longer create the element here, so the
   // ~3.4MB track is never fetched until the visitor actually presses play.
   useEffect(() => {
     return () => {

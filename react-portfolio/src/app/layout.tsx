@@ -44,7 +44,7 @@ export const metadata: Metadata = {
         url: "/assets/og-card.jpg",
         width: 1200,
         height: 630,
-        alt: "Rohan Pradyumna — AI Strategist & Consultant",
+        alt: "Rohan Pradyumna, AI Strategist & Consultant",
       },
     ],
   },

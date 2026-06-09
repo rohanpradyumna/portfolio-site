@@ -1,0 +1,404 @@
+/* ============================================================================
+   ExperienceTakeover: full-screen "what i'm building" panel.
+   Rendered outside the Stage, so it lives at true viewport scale.
+   Reduced motion is honored by the global rule in theme.css (it zeroes
+   animation/transition durations), so these keyframes simply no-op there.
+   ============================================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: var(--paper);
+  color: var(--ink);
+  animation: takeoverIn var(--duration-base) var(--ease-smooth);
+}
+
+@keyframes takeoverIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Panel is the scroll container; the overlay (and close button) stay put. */
+.panel {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 48px) clamp(64px, 10vw, 120px);
+}
+
+/* Fixed, quiet close affordance (≥44×44 hit area). */
+.close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-smooth),
+    background var(--duration-fast) var(--ease-smooth);
+}
+
+.close:hover {
+  color: var(--ink);
+  background: var(--paper-secondary);
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 2px;
+}
+
+/* Section reveal: staggered fade/translate-up, ordered by --i. */
+.section {
+  animation: sectionReveal var(--duration-base) var(--ease-smooth) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms + 60ms);
+}
+
+@keyframes sectionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- 1. Header band --- */
+.header {
+  margin-bottom: clamp(40px, 7vw, 72px);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  margin: 0 0 12px;
+}
+
+.headline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(40px, 8vw, 72px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+
+/* --- 2. NOW hero (the visual anchor) --- */
+.now {
+  margin-bottom: clamp(56px, 9vw, 96px);
+  padding-left: clamp(16px, 3vw, 28px);
+  border-left: 3px solid var(--accent-orange);
+}
+
+.nowRole {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin: 0 0 18px;
+}
+
+.nowThesis {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 4.4vw, 40px);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 28px;
+  text-wrap: balance;
+}
+
+.nowBody {
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.6vw, 18px);
+  line-height: 1.66;
+  color: var(--ink-secondary);
+  margin: 0 0 16px;
+  max-width: 64ch;
+  text-wrap: pretty;
+}
+
+.signals {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 0;
+}
+
+.signal {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  background: var(--accent-orange-soft);
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+}
+
+/* --- shared group label --- */
+.groupLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0 0 24px;
+}
+
+/* --- 3. Trajectory (vertical list, not a carousel) --- */
+.trajectory {
+  margin-bottom: clamp(56px, 9vw, 96px);
+}
+
+.roleList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.role {
+  display: flex;
+  gap: clamp(14px, 2.4vw, 24px);
+  padding: clamp(20px, 3vw, 28px) 0;
+  border-top: 1px solid var(--grid-strong);
+}
+
+.role:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+/* Older roles read lighter/denser: hierarchy by recency. */
+.roleDim {
+  opacity: 0.74;
+}
+
+.mark {
+  flex: 0 0 auto;
+  width: clamp(44px, 6vw, 56px);
+  height: clamp(44px, 6vw, 56px);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(20px, 2.6vw, 26px);
+  color: #fff;
+  user-select: none;
+}
+
+.roleBody {
+  min-width: 0;
+}
+
+.roleTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-bottom: 6px;
+}
+
+.roleName {
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 2.8vw, 26px);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.roleSub {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.rolePeriod {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.roleTitle {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.roleTagline {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--ink-secondary);
+  margin: 0 0 14px;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.highlights {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.highlight {
+  position: relative;
+  padding-left: 18px;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.highlight::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+}
+
+.techRow {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.tech {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  background: var(--paper-secondary);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.roleLink {
+  display: inline-block;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+
+.roleLink:hover {
+  text-decoration: underline;
+}
+
+/* --- 4. Skills / capabilities --- */
+.skillGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 40px);
+}
+
+.skillGroup {
+  min-width: 0;
+}
+
+.skillGroupLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+
+.pillRow {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.pill {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  background: var(--paper-secondary);
+  border: 1px solid var(--grid-strong);
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+}
+
+/* --- Mobile: full-screen sheet, single column --- */
+@media (max-width: 768px) {
+  .overlay {
+    animation: takeoverInMobile var(--duration-base) var(--ease-smooth);
+  }
+
+  .skillGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .rolePeriod {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+
+@keyframes takeoverInMobile {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

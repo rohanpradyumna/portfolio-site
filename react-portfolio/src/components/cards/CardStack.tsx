@@ -120,35 +120,20 @@ export function CardStack() {
 
   // Calculate card transforms for non-dragging states
   const getCardTransform = (stackPos: number, isTop: boolean) => {
-    if (shuffling === 'next' && isTop) {
-      return {
-        scale: 0.88,
-        rotate: 4,
-        opacity: 0.4,
-        yOffset: 5 * stackOffset,
-      };
-    }
-
-    if (shuffling === 'next' && !isTop) {
-      const newStackPos = Math.max(0, stackPos - 1);
-      return {
-        scale: 1 - newStackPos * 0.03,
-        rotate: 0,
-        opacity: newStackPos === 0 ? 1 : 0.95,
-        yOffset: newStackPos * stackOffset,
-      };
-    }
-
-    if (shuffling === 'prev' && isTop) {
+    // Both directions share the same quick "snap" feel: the top card gives a
+    // subtle directional tilt (no travel) while the cards behind settle one notch
+    // deeper, then the incoming card pops in on top. The rotate sign is the only
+    // difference between next (right) and prev (left).
+    if (shuffling && isTop) {
       return {
         scale: 1,
-        rotate: -2,
+        rotate: shuffling === 'next' ? 2 : -2,
         opacity: 1,
         yOffset: 0,
       };
     }
 
-    if (shuffling === 'prev' && !isTop) {
+    if (shuffling && !isTop) {
       const newStackPos = stackPos + 1;
       return {
         scale: 1 - newStackPos * 0.03,
@@ -195,9 +180,9 @@ export function CardStack() {
         <motion.div
           key={'shadow' + n}
           animate={{
-            y: shuffling === 'next' ? (n - 1) * stackOffset : n * stackOffset,
-            scale: shuffling === 'next' ? 1 - (n - 1) * 0.018 : 1 - n * 0.018,
-            rotate: shuffling === 'next' ? (n - 1) * 0.3 : n * 0.3,
+            y: n * stackOffset,
+            scale: 1 - n * 0.018,
+            rotate: n * 0.3,
           }}
           transition={cardSpring}
           style={{

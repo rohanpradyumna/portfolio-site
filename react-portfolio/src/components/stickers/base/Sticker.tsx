@@ -35,13 +35,13 @@ export interface StickerProps {
   scale?: number;
   /** Bounds the drag so the sticker can't be flung out of its container (mobile canvas). */
   dragConstraints?: React.RefObject<Element | null>;
-  /** Skip the 140px magnetic grid snap — the desktop grid feels wrong in a small canvas. */
+  /** Skip the 140px magnetic grid snap; the desktop grid feels wrong in a small canvas. */
   disableSnap?: boolean;
   /** Quiet mono chip naming what's inside; revealed on hover (real pointers only). */
   peekLabel?: string;
   /** One-shot "breathe" on first visit to invite exploration. */
   wake?: boolean;
-  /** Delay (ms) before this sticker's wake breathe fires — used to stagger the wave. */
+  /** Delay (ms) before this sticker's wake breathe fires; used to stagger the wave. */
   wakeDelay?: number;
 }
 
@@ -123,7 +123,7 @@ export function Sticker({
   // Reset the moved flag at the start of every interaction. Without this, the
   // flag set during a drag would persist (a plain tap never fires onDragStart),
   // so after moving a sticker the next click would be swallowed by handleTap's
-  // guard — the sticker would only open from its original, un-dragged position.
+  // guard, so the sticker would only open from its original, un-dragged position.
   const handlePointerDown = () => {
     hasMoved.current = false;
   };

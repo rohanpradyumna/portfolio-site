@@ -37,7 +37,7 @@
   }
 }
 
-/* Quiet "peek" chip naming what's inside a sticker — fades in above it on hover.
+/* Quiet "peek" chip naming what's inside a sticker; fades in above it on hover.
    Hidden by default; revealed only on real pointers (see media query below) so it
    never gets stuck visible after a tap on touch devices. */
 .peekLabel {

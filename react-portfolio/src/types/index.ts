@@ -114,12 +114,27 @@ export interface Project {
   subtitle?: string;
   tagline: string;
   color: string;
-  icon: string;
+  /** Legacy emoji (unused by ExperienceTakeover; kept optional for old components). */
+  icon?: string;
+  /** Typographic monogram rendered on the accent color (e.g. "YB", "In", "Fl"). */
+  monogram?: string;
   period: string;
   role: string;
   description: string;
   techStack: string[];
+  /** 2-3 concrete bullets describing what was done in the role. */
+  highlights?: string[];
+  link?: { label: string; href: string };
   rotation?: number;
+}
+
+// ============================================================================
+// SKILL TYPES
+// ============================================================================
+
+export interface SkillGroup {
+  label: string;
+  items: string[];
 }
 
 // ============================================================================

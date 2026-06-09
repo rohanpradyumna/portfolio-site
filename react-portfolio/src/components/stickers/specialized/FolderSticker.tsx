@@ -5,7 +5,7 @@ import { Sticker, StickerProps } from '../base/Sticker';
 import { useResponsive } from '@/hooks/useDimensions';
 
 interface FolderStickerProps extends Omit<StickerProps, 'children'> {
-  /** Number of writing pieces inside — surfaced as a notification-style count
+  /** Number of writing pieces inside, surfaced as a notification-style count
       badge so visitors can see at a glance there's more to read. */
   count?: number;
 }
@@ -66,7 +66,7 @@ export function FolderSticker({ count, ...props }: FolderStickerProps) {
           WRITING
         </div>
 
-        {/* Count badge — the "more to read" affordance. Mirrors the email
+        {/* Count badge: the "more to read" affordance. Mirrors the email
             sticker's accent circle so it reads as a notification badge. Sits
             outside the folder's top-right corner. */}
         {count != null && count > 0 && (

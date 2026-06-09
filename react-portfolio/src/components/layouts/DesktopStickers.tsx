@@ -268,13 +268,13 @@ export function DesktopStickers({
         onClick={handlers.openWriting}
         entranceDelay={950}
         count={writingCount}
-        title={writingCount ? `writing — ${writingCount} posts` : 'writing'}
+        title={writingCount ? `writing · ${writingCount} posts` : 'writing'}
         peekLabel={writingCount ? `${writingCount} reads inside →` : 'read my writing →'}
         wake={wake}
         wakeDelay={wakeDelayFor('folder')}
       />
 
-      {/* Easter Egg: Coffee Machine — tucked into the bottom-left corner */}
+      {/* Easter Egg: Coffee Machine, tucked into the bottom-left corner */}
       <CoffeeMachineSticker
         id="coffeeMachine"
         initial={{ x: 6, y: DESIGN_H - 180, rot: -3 }}

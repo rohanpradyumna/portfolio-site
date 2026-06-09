@@ -26,7 +26,9 @@ npx tsc --noEmit # typecheck (no test suite exists)
 
 There are **no automated tests**. Verification is done visually (often via the Playwright MCP browser tools) and with `tsc --noEmit`.
 
-The vanilla site needs no build — open `index.html` in a browser. Deploy is push-to-`main` → Vercel auto-deploy.
+The vanilla site needs no build — open `index.html` in a browser.
+
+Deploy: the vanilla root site is push-to-`main` → Vercel auto-deploy. **`react-portfolio/` is deployed manually**, from inside the directory: `vercel --prod --yes`, then alias the resulting deployment URL to the production domain with `vercel alias set <deployment-url> rohanpradyumna.vercel.app`. Do this only when explicitly asked.
 
 ## CRITICAL: This is not the Next.js you know
 
@@ -67,13 +69,21 @@ In `page.tsx`, the `{ positions, bbox }` `useMemo` is the layout brain: it place
 
 ### Stickers
 
-`src/components/stickers/base/Sticker.tsx` is the draggable base (framer-motion `motion.div`, `drag`, momentum, magnetic grid snap at `GRID_SIZE=140`, tap-vs-drag discrimination via a `hasMoved` ref, z-index bumped directly on the DOM node to avoid re-renders, Web Audio tap sound + haptics). Specialized stickers in `stickers/specialized/` wrap it (`ImageSticker`, `PhotoSticker`, `WordSticker`, plus interactive ones like `AirPodsSticker`→music, `CoffeeMachineSticker`→stoic quote, `LaptopSticker`→work modal, `FolderSticker`→`/blog.html`).
+`src/components/stickers/base/Sticker.tsx` is the draggable base (framer-motion `motion.div`, `drag`, momentum, magnetic grid snap at `GRID_SIZE=140`, tap-vs-drag discrimination via a `hasMoved` ref, z-index bumped directly on the DOM node to avoid re-renders, Web Audio tap sound + haptics). Specialized stickers in `stickers/specialized/` wrap it (`ImageSticker`, `PhotoSticker`, `WordSticker`, plus interactive ones like `AirPodsSticker`→music, `CoffeeMachineSticker`→stoic quote, `LaptopSticker`→experience takeover, `FolderSticker`→`/blog.html`).
+
+### The experience takeover
+
+The laptop sticker opens `src/components/experience/ExperienceTakeover.tsx`, a **full-screen** panel (not the shared `Modal`) rendered as a sibling of `<main>`, outside the Stage. It reimplements the `Modal` a11y contract (focus trap, Escape to close, body scroll lock) and composes three data sources: `data/now.ts` (current-focus hero), `data/projects.ts` (trajectory list), and `data/skills.ts` (grouped capabilities). It replaced the older `WorkCardStack` carousel.
 
 ### Data, hooks, content
 
-- Card stack copy lives in **`src/data/cards.ts`** (`CARDS`), not in `CardStack.tsx`. Projects in `data/projects.ts`, stoic quotes in `data/quotes.ts`.
+- Card stack copy lives in **`src/data/cards.ts`** (`CARDS`), not in `CardStack.tsx`. Projects in `data/projects.ts`, stoic quotes in `data/quotes.ts`, the experience takeover's current-focus hero in `data/now.ts` and grouped capabilities in `data/skills.ts`. Cards use `minHeight` (not a fixed height), so over-long copy grows a card past its box and pokes out behind shorter stacked cards: keep bullets to ~1-2 lines.
 - `src/hooks/useAudio.ts` — tap sounds (Web Audio) + the background song player (`/assets/believer.mp3`). `useDimensions.ts` — viewport tracking + `DESIGN_W/H` + `useResponsive`.
 - Easter eggs: typing `ai` opens an AI showcase modal (key listener in `page.tsx`); the coffee machine "brews" a random stoic quote; the lego brick counts clicks.
+
+## Writing / blog posts
+
+Posts are plain Markdown in `react-portfolio/public/posts/<slug>.md` with a YAML-ish frontmatter block (`title`, `slug`, `date`, `tags`, `excerpt`, `published`). To publish a new post: (1) add the `<slug>.md` file, and (2) add a matching entry to `public/posts/index.json` (the list `blog.html` reads). `post.html` renders a single post via marked.js; `next.config.ts` rewrites `/blog/:slug` → `/post.html`. The WRITING folder sticker's count badge is driven by a fetch of `index.json` in `page.tsx`, so the badge updates automatically when `index.json` grows.
 
 ## Design system
 
@@ -83,6 +93,7 @@ CSS custom properties live in `react-portfolio/src/styles/theme.css` / `globals.
 ## Conventions
 
 - Components touching `window`, framer-motion, or audio must be `'use client'`.
+- **Never use em dashes (—) in any user-facing copy, content, or comments.** Use a period, comma, colon, parentheses, or the middot separator (·) instead. This applies to card copy, modal text, project data, alt text, and prose everywhere. En dashes (–) in ranges should also be plain hyphens (-).
 - Comments: sparing, and only for genuinely complex logic (e.g. the Stage scaling/drag math). Keep them explanatory of the *why*; humor is on-brand but optional.
 - Path alias: `@/*` → `react-portfolio/src/*`.
 - Many stray `*.png` / `*.jpeg` screenshots in the repo root are throwaway visual-verification artifacts, not source.

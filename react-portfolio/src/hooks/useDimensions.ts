@@ -19,7 +19,7 @@ export function useDimensions(): Dimensions {
   // render agree (no hydration mismatch). Reading window here instead would make
   // the client's first render differ from the server markup; combined with the
   // Stage's suppressHydrationWarning, React would keep the stale server transform
-  // in the DOM and the post-mount update would be a no-op patch — leaving the
+  // in the DOM and the post-mount update would be a no-op patch, leaving the
   // board scaled for 1440x900 until the user happened to resize. Updating in the
   // effect below guarantees a real state change that forces React to repaint.
   const [dims, setDims] = useState<Dimensions>(DEFAULT_DIMS);

@@ -1,7 +1,7 @@
 @import './theme.css';
 
 /* Fonts (Fraunces / Inter / JetBrains Mono) are self-hosted via next/font in
-   layout.tsx — exposed as --font-fraunces / --font-inter / --font-jetbrains-mono
+   layout.tsx, exposed as --font-fraunces / --font-inter / --font-jetbrains-mono
    and wired into --font-serif/sans/mono in theme.css. No external font request. */
 
 /* ============================================================================

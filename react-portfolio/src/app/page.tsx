@@ -4,10 +4,10 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useResponsive, DESIGN_W, DESIGN_H } from '@/hooks/useDimensions';
 import { useSongAudio } from '@/hooks/useAudio';
 import { CardStack } from '@/components/cards';
-import { Modal, StoicWisdomModal, WorkCardStack, AIShowcaseModal } from '@/components/modals';
+import { Modal, StoicWisdomModal, AIShowcaseModal } from '@/components/modals';
+import { ExperienceTakeover } from '@/components/experience/ExperienceTakeover';
 import { EqBars } from '@/components/ui/EqBars';
 import { DesktopStickers, Stage, MobileDragCanvas } from '@/components/layouts';
-import { PROJECTS } from '@/data/projects';
 import { STOIC_QUOTES } from '@/data/quotes';
 import { StoicQuote } from '@/types';
 import { placeOrbital, resolveCluster, positionsToObject } from '@/utils/layoutEngine';
@@ -113,7 +113,7 @@ export default function Home() {
   const portraitW = isMobile ? 120 : s(210);
   const portraitH = isMobile ? 150 : s(315);
 
-  // Calculate orbital positions in the fixed design canvas. These are constant —
+  // Calculate orbital positions in the fixed design canvas. These are constant:
   // the Stage handles all viewport scaling, so positions never depend on dims.
   const { positions, bbox } = useMemo(() => {
     if (isMobile) return { positions: {}, bbox: null };
@@ -128,7 +128,7 @@ export default function Home() {
     // Gentle radial tightening: pull every orbital sticker slightly toward the
     // card so the cluster reads as one centered group rather than drifting to the
     // edges. resolveCluster keeps the card/coffee machine immovable (pad 12), so
-    // pulling in can never overlap the card — the nearest stickers just settle at
+    // pulling in can never overlap the card; the nearest stickers just settle at
     // card-edge + gap.
     const PULL = 0.88;
     const od = (dist: number) => d(Math.round(dist * PULL));
@@ -412,17 +412,17 @@ export default function Home() {
       <Modal open={modal === 'terrapin'} noAnimation={true} onClose={closeModal} title="go terps 🐢" color="#c8102e">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
           masters from the robert h. smith school of business. disruptive innovation, digital business transformation,
-          and machine learning — the stuff that got me building AI in d.c. fear the turtle.
+          and machine learning. the stuff that got me building AI in d.c. fear the turtle.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-          plenty of volleyball and good times in the startup shell — plus the wildest parties I could throw along the
+          plenty of volleyball and good times in the startup shell, plus the wildest parties I could throw along the
           way. I loved my professors, and I&apos;d run the whole course all over again given the chance.
         </div>
       </Modal>
 
       <Modal open={modal === 'charminar'} noAnimation={true} onClose={closeModal} title="hyderabad 🍛" color="#a8794a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
-          home. my heart lives here even when I don&apos;t. the city that never sleeps — and neither did I when I was
+          home. my heart lives here even when I don&apos;t. the city that never sleeps, and neither did I when I was
           there.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
@@ -438,7 +438,7 @@ export default function Home() {
           keep going back. they tell me stories.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.7)', marginBottom: 12 }}>
-          <b style={{ color: '#e85d3a' }}>annapolis, maryland</b> — been there 10+ times and counting. idk what it is,
+          <b style={{ color: '#e85d3a' }}>annapolis, maryland</b>: been there 10+ times and counting. idk what it is,
           but that place has me.
         </div>
         <div style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontStyle: 'italic' }}>
@@ -461,7 +461,7 @@ export default function Home() {
         color="#3a7d44"
       >
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
-          pickleball, tennis, badminton, TT — I play them all and I&apos;m weirdly decent at each? not pro level, but
+          pickleball, tennis, badminton, TT. I play them all and I&apos;m weirdly decent at each? not pro level, but
           I&apos;ll make you work for it.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>
@@ -472,7 +472,7 @@ export default function Home() {
 
       <Modal open={modal === 'camera'} noAnimation={true} onClose={closeModal} title="photo walks" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#f5f2e8' }}>
-          mostly street + architecture on a fuji x100v. not for the &apos;gram — just for me. there&apos;s something
+          mostly street + architecture on a fuji x100v. not for the &apos;gram, just for me. there&apos;s something
           about noticing that makes me a better PM too.
         </div>
       </Modal>
@@ -485,8 +485,8 @@ export default function Home() {
         color="#6b3a1f"
       >
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
-          yes, I&apos;m that guy who asks where the beans are from. black, or their specialty if I&apos;m feeling fancy
-          — but always strong.
+          yes, I&apos;m that guy who asks where the beans are from. black, or their specialty if I&apos;m feeling fancy,
+          but always strong.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, marginBottom: 10 }}>
           I drink based on the coffee belt: <b>Ethiopian · Colombian · Vietnamese · Indian · Peruvian</b>. Medium roast,
@@ -500,7 +500,7 @@ export default function Home() {
       <Modal open={modal === 'gym'} noAnimation={true} onClose={closeModal} title="fitness arc 💪" color="#2d6cdf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef' }}>
           currently in my &quot;get fit&quot; era. shipping products = sitting all day, so the gym is non-negotiable.
-          compound effect works here too — small reps, big gains. (that&apos;s the plan anyway)
+          compound effect works here too: small reps, big gains. (that&apos;s the plan anyway)
         </div>
       </Modal>
 
@@ -510,10 +510,8 @@ export default function Home() {
         </div>
       </Modal>
 
-      {/* My Work Modal */}
-      <Modal open={modal === 'work'} onClose={closeModal} title="my work" color="#1a1a1a" noAnimation={true}>
-        <WorkCardStack projects={PROJECTS} />
-      </Modal>
+      {/* My Experience: full-screen takeover (rendered outside the Stage) */}
+      <ExperienceTakeover open={modal === 'work'} onClose={closeModal} />
 
       {/* Stoic Wisdom Modal */}
       <StoicWisdomModal open={modal === 'stoic'} onClose={closeModal} quote={stoicQuote} />

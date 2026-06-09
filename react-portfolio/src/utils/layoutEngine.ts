@@ -243,7 +243,7 @@ export interface ClusterObstacle {
  *
  * Each overlapping pair is separated along its axis of least penetration (minimal
  * translation), so stickers slide apart the smallest distance needed rather than
- * being flung radially — this preserves the hand-placed arrangement. Immovable
+ * being flung radially. This preserves the hand-placed arrangement. Immovable
  * obstacles (the center card, the coffee machine) push stickers out but never move.
  * A weak per-iteration pull back toward home keeps drift small and the layout
  * recognisable. Operate on RENDER sizes for visual accuracy.

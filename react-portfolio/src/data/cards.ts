@@ -20,7 +20,7 @@ export const CARDS: Card[] = [
     kind: 'bullets',
     title: 'currently',
     items: [
-      'Building YottaBuilder — AI that handles the boring parts of dev',
+      'Building YottaBuilder, AI that handles the boring parts of dev',
       'Turning Yottaflex from dev shop into an actual AI company',
       'Living in DC, craving Hyderabad biryani at odd hours',
     ],
@@ -29,16 +29,26 @@ export const CARDS: Card[] = [
     kind: 'bullets',
     title: 'lore',
     items: [
-      'Founded Intripid — AI travel app, 15K users, Antler-backed',
-      "Built 'What's Next' — still convinced it's a billion dollar idea",
+      'Founded Intripid: AI travel app, 15K users, Antler-backed',
+      "Built 'What's Next', still convinced it's a billion dollar idea",
       'First startup job at Flock, learned to ship fast',
-      'Smith School at UMD — would redo the whole thing. Go Terps.',
+      'Smith School at UMD. would redo the whole thing. Go Terps.',
+    ],
+  },
+  {
+    kind: 'bullets',
+    title: 'making a difference',
+    items: [
+      'Ran national campaigns and a camp for kids in foster homes',
+      'Argued in the Hyderabad Youth Assembly, lobbied funds for girls and digital education',
+      'With Blood Warriors India, built donor chains for thalassemia kids',
+      'With COVID Warriors, got people oxygen, medicine, and hospital beds at the peak',
     ],
   },
   {
     kind: 'quote',
     body: '"Ship the ugly version first. You can fix it once it exists."',
-    foot: '— something I have to keep reminding myself',
+    foot: 'something I have to keep reminding myself',
   },
   {
     kind: 'bullets',
@@ -72,7 +82,7 @@ export const CARDS: Card[] = [
   {
     kind: 'cta',
     title: "let's talk",
-    body: 'Building with AI? Navigating immigrant founder logistics? Want to argue about coffee or stoicism? The stickers around here do things — poke around.',
+    body: 'Building with AI? Navigating immigrant founder logistics? Want to argue about coffee or stoicism? The stickers around here do things, so poke around.',
     foot: 'pradyumnarohan@gmail.com',
   },
 ];

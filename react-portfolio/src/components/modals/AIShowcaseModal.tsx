@@ -255,7 +255,7 @@ export function AIShowcaseModal({ open, onClose }: AIShowcaseModalProps) {
               lineHeight: 1.5,
             }}
           >
-            This entire portfolio — every component, animation, and interaction — was pair-programmed with Claude. The human wrote ~20% of the code.
+            This entire portfolio, every component, animation, and interaction, was pair-programmed with Claude. The human wrote ~20% of the code.
           </div>
         </motion.div>
 
