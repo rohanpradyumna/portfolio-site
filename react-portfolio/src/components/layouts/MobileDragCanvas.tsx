@@ -53,29 +53,31 @@ interface LayoutItem {
   y: number;
   w: number;
   h: number;
+  /** Static tilt in degrees so the canvas reads hand-placed, not grid-stamped. */
+  rot: number;
 }
 
 const LAYOUT: LayoutItem[] = [
-  { id: 'portrait', xFrac: 0.5, y: 0, w: 150, h: 226 },
-  { id: 'tagFounder', xFrac: 0.14, y: 250, w: 108, h: 40 },
-  { id: 'tagAI', xFrac: 0.58, y: 258, w: 150, h: 40 },
-  { id: 'linkedin', xFrac: 0.16, y: 322, w: 88, h: 88 },
-  { id: 'email', xFrac: 0.62, y: 330, w: 100, h: 74 },
-  { id: 'charminar', xFrac: 0.08, y: 430, w: 104, h: 104 },
-  { id: 'plane', xFrac: 0.9, y: 470, w: 92, h: 92 },
-  { id: 'laptop', xFrac: 0.18, y: 560, w: 100, h: 96 },
-  { id: 'folder', xFrac: 0.6, y: 552, w: 100, h: 86 },
-  { id: 'airpods', xFrac: 0.1, y: 672, w: 90, h: 100 },
-  { id: 'beach', xFrac: 0.46, y: 680, w: 92, h: 92 },
-  { id: 'camera', xFrac: 0.84, y: 668, w: 96, h: 80 },
-  { id: 'coffee', xFrac: 0.12, y: 788, w: 84, h: 84 },
-  { id: 'gym', xFrac: 0.42, y: 796, w: 88, h: 88 },
-  { id: 'pickleball', xFrac: 0.74, y: 784, w: 90, h: 94 },
-  { id: 'terrapin', xFrac: 0.5, y: 892, w: 96, h: 96 },
-  { id: 'coffeeMachine', xFrac: 0.5, y: 980, w: 100, h: 130 },
+  { id: 'portrait', xFrac: 0.5, y: 0, w: 150, h: 226, rot: -2 },
+  { id: 'tagFounder', xFrac: 0.14, y: 250, w: 108, h: 40, rot: -3 },
+  { id: 'tagAI', xFrac: 0.58, y: 258, w: 150, h: 40, rot: 2 },
+  { id: 'linkedin', xFrac: 0.16, y: 322, w: 88, h: 88, rot: -4 },
+  { id: 'email', xFrac: 0.62, y: 330, w: 100, h: 74, rot: 3 },
+  { id: 'charminar', xFrac: 0.08, y: 430, w: 104, h: 104, rot: -3 },
+  { id: 'plane', xFrac: 0.9, y: 470, w: 92, h: 92, rot: 6 },
+  { id: 'laptop', xFrac: 0.18, y: 560, w: 100, h: 96, rot: -2 },
+  { id: 'folder', xFrac: 0.6, y: 552, w: 100, h: 86, rot: 3 },
+  { id: 'airpods', xFrac: 0.1, y: 672, w: 90, h: 100, rot: -5 },
+  { id: 'beach', xFrac: 0.46, y: 680, w: 92, h: 92, rot: 4 },
+  { id: 'camera', xFrac: 0.84, y: 668, w: 96, h: 80, rot: -3 },
+  { id: 'coffee', xFrac: 0.12, y: 788, w: 84, h: 84, rot: 5 },
+  { id: 'gym', xFrac: 0.42, y: 796, w: 88, h: 88, rot: -4 },
+  { id: 'pickleball', xFrac: 0.74, y: 784, w: 90, h: 94, rot: 6 },
+  { id: 'terrapin', xFrac: 0.5, y: 892, w: 96, h: 96, rot: -3 },
+  { id: 'coffeeMachine', xFrac: 0.5, y: 1030, w: 100, h: 130, rot: 2 },
 ];
 
-const CANVAS_MIN_HEIGHT = 1180;
+const CANVAS_MIN_HEIGHT = 1210;
 
 export function MobileDragCanvas({ wake = false, writingCount, handlers }: MobileDragCanvasProps) {
   const { dims } = useResponsive();
@@ -88,7 +90,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
   const pos = (item: LayoutItem) => ({
     x: Math.round(item.xFrac * (canvasW - item.w)),
     y: item.y,
-    rot: 0,
+    rot: item.rot,
   });
 
   // Entrance stagger keyed to vertical order, suppressed under reduced motion.
@@ -97,7 +99,19 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
   const wakeDelayFor = (id: string) => WAKE_BASE + Math.max(0, order.indexOf(id)) * WAKE_STAGGER;
 
   return (
-    <div style={{ position: 'relative', width: '100%', padding: '0 16px 72px' }}>
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        // Top padding clears the card stack's layered shadows so the portrait
+        // never floats over the card; bottom padding clears the fixed hint bar
+        // and CTA pill at full scroll.
+        padding: '32px 16px 150px',
+        // Contain every sticker z-index (including the 9999 drag bump) so
+        // dragged stickers never paint over the fixed header, hint, or modals.
+        isolation: 'isolate',
+      }}
+    >
       {/* Keyed by canvasW: the base Sticker captures its `initial` position only
           once (useMotionValue), so when the viewport width changes (including the
           SSR-default 1440 → real-width correction on first mount) we remount the
