@@ -21,6 +21,25 @@ export const PROJECTS: Project[] = [
     rotation: -2,
   },
   {
+    id: 'nsp',
+    name: 'NSP Systems',
+    monogram: 'NS',
+    subtitle: '',
+    tagline: 'Making Fortune 500 chatbots actually work',
+    color: '#8e5ba6',
+    period: 'CONSULTING · 2023-2024',
+    role: 'AI Consultant',
+    description:
+      'Consulted on Fortune 500 conversational AI programs: RLHF strategy, evals, and governance for voicebots and IVRs, plus AI-native POCs that grew into production-scale projects.',
+    highlights: [
+      'Shaped the RLHF strategy that made a telecom client\u2019s voicebots and IVRs land better with their users',
+      'Built eval frameworks and governance so chatbot quality was measured, not guessed',
+      'Delivered AI-native POCs that were later scaled into production projects',
+    ],
+    techStack: ['RLHF', 'Conversational AI', 'Evals', 'AI governance'],
+    rotation: 1,
+  },
+  {
     id: 'intripid',
     name: 'Intripid',
     monogram: 'In',
