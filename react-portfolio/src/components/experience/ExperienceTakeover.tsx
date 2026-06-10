@@ -146,6 +146,27 @@ export function ExperienceTakeover({ open, onClose }: ExperienceTakeoverProps) {
               ))}
             </div>
           </section>
+
+          {/* 5. CTA: the deepest engagement point should end with a next step */}
+          <section className={`${styles.section} ${styles.ctaSection}`} style={{ '--i': 4 } as React.CSSProperties}>
+            <h2 className={styles.groupLabel}>work with me</h2>
+            <p className={styles.ctaText}>
+              Building an AI product? Need someone who turns messy requirements into shipped code? Let&apos;s talk.
+            </p>
+            <div className={styles.ctaRow}>
+              <a href="mailto:pradyumnarohan@gmail.com" className={styles.ctaPrimary}>
+                email me →
+              </a>
+              <a
+                href="https://www.linkedin.com/in/rohanpradyumna/"
+                target="_blank"
+                rel="noreferrer"
+                className={styles.ctaSecondary}
+              >
+                connect on linkedin
+              </a>
+            </div>
+          </section>
         </div>
       </div>
     </div>

@@ -1,0 +1,58 @@
+.pill {
+  position: fixed;
+  bottom: 40px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(40, 30, 10, 0.25);
+  animation: pillIn var(--duration-slow) var(--ease-smooth) backwards;
+  transition: transform var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth);
+}
+
+.pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(40, 30, 10, 0.3);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+}
+
+.arrow {
+  color: var(--accent-orange);
+}
+
+@keyframes pillIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile: the hint bar is centered at the very bottom, so lift the pill clear
+   of it and respect the home-indicator safe area. */
+@media (max-width: 768px) {
+  .pill {
+    bottom: calc(52px + env(safe-area-inset-bottom));
+    right: max(12px, env(safe-area-inset-right));
+  }
+}

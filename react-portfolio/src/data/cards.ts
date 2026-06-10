@@ -82,7 +82,7 @@ export const CARDS: Card[] = [
   {
     kind: 'cta',
     title: "let's talk",
-    body: 'Building with AI? Navigating immigrant founder logistics? Want to argue about coffee or stoicism? The stickers around here do things, so poke around.',
+    body: 'Building with AI and need someone who ships? Navigating immigrant founder logistics? Want to argue about coffee or stoicism? My inbox is open, and I actually reply.',
     foot: 'pradyumnarohan@gmail.com',
   },
 ];

@@ -7,6 +7,7 @@ import { CardStack } from '@/components/cards';
 import { Modal, StoicWisdomModal, AIShowcaseModal } from '@/components/modals';
 import { ExperienceTakeover } from '@/components/experience/ExperienceTakeover';
 import { EqBars } from '@/components/ui/EqBars';
+import { FixedCTA } from '@/components/ui/FixedCTA';
 import { DesktopStickers, Stage, MobileDragCanvas } from '@/components/layouts';
 import { STOIC_QUOTES } from '@/data/quotes';
 import { StoicQuote } from '@/types';
@@ -288,6 +289,9 @@ export default function Home() {
 
       {/* Hint */}
       <div className="hint">drag stickers · tap to interact · swipe cards</div>
+
+      {/* Persistent contact pill (appears after a short delay, outside the Stage) */}
+      <FixedCTA />
 
       {/* Main content */}
       <main suppressHydrationWarning>
