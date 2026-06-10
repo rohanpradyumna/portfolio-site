@@ -162,6 +162,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
         />
         <WordSticker
           id="tag-ai-m"
@@ -177,6 +178,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
         />
 
         <ImageSticker
@@ -190,6 +192,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('linkedin')}
         />
@@ -202,6 +205,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('email')}
         />
@@ -217,6 +221,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('charminar')}
         />
@@ -231,6 +236,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('plane')}
         />
@@ -244,6 +250,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('laptop')}
         />
@@ -258,6 +265,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('folder')}
         />
@@ -271,6 +279,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('airpods')}
         />
@@ -285,6 +294,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('beach')}
         />
@@ -297,6 +307,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('camera')}
         />
@@ -312,6 +323,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('coffee')}
         />
@@ -326,6 +338,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('gym')}
         />
@@ -338,6 +351,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('pickleball')}
         />
@@ -352,6 +366,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('terrapin')}
         />
@@ -384,6 +399,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           dragConstraints={canvasRef}
           disableSnap
           allowPageScroll
+          snapBackHome
         />
       </div>
     </div>

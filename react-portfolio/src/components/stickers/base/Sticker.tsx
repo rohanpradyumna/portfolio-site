@@ -38,8 +38,10 @@ export interface StickerProps {
   /** Let vertical swipes scroll the page (touch-action: pan-y) instead of dragging the
       sticker; without this, a scroll gesture that starts on a sticker hijacks the page. */
   allowPageScroll?: boolean;
-  /** Spring back to the home position after a drag; keeps oversized stickers (the mobile
-      portrait) from being parked on top of their neighbors. */
+  /** Spring back to the home position after a drag and disable fling momentum. Used by
+      every mobile sticker: a scroll swipe that brushes a sticker fires pointercancel,
+      which framer treats as a drag end WITH the swipe's velocity, so without this the
+      sticker gets flung across the canvas and parked on top of its neighbors. */
   snapBackHome?: boolean;
   /** Quiet mono chip naming what's inside; revealed on hover (real pointers only). */
   peekLabel?: string;
