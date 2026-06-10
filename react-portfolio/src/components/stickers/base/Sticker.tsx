@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import { motion, PanInfo, useMotionValue, animate } from 'framer-motion';
 import { useAudio } from '@/hooks/useAudio';
 import { Position } from '@/types';
@@ -35,6 +35,12 @@ export interface StickerProps {
   dragConstraints?: React.RefObject<Element | null>;
   /** Skip the 140px magnetic grid snap; the desktop grid feels wrong in a small canvas. */
   disableSnap?: boolean;
+  /** Let vertical swipes scroll the page (touch-action: pan-y) instead of dragging the
+      sticker; without this, a scroll gesture that starts on a sticker hijacks the page. */
+  allowPageScroll?: boolean;
+  /** Spring back to the home position after a drag; keeps oversized stickers (the mobile
+      portrait) from being parked on top of their neighbors. */
+  snapBackHome?: boolean;
   /** Quiet mono chip naming what's inside; revealed on hover (real pointers only). */
   peekLabel?: string;
   /** One-shot "breathe" on first visit to invite exploration. */
@@ -57,6 +63,8 @@ export function Sticker({
   entranceDelay = 0,
   dragConstraints,
   disableSnap = false,
+  allowPageScroll = false,
+  snapBackHome = false,
   peekLabel,
   wake = false,
   wakeDelay = 0,
@@ -71,6 +79,16 @@ export function Sticker({
   const y = useMotionValue(initial.y);
 
   const { playTapSound, triggerHaptic } = useAudio();
+
+  // framer-motion force-sets touch-action: none on drag-enabled elements,
+  // overriding the style prop, so re-apply pan-y on the DOM node after every
+  // render. With pan-y the browser owns vertical pans (page scroll fires
+  // pointercancel and aborts the drag) while horizontal drags still work.
+  useLayoutEffect(() => {
+    if (allowPageScroll && elementRef.current) {
+      elementRef.current.style.touchAction = 'pan-y';
+    }
+  });
 
   const handleDragStart = () => {
     playTapSound();
@@ -92,6 +110,13 @@ export function Sticker({
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, _info: PanInfo) => {
     if (hasMoved.current) {
       zIndexRef.current = zBase + 10;
+
+      // Spring home after a drag. dragSnapToOrigin won't do: it animates the
+      // motion values to 0, not to the seeded `initial` position.
+      if (snapBackHome) {
+        animate(x, initial.x, { type: 'spring', stiffness: 280, damping: 26 });
+        animate(y, initial.y, { type: 'spring', stiffness: 280, damping: 26 });
+      }
 
       // Check for magnetic snap after momentum settles (skipped on mobile canvas
       // where the 140px desktop grid would feel wrong in a ~360px space).
@@ -160,12 +185,12 @@ export function Sticker({
         rotate: initial.rot || 0,
         zIndex: zBase,
         cursor: 'grab',
-        touchAction: 'none',
+        touchAction: allowPageScroll ? 'pan-y' : 'none',
         ...style,
       }}
       drag
       dragConstraints={dragConstraints}
-      dragMomentum={true}
+      dragMomentum={!snapBackHome}
       dragElastic={0.12}
       dragTransition={{
         power: 0.15,

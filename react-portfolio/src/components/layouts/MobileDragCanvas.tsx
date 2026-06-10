@@ -123,8 +123,10 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           position: 'relative',
           width: '100%',
           minHeight: CANVAS_MIN_HEIGHT,
-          // Let the page scroll vertically; each sticker (touchAction:none) still
-          // drags freely in any direction.
+          // Let the page scroll vertically. Stickers use allowPageScroll
+          // (touch-action: pan-y) so a vertical swipe that starts on a sticker
+          // scrolls the page instead of dragging the sticker; horizontal drags
+          // still work.
           touchAction: 'pan-y',
         }}
       >
@@ -140,6 +142,8 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('portrait')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
+          snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('portrait')}
         />
@@ -157,6 +161,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('tagFounder')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
         />
         <WordSticker
           id="tag-ai-m"
@@ -171,6 +176,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('tagAI')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
         />
 
         <ImageSticker
@@ -183,6 +189,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('linkedin')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('linkedin')}
         />
@@ -194,6 +201,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('email')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('email')}
         />
@@ -208,6 +216,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('charminar')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('charminar')}
         />
@@ -221,6 +230,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('plane')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('plane')}
         />
@@ -233,6 +243,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('laptop')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('laptop')}
         />
@@ -246,6 +257,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           title={writingCount ? `writing · ${writingCount} posts` : 'writing'}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('folder')}
         />
@@ -258,6 +270,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('airpods')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('airpods')}
         />
@@ -271,6 +284,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('beach')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('beach')}
         />
@@ -282,6 +296,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('camera')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('camera')}
         />
@@ -296,6 +311,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('coffee')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('coffee')}
         />
@@ -309,6 +325,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('gym')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('gym')}
         />
@@ -320,6 +337,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('pickleball')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('pickleball')}
         />
@@ -333,6 +351,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('terrapin')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
           wake={wake}
           wakeDelay={wakeDelayFor('terrapin')}
         />
@@ -364,6 +383,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           entranceDelay={delayFor('coffeeMachine')}
           dragConstraints={canvasRef}
           disableSnap
+          allowPageScroll
         />
       </div>
     </div>
