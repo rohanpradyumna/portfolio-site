@@ -17,8 +17,6 @@ const findSnapPoint = (value: number): number | null => {
   return distance <= SNAP_THRESHOLD ? nearestGrid : null;
 };
 
-// Simple hover animation - no jumping or complex movements
-const simpleHoverAnimation = { scale: 1.05 };
 
 export interface StickerProps {
   id: string;
@@ -173,7 +171,7 @@ export function Sticker({
         power: 0.15,
         timeConstant: 250,
       }}
-      whileHover={simpleHoverAnimation}
+      whileHover={{ scale: 1.05, rotate: (initial.rot || 0) + 1.5 }}
       whileDrag={{ scale: 1.08, cursor: 'grabbing' }}
       whileTap={{ scale: 1.08 }}
       onPointerDown={handlePointerDown}

@@ -32,7 +32,10 @@ export function PhotoSticker({
             width: w,
             height: h,
             objectFit: 'contain',
-            filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.25))',
+            // Chained white drop-shadows trace the cutout's alpha edge, giving
+            // the photo the same die-cut border the illustrated stickers have.
+            filter:
+              'drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 12px rgba(40,30,10,0.25))',
             pointerEvents: 'none',
           }}
         />

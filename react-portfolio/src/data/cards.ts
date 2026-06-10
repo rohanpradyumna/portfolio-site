@@ -42,7 +42,6 @@ export const CARDS: Card[] = [
       'Ran national campaigns and a camp for kids in foster homes',
       'Argued in the Hyderabad Youth Assembly, lobbied funds for girls and digital education',
       'With Blood Warriors India, built donor chains for thalassemia kids',
-      'With COVID Warriors, got people oxygen, medicine, and hospital beds at the peak',
     ],
   },
   {

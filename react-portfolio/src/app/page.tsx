@@ -304,8 +304,24 @@ export default function Home() {
                 padding: '0 24px',
                 textAlign: 'center',
                 fontFamily: "'Geist Mono', monospace",
+                // The fixed .board background paints above plain in-flow text;
+                // a positioned stacking context keeps the hero visible.
+                position: 'relative',
+                zIndex: 1,
               }}
             >
+              <div
+                style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontStyle: 'italic',
+                  fontSize: 32,
+                  lineHeight: 1.1,
+                  color: 'var(--ink)',
+                  marginBottom: 8,
+                }}
+              >
+                Rohan Pradyumna
+              </div>
               <div
                 style={{
                   fontSize: 12,
