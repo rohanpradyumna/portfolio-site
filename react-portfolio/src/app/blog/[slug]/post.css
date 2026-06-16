@@ -61,6 +61,13 @@
 .postCorner a { color: var(--ink-secondary); text-decoration: none; transition: color 0.2s; }
 .postCorner a:hover { color: var(--accent-orange); }
 
+.postScroll {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  z-index: 1;
+}
+
 .postContentWrap {
   position: relative;
   max-width: 680px;

@@ -74,6 +74,7 @@ export default async function BlogPostPage({
         <a href="/blog.html">all posts</a>
       </div>
 
+      <div className="postScroll">
       <article className="postContentWrap">
         <a href="/blog.html" className="backLink">
           back to all posts
@@ -101,6 +102,7 @@ export default async function BlogPostPage({
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </article>
+      </div>
     </>
   );
 }
