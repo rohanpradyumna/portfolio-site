@@ -1,38 +1,26 @@
-# rohan-pradyumna.vercel.app
+# rohanpradyumna.vercel.app
 
-An interactive sticker-board portfolio inspired by [hey.milo.gg](https://hey.milo.gg).
+An interactive sticker-board portfolio. Drag stickers around, swipe through cards, tap things to hear sounds, read the blog.
 
-**Live:** https://rohan-pradyumna.vercel.app
-
-## What is this?
-
-A single-page portfolio that feels like a messy desk. Drag stickers around, swipe through cards, tap things to hear sounds. Built with vanilla React (no build step) and deployed on Vercel.
-
-## Features
-
-- **Swipeable card stack** — Drag to dismiss or use arrow keys
-- **Draggable stickers** — Each opens a modal with more info
-- **Orbital layout** — Stickers cluster around the center card
-- **Tap sounds** — Web Audio API for tactile feedback
-- **Paper texture** — Warm grid background with vignette
-- **Staggered animations** — Pop-in entrance for stickers
-- **Fully responsive** — Repositions on window resize
+**Live:** https://rohanpradyumna.vercel.app
 
 ## Stack
 
-- React 18 (via CDN + Babel)
-- No bundler, no dependencies
-- Vercel for hosting
-- GitHub for version control + auto-deploy
+- Next.js 16 (Turbopack) + React 19 + TypeScript
+- framer-motion for drag and animation
+- Markdown blog with native `/blog/[slug]` route + per-post share cards
+- Deployed on Vercel
 
 ## Local dev
 
-Just open `index.html` in a browser. That's it.
+```bash
+cd react-portfolio
+npm install
+npm run dev
+```
+
+The app lives entirely inside `react-portfolio/`. See `CLAUDE.md` for architecture notes.
 
 ## Deploy
 
-Push to `main` and Vercel auto-deploys.
-
----
-
-Built with [Claude Code](https://claude.ai/code)
+From `react-portfolio/`: `vercel --prod --yes`.
