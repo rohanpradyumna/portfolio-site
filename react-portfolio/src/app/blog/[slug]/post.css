@@ -1,0 +1,199 @@
+/* Blog post reading page. Ported from the vanilla public/post.html so the React
+   route renders identically, but wired to the shared theme tokens in theme.css. */
+
+.postBoard {
+  position: fixed;
+  inset: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 40%, #fffbef 0%, #faf5e4 55%, #f2e9cf 100%);
+  background-size: 28px 28px, 28px 28px, 140px 140px, 140px 140px, 100% 100%;
+  z-index: -1;
+}
+
+.postBrand {
+  position: fixed;
+  top: 24px;
+  left: 28px;
+  z-index: 1000;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.postBrand a { text-decoration: none; color: inherit; }
+.postBrand .name {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.postBrand .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+  align-self: center;
+}
+.postBrand .sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.postCorner {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  z-index: 1000;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.postCorner a { color: var(--ink-secondary); text-decoration: none; transition: color 0.2s; }
+.postCorner a:hover { color: var(--accent-orange); }
+
+.postContentWrap {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 120px 24px 80px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  margin-bottom: 32px;
+  transition: color 0.2s;
+}
+.backLink:hover { color: var(--accent-orange); }
+.backLink::before { content: "<-"; }
+
+.postHeader { margin-bottom: 40px; }
+
+.postTags { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.postTag {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.postTag.ai { background: var(--accent-orange-soft); color: var(--accent-orange); }
+.postTag.startups { background: var(--accent-blue-soft); color: var(--accent-blue); }
+.postTag.philosophy { background: rgba(74, 139, 84, 0.15); color: var(--accent-green); }
+.postTag.life { background: rgba(230, 179, 42, 0.25); color: #9a7a0a; }
+
+.postTitle {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.postMeta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  letter-spacing: 0.02em;
+}
+
+.postBody {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.postBody p { margin-bottom: 1.5em; }
+.postBody h2 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+.postBody h3 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+.postBody strong { font-weight: 600; color: var(--ink); }
+.postBody em { font-style: italic; }
+.postBody a {
+  color: var(--accent-orange);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+.postBody a:hover { color: var(--accent-blue); }
+.postBody ul, .postBody ol { margin-bottom: 1.5em; padding-left: 1.5em; }
+.postBody li { margin-bottom: 0.5em; }
+.postBody li::marker { color: var(--accent-orange); }
+.postBody blockquote {
+  border-left: 4px solid var(--accent-orange);
+  padding-left: 20px;
+  margin: 1.5em 0;
+  font-style: italic;
+  color: var(--ink-secondary);
+}
+.postBody blockquote p { margin-bottom: 0; }
+.postBody code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.postBody pre {
+  background: var(--card-bg);
+  color: var(--card-ink);
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin: 1.5em 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.postBody pre code { background: none; padding: 0; font-size: inherit; }
+.postBody hr { border: none; height: 1px; background: var(--grid-strong); margin: 2.5em 0; }
+.postBody img { max-width: 100%; border-radius: 8px; margin: 1.5em 0; }
+
+@media (max-width: 768px) {
+  .postBrand { top: 16px; left: 16px; gap: 6px; }
+  .postBrand .name { font-size: 26px; }
+  .postBrand .dot { width: 5px; height: 5px; }
+  .postBrand .sub { display: none; }
+  .postCorner { top: 16px; right: 16px; font-size: 10px; }
+  .postContentWrap { padding: 90px 16px 60px; }
+  .postTitle { font-size: 32px; }
+  .postBody { font-size: 16px; }
+  .postBody h2 { font-size: 24px; }
+  .postBody h3 { font-size: 20px; }
+  .postBody pre { padding: 16px; font-size: 13px; border-radius: 8px; }
+}
+
+@media (max-width: 380px) {
+  .postBrand .name { font-size: 22px; }
+  .postTitle { font-size: 28px; }
+}

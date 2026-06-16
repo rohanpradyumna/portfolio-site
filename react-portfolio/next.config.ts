@@ -1,14 +1,7 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/blog/:slug',
-        destination: '/post.html',
-      },
-    ];
-  },
-};
+// /blog/:slug is now served by the native app route at src/app/blog/[slug]/,
+// which gives crawlers real per-post metadata and a generated share card.
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
