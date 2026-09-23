@@ -23,7 +23,7 @@ npx tsc --noEmit # typecheck (no test suite exists)
 
 There are **no automated tests**. Verification is done visually (often via the Playwright MCP browser tools) and with `tsc --noEmit`.
 
-Deploy is manual from inside `react-portfolio/`: `vercel --prod --yes`. Do this only when explicitly asked.
+Deploy is manual, run from the **repo root** (not `react-portfolio/`): `vercel --prod --yes`. The linked Vercel project's Root Directory setting is `react-portfolio`, so invoking the CLI from inside that folder doubles the path and fails ("...react-portfolio/react-portfolio does not exist"). The `.vercel` project link lives at the repo root for this reason. Do this only when explicitly asked.
 
 ## CRITICAL: This is not the Next.js you know
 
