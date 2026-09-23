@@ -117,6 +117,87 @@ export function useAudio() {
     osc.stop(now + 2);
   }, []);
 
+  // Wheel spin: a low whoosh that decays over the spin animation's duration.
+  const playSpinSound = useCallback((duration: number = 3) => {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    const bufferSize = ctx.sampleRate * duration;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1800, now);
+    filter.frequency.exponentialRampToValueAtTime(300, now + duration);
+    filter.Q.value = 0.9;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+    noise.connect(filter).connect(gain).connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + duration);
+  }, []);
+
+  // Wheel tick: a short click, called once per wedge boundary the wheel
+  // crosses while spinning so ticks naturally decelerate with the rotation.
+  const playTickSound = useCallback(() => {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    const bufferSize = ctx.sampleRate * 0.02;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const envelope = Math.exp(-i / (bufferSize * 0.1));
+      data[i] = (Math.random() * 2 - 1) * envelope;
+    }
+
+    const click = ctx.createBufferSource();
+    click.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 3000;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.25;
+
+    click.connect(filter).connect(gain).connect(ctx.destination);
+    click.start(now);
+  }, []);
+
+  // Wheel reveal chime: a short bright two-note rise once the wheel settles.
+  const playRevealChime = useCallback(() => {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    [660, 990].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      const start = now + i * 0.09;
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.exponentialRampToValueAtTime(0.16, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.32);
+    });
+  }, []);
+
   // Haptic feedback (mobile)
   const triggerHaptic = useCallback((duration: number = 10) => {
     if (navigator.vibrate) {
@@ -139,6 +220,9 @@ export function useAudio() {
     playShuffleSound,
     playOpenSound,
     playBrewSound,
+    playSpinSound,
+    playTickSound,
+    playRevealChime,
     triggerHaptic,
   };
 }

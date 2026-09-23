@@ -5,6 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
+      disallow: '/wheel/admin',
     },
     sitemap: 'https://rohanpradyumna.vercel.app/sitemap.xml',
   };

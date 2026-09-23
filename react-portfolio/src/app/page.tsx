@@ -154,6 +154,7 @@ export default function Home() {
       { id: 'gym', ...placeOrbital(300, od(115), s(96), s(96), 0, config) },
       { id: 'laptop', ...placeOrbital(-58, od(150), s(100), s(90), 0, config) },
       { id: 'folder', ...placeOrbital(122, od(160), s(100), s(80), 0, config) },
+      { id: 'wheel', ...placeOrbital(-78, od(190), s(96), s(120), 0, config) },
     ];
 
     // True on-screen sizes per sticker (some components render a different size
@@ -175,6 +176,7 @@ export default function Home() {
       gym: [s(96), s(96)],
       laptop: [s(100), s(90)],
       folder: [s(100), s(80)],
+      wheel: [s(96), s(120)],
     };
 
     // Immovable obstacles: the center card and the bottom-left coffee machine
@@ -245,6 +247,7 @@ export default function Home() {
       terrapinFact: () => setModal('terrapin'),
       openWork: () => setModal('work'),
       openWriting: () => (window.location.href = '/blog.html'),
+      openWheel: () => (window.location.href = '/wheel'),
       brewCoffee: () => {
         const randomQuote = STOIC_QUOTES[Math.floor(Math.random() * STOIC_QUOTES.length)];
         setStoicQuote(randomQuote);

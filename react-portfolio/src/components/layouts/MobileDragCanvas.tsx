@@ -14,6 +14,7 @@ import {
   PickleballSticker,
   FolderSticker,
   CoffeeMachineSticker,
+  WheelSticker,
 } from '@/components/stickers';
 
 // First-visit wake-up wave timing (mirrors DesktopStickers). On touch this is the
@@ -39,6 +40,7 @@ interface MobileDragCanvasProps {
     terrapinFact: () => void;
     openWork: () => void;
     openWriting: () => void;
+    openWheel: () => void;
     brewCoffee: () => void;
   };
 }
@@ -74,10 +76,11 @@ const LAYOUT: LayoutItem[] = [
   { id: 'gym', xFrac: 0.42, y: 796, w: 88, h: 88, rot: -4 },
   { id: 'pickleball', xFrac: 0.74, y: 784, w: 90, h: 94, rot: 6 },
   { id: 'terrapin', xFrac: 0.5, y: 892, w: 96, h: 96, rot: -3 },
-  { id: 'coffeeMachine', xFrac: 0.5, y: 1030, w: 100, h: 130, rot: 2 },
+  { id: 'wheel', xFrac: 0.5, y: 1010, w: 96, h: 120, rot: -2 },
+  { id: 'coffeeMachine', xFrac: 0.5, y: 1160, w: 100, h: 130, rot: 2 },
 ];
 
-const CANVAS_MIN_HEIGHT = 1210;
+const CANVAS_MIN_HEIGHT = 1340;
 
 export function MobileDragCanvas({ wake = false, writingCount, handlers }: MobileDragCanvasProps) {
   const { dims } = useResponsive();
@@ -371,11 +374,25 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           wakeDelay={wakeDelayFor('terrapin')}
         />
 
+        <WheelSticker
+          id="wheel-m"
+          initial={pos(LAYOUT[16])}
+          zBase={7}
+          onClick={handlers.openWheel}
+          entranceDelay={delayFor('wheel')}
+          dragConstraints={canvasRef}
+          disableSnap
+          allowPageScroll
+          snapBackHome
+          wake={wake}
+          wakeDelay={wakeDelayFor('wheel')}
+        />
+
         {/* Easter egg label + coffee machine, tucked at the bottom of the canvas */}
         <div
           style={{
             position: 'absolute',
-            top: LAYOUT[16].y - 26,
+            top: LAYOUT[17].y - 26,
             left: 0,
             width: '100%',
             textAlign: 'center',
@@ -392,7 +409,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
         </div>
         <CoffeeMachineSticker
           id="coffeeMachine-m"
-          initial={pos(LAYOUT[16])}
+          initial={pos(LAYOUT[17])}
           zBase={6}
           onBrew={handlers.brewCoffee}
           entranceDelay={delayFor('coffeeMachine')}

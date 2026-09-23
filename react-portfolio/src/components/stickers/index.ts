@@ -22,3 +22,4 @@ export { PickleballSticker } from './specialized/PickleballSticker';
 export { FolderSticker } from './specialized/FolderSticker';
 export { CoffeeMachineSticker } from './specialized/CoffeeMachineSticker';
 export type { CoffeeMachineStickerProps } from './specialized/CoffeeMachineSticker';
+export { WheelSticker } from './specialized/WheelSticker';

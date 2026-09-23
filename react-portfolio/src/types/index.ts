@@ -176,6 +176,43 @@ export interface StoicQuote {
 }
 
 // ============================================================================
+// WHEEL TYPES
+// ============================================================================
+
+export interface WheelTopic {
+  id: string;
+  text: string;
+}
+
+export interface WheelCategory {
+  id: string;
+  label: string;
+  color: string;
+  topics: WheelTopic[];
+}
+
+export interface WheelTopicFlat extends WheelTopic {
+  categoryId: string;
+  categoryLabel: string;
+  categoryColor: string;
+}
+
+export type WheelSubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+export interface WheelSubmission {
+  id: number;
+  topicId: string;
+  category: string;
+  topicText: string;
+  authorName: string | null;
+  isAnonymous: boolean;
+  body: string;
+  status: WheelSubmissionStatus;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+// ============================================================================
 // LAYOUT TYPES
 // ============================================================================
 

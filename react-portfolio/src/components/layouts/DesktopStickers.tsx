@@ -14,6 +14,7 @@ import {
   PickleballSticker,
   FolderSticker,
   CoffeeMachineSticker,
+  WheelSticker,
 } from '@/components/stickers';
 
 // First-visit wake-up wave: content stickers breathe once in a gentle stagger,
@@ -29,6 +30,7 @@ const WAKE_ORDER = [
   'plane',
   'laptop',
   'folder',
+  'wheel',
   'airpods',
   'beach',
   'camera',
@@ -59,6 +61,7 @@ interface DesktopStickersProps {
     terrapinFact: () => void;
     openWork: () => void;
     openWriting: () => void;
+    openWheel: () => void;
     brewCoffee: () => void;
   };
 }
@@ -272,6 +275,18 @@ export function DesktopStickers({
         peekLabel={writingCount ? `${writingCount} reads inside →` : 'read my writing →'}
         wake={wake}
         wakeDelay={wakeDelayFor('folder')}
+      />
+
+      {/* Spin the Wheel */}
+      <WheelSticker
+        id="wheel"
+        initial={positions.wheel || { x: 0, y: 0, rot: 0 }}
+        zBase={7}
+        onClick={handlers.openWheel}
+        entranceDelay={875}
+        peekLabel="spin for a topic →"
+        wake={wake}
+        wakeDelay={wakeDelayFor('wheel')}
       />
 
       {/* Easter Egg: Coffee Machine, tucked into the bottom-left corner */}

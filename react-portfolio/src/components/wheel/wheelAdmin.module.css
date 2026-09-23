@@ -1,0 +1,139 @@
+.wrap {
+  min-height: 100vh;
+  background: var(--paper);
+  padding: 60px 24px;
+  font-family: var(--font-sans);
+}
+
+.inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.unlockForm {
+  display: flex;
+  gap: 10px;
+  max-width: 420px;
+}
+
+.tokenInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--grid-strong);
+  font-size: 14px;
+}
+
+.unlockButton,
+.actionButton {
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.errorText {
+  color: var(--accent-orange);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--grid-strong);
+  background: var(--paper);
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+.tab.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.card {
+  background: var(--paper-secondary);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+
+.cardTopic {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.cardBody {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  margin-bottom: 10px;
+}
+
+.cardMeta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 10px;
+}
+
+.approveButton,
+.rejectButton {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.approveButton { background: var(--accent-green); color: #fff; }
+.rejectButton { background: var(--accent-orange); color: #fff; }
+
+.statusBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.statusBadge.pending { background: var(--accent-yellow); color: #4a3a00; }
+.statusBadge.approved { background: var(--accent-green); color: #fff; }
+.statusBadge.rejected { background: var(--accent-orange); color: #fff; }
+
+.emptyState {
+  color: var(--ink-muted);
+  font-style: italic;
+  font-size: 13px;
+}

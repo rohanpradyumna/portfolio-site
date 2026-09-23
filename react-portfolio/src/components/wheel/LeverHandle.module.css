@@ -1,0 +1,81 @@
+.leverWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.rail {
+  position: relative;
+  width: 16px;
+  height: 190px;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+}
+.rail::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.knob {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin-left: -26px;
+  border-radius: 50%;
+  background: var(--accent-yellow);
+  border: 4px solid var(--ink);
+  cursor: grab;
+  touch-action: none;
+}
+.knob:active {
+  cursor: grabbing;
+}
+.knob:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 3px;
+}
+
+.knobDisabled {
+  cursor: default;
+  pointer-events: none;
+  animation: leverBusyPulse 1s ease-in-out infinite;
+}
+
+@keyframes leverBusyPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.06); }
+}
+
+.fallbackButton {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px;
+}
+.fallbackButton:hover:not(:disabled) {
+  color: var(--accent-orange);
+}
+.fallbackButton:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+.fallbackButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+  text-decoration: none;
+}
