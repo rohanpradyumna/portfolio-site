@@ -1,5 +1,12 @@
 [
   {
+    "slug": "your-agent-doesnt-need-to-read-everything",
+    "title": "Your Agent Doesn't Need to Read Everything",
+    "date": "2026-09-25",
+    "tags": ["ai"],
+    "excerpt": "Choosing which tool to use is a narrow classification problem. You shouldn't pay a large language model to solve it by rereading your entire catalog every time."
+  },
+  {
     "slug": "you-cannot-outsource-original-thought",
     "title": "You Cannot Outsource Original Thought",
     "date": "2026-06-16",
