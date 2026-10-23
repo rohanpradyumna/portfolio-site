@@ -43,7 +43,7 @@ export function WheelSticker(props: Omit<StickerProps, 'children'>) {
         >
           <span
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               fontWeight: 700,
               fontSize: s(20),
               lineHeight: 1,
@@ -55,7 +55,7 @@ export function WheelSticker(props: Omit<StickerProps, 'children'>) {
           </span>
           <span
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               fontWeight: 700,
               fontSize: s(20),
               lineHeight: 1,

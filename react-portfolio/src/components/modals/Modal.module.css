@@ -12,7 +12,7 @@
 .content {
   color: #f5f2e8;
   box-shadow: 0 -10px 40px rgba(20, 10, 0, 0.3), 0 30px 60px rgba(20, 10, 0, 0.4);
-  font-family: 'Geist Mono', monospace;
+  font-family: var(--font-mono);
   position: relative;
   overflow-y: auto;
 }
@@ -46,12 +46,12 @@
 }
 
 .closeButton:focus-visible {
-  outline: 2px solid var(--accent-orange, #e85d3a);
+  outline: 2px solid var(--accent-orange);
   outline-offset: 2px;
 }
 
 .title {
-  font-family: 'Instrument Serif', serif;
+  font-family: var(--font-serif);
   font-style: italic;
   margin-bottom: 12px;
   padding-right: 40px;

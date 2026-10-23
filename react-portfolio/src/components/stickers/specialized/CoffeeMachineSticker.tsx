@@ -85,18 +85,19 @@ export function CoffeeMachineSticker({ onBrew, ...props }: CoffeeMachineStickerP
             transform: 'translateX(-50%)',
             background: brewing ? '#8B4513' : '#6b3a1f',
             color: '#faf7ef',
-            fontFamily: "'Geist Mono', monospace",
-            fontSize: s(9),
+            fontFamily: 'var(--font-mono)',
+            fontSize: s(11),
             fontWeight: 700,
+            lineHeight: 1.2,
             padding: `${s(4)}px ${s(10)}px`,
             borderRadius: s(6),
-            letterSpacing: '0.08em',
+            letterSpacing: '0.03em',
             whiteSpace: 'nowrap',
             border: '2px solid #fff',
             transition: 'background 0.3s',
           }}
         >
-          {brewing ? '☕ BREWING...' : '☕ BREW ME'}
+          {brewing ? 'BREWING...' : 'BREW ME'}
         </div>
       </div>
     </Sticker>

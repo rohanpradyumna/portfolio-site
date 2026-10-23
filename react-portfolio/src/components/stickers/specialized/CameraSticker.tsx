@@ -15,7 +15,7 @@ export function CameraSticker(props: Omit<StickerProps, 'children'>) {
         <circle cx="50" cy="48" r="18" fill="#3a3a3a" stroke="#fff" strokeWidth="3" />
         <circle cx="50" cy="48" r="12" fill="#1a1a1a" />
         <circle cx="54" cy="44" r="4" fill="#f5f2e8" />
-        <circle cx="80" cy="32" r="4" fill="#e85d3a" />
+        <circle cx="80" cy="32" r="4" fill="var(--accent-orange)" />
       </svg>
     </Sticker>
   );

@@ -1,29 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "@/styles/theme.css";
 import "@/styles/globals.css";
 
-// Fraunces - serif headings/name (variable, with optical-size axis)
-const fraunces = Fraunces({
+// next/font hashes family names, so components must reach these through the
+// --font-serif/sans/mono tokens in theme.css, never by literal family name.
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-instrument-serif",
   display: "swap",
-  axes: ["opsz"],
+  weight: "400",
   style: ["normal", "italic"],
 });
 
-// Inter - body text (variable)
-const inter = Inter({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-geist",
   display: "swap",
 });
 
-// JetBrains Mono - code/mono UI (variable)
-const jetbrainsMono = JetBrains_Mono({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -110,7 +109,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${instrumentSerif.variable} ${geist.variable} ${geistMono.variable}`}
     >
       <body>
         <script

@@ -96,14 +96,14 @@
 }
 
 .title {
-  font-family: 'Instrument Serif', serif;
+  font-family: var(--font-serif);
   font-style: italic;
   color: #3d2314;
   letter-spacing: -0.01em;
 }
 
 .subtitle {
-  font-family: 'Geist Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: #8b6914;
   letter-spacing: 0.1em;
@@ -112,7 +112,7 @@
 }
 
 .quote {
-  font-family: 'Instrument Serif', serif;
+  font-family: var(--font-serif);
   line-height: 1.4;
   color: #3d2314;
   margin-bottom: 20px;
@@ -121,7 +121,7 @@
 }
 
 .author {
-  font-family: 'Geist Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: #6b5344;
   letter-spacing: 0.04em;
@@ -145,7 +145,7 @@
   color: #f5e6d3;
   border: none;
   border-radius: 12px;
-  font-family: 'Geist Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;

@@ -85,7 +85,9 @@ The blog post page wraps its article in a `.postScroll` div (`position: fixed; i
 ## Design system
 
 CSS custom properties live in `react-portfolio/src/styles/theme.css` / `globals.css`:
-`--paper #faf7ef`, `--ink #1a1a1a`, `--accent #e85d3a`, `--accent-blue #2d6cdf`, `--accent-green #3a7d44`, `--accent-yellow #f2c230`. Fonts: **Instrument Serif** (name/headings), **Geist** (body), **Geist Mono** (code/mono UI).
+`--paper #fdfbf7`, `--ink #2a251f`, `--ink-secondary #6b5d52`, `--accent-orange #c4472a` (deep enough for white text at WCAG AA; don't brighten it back to `#e85d3a`), `--accent-blue`, `--accent-green`, `--accent-yellow`. Fonts: **Instrument Serif** (name/headings), **Geist** (body), **Geist Mono** (card copy/UI), loaded via `next/font` in `layout.tsx`.
+
+Always reference fonts as `var(--font-serif)` / `var(--font-sans)` / `var(--font-mono)`, never by literal family name: `next/font` hashes the names, so `'Geist Mono'` silently falls back to a system font. Keep functional text (sticker labels, chrome) at 11px or larger.
 
 ## Conventions
 

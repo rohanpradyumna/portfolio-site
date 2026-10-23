@@ -19,7 +19,7 @@ export function WordSticker({
   text,
   bg = '#1a1a1a',
   fg = '#f5f2e8',
-  font = "'Geist Mono', monospace",
+  font = 'var(--font-mono)',
   fontSize = 22,
   padX = 18,
   padY = 10,

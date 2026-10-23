@@ -245,6 +245,8 @@ export function CardStack() {
             role="group"
             aria-roledescription="slide"
             aria-label={`Card ${cardIdx + 1} of ${CARDS.length}`}
+            aria-hidden={!isTop}
+            inert={!isTop}
           >
             {/* Top chrome: prev / idx / next */}
             <div
@@ -254,7 +256,7 @@ export function CardStack() {
                 justifyContent: 'center',
                 gap: isMobile ? 10 : 14,
                 marginBottom: isMobile ? 12 : 16,
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: 'var(--font-mono)',
                 fontSize: isMobile ? 11 : 12,
                 color: 'rgba(245,242,232,0.5)',
                 whiteSpace: 'nowrap',
@@ -266,7 +268,7 @@ export function CardStack() {
                   prev();
                 }}
                 style={getChevBtnStyle(isMobile)}
-                whileHover={{ scale: 1.1, background: 'rgba(245,242,232,0.15)' }}
+                whileHover={{ scale: 1.05, background: 'rgba(245,242,232,0.15)' }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="Previous card"
               >
@@ -281,16 +283,15 @@ export function CardStack() {
                   border: '1px solid rgba(245,242,232,0.24)',
                   padding: '6px 12px',
                   borderRadius: 20,
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
                   letterSpacing: '0.04em',
+                  fontVariantNumeric: 'tabular-nums',
                 }}
                 aria-live="polite"
               >
                 <span style={{ color: '#f2c230', fontWeight: 600 }}>
                   {String(cardIdx + 1).padStart(2, '0')}
                 </span>
-                <span style={{ color: 'rgba(245,242,232,0.4)' }}>
+                <span style={{ color: 'rgba(245,242,232,0.65)' }}>
                   &nbsp;/&nbsp;{String(CARDS.length).padStart(2, '0')}
                 </span>
               </span>
@@ -300,7 +301,7 @@ export function CardStack() {
                   next();
                 }}
                 style={getChevBtnStyle(isMobile)}
-                whileHover={{ scale: 1.1, background: 'rgba(245,242,232,0.15)' }}
+                whileHover={{ scale: 1.05, background: 'rgba(245,242,232,0.15)' }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="Next card"
               >

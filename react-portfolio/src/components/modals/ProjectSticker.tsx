@@ -88,7 +88,7 @@ export function ProjectSticker({ project, isExpanded, onToggle }: ProjectSticker
             style={{
               fontSize: isMobile ? 9 : 10,
               color: project.color,
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               fontWeight: 500,
             }}
           >
@@ -129,7 +129,7 @@ export function ProjectSticker({ project, isExpanded, onToggle }: ProjectSticker
               fontSize: 11,
               color: project.color,
               fontWeight: 600,
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               marginBottom: 6,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
@@ -158,7 +158,7 @@ export function ProjectSticker({ project, isExpanded, onToggle }: ProjectSticker
                   borderRadius: 20,
                   background: `${project.color}15`,
                   color: project.color,
-                  fontFamily: "'Geist Mono', monospace",
+                  fontFamily: 'var(--font-mono)',
                   fontWeight: 500,
                 }}
               >

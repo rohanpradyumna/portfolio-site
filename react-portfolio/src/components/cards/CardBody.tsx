@@ -9,7 +9,7 @@ interface CardBodyProps {
 }
 
 const titleStyle = {
-  fontFamily: "'Instrument Serif', serif",
+  fontFamily: 'var(--font-serif)',
   fontSize: 30,
   fontStyle: 'italic' as const,
   color: '#f5f2e8',
@@ -18,19 +18,17 @@ const titleStyle = {
 
 const footStyle = {
   marginTop: 14,
-  fontFamily: "'Geist Mono', monospace",
-  fontSize: 11,
-  color: 'rgba(245,242,232,0.5)',
-  letterSpacing: '0.05em',
-  textTransform: 'uppercase' as const,
+  fontFamily: 'var(--font-mono)',
+  fontSize: 12,
+  color: 'rgba(245,242,232,0.62)',
 };
 
 const ctaBtn = {
   display: 'inline-block',
   padding: '8px 14px',
-  background: '#e85d3a',
+  background: 'var(--accent-orange)',
   color: '#faf7ef',
-  fontFamily: "'Geist Mono', monospace",
+  fontFamily: 'var(--font-mono)',
   fontSize: 12,
   fontWeight: 600,
   borderRadius: 8,
@@ -45,7 +43,7 @@ export function CardBody({ card, isMobile }: CardBodyProps) {
   };
   const mFootStyle = {
     ...footStyle,
-    fontSize: isMobile ? 10 : 11,
+    fontSize: 12,
     marginTop: isMobile ? 10 : 14,
   };
   const mCtaBtn = {
@@ -61,7 +59,7 @@ export function CardBody({ card, isMobile }: CardBodyProps) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div
           style={{
-            fontFamily: "'Geist Mono', monospace",
+            fontFamily: 'var(--font-mono)',
             fontSize: isMobile ? 16 : 19,
             lineHeight: 1.5,
             fontWeight: 500,
@@ -80,7 +78,7 @@ export function CardBody({ card, isMobile }: CardBodyProps) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div
           style={{
-            fontFamily: "'Instrument Serif', serif",
+            fontFamily: 'var(--font-serif)',
             fontSize: isMobile ? 22 : 28,
             lineHeight: 1.25,
             fontStyle: 'italic',
@@ -101,7 +99,7 @@ export function CardBody({ card, isMobile }: CardBodyProps) {
         <div style={mTitleStyle}>{card.title}</div>
         <div
           style={{
-            fontFamily: "'Geist Mono', monospace",
+            fontFamily: 'var(--font-mono)',
             fontSize: isMobile ? 12 : 14,
             lineHeight: 1.55,
             color: 'rgba(245,242,232,0.85)',
@@ -129,7 +127,7 @@ export function CardBody({ card, isMobile }: CardBodyProps) {
           <li
             key={i}
             style={{
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               fontSize: isMobile ? 12 : 13.5,
               lineHeight: 1.55,
               color: 'rgba(245,242,232,0.92)',
@@ -138,7 +136,7 @@ export function CardBody({ card, isMobile }: CardBodyProps) {
               gap: isMobile ? 8 : 10,
             }}
           >
-            <span style={{ color: '#e85d3a', flexShrink: 0 }}>▸</span>
+            <span style={{ color: 'var(--accent-orange)', flexShrink: 0 }}>▸</span>
             <span style={{ textWrap: 'pretty' as 'pretty' }}>{t}</span>
           </li>
         ))}

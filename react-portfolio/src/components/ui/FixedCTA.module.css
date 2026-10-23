@@ -21,9 +21,15 @@
     box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
-.pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(40, 30, 10, 0.3);
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40, 30, 10, 0.3);
+  }
+}
+
+.pill:active {
+  transform: scale(0.97);
 }
 
 .dot {

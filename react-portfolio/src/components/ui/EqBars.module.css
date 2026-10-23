@@ -7,7 +7,7 @@
 
 .container > div {
   width: 4px;
-  background: #e85d3a;
+  background: var(--accent-orange);
   border-radius: 2px;
 }
 

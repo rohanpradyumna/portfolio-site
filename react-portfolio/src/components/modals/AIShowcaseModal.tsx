@@ -92,7 +92,7 @@ export function AIShowcaseModal({ open, onClose }: AIShowcaseModalProps) {
           <div
             style={{
               fontSize: 10,
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               color: '#d95f3e',
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
@@ -130,7 +130,7 @@ export function AIShowcaseModal({ open, onClose }: AIShowcaseModalProps) {
           <div
             style={{
               fontSize: 11,
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               color: 'rgba(245,242,232,0.5)',
               marginBottom: 12,
               textTransform: 'uppercase',
@@ -187,7 +187,7 @@ export function AIShowcaseModal({ open, onClose }: AIShowcaseModalProps) {
           <div
             style={{
               fontSize: 11,
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               color: 'rgba(245,242,232,0.5)',
               marginBottom: 12,
               textTransform: 'uppercase',
@@ -241,7 +241,7 @@ export function AIShowcaseModal({ open, onClose }: AIShowcaseModalProps) {
           <div
             style={{
               fontSize: 11,
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               color: '#d95f3e',
               marginBottom: 6,
             }}
@@ -265,7 +265,7 @@ export function AIShowcaseModal({ open, onClose }: AIShowcaseModalProps) {
             marginTop: 20,
             textAlign: 'center',
             fontSize: 10,
-            fontFamily: "'Geist Mono', monospace",
+            fontFamily: 'var(--font-mono)',
             color: 'rgba(245,242,232,0.3)',
           }}
         >

@@ -20,7 +20,7 @@ export function EmailSticker(props: Omit<StickerProps, 'children'>) {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx="98" cy="18" r="16" fill="#e85d3a" stroke="#fff" strokeWidth="4" />
+        <circle cx="98" cy="18" r="16" fill="var(--accent-orange)" stroke="#fff" strokeWidth="4" />
         <text
           x="98"
           y="25"
@@ -28,7 +28,7 @@ export function EmailSticker(props: Omit<StickerProps, 'children'>) {
           fill="#fff"
           fontSize="18"
           fontWeight="800"
-          fontFamily="'Geist Mono', monospace"
+          style={{ fontFamily: 'var(--font-mono)' }}
         >
           @
         </text>

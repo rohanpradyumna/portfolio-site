@@ -4,3 +4,6 @@
 .agents/
 skills-lock.json
 .env*.local
+
+# taste-skill working files (screenshots, reports)
+.taste-skill/

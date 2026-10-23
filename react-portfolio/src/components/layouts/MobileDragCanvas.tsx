@@ -172,7 +172,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           text="ai · strategist"
           initial={pos(LAYOUT[2])}
           zBase={5}
-          bg="#e85d3a"
+          bg="var(--accent-orange)"
           fg="#faf7ef"
           fontSize={12}
           padX={12}
@@ -396,12 +396,9 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
             left: 0,
             width: '100%',
             textAlign: 'center',
-            fontFamily: "'Geist Mono', monospace",
-            fontSize: 10,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
             color: 'var(--ink-secondary)',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            opacity: 0.55,
             pointerEvents: 'none',
           }}
         >

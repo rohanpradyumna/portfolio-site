@@ -1,8 +1,8 @@
 @import './theme.css';
 
-/* Fonts (Fraunces / Inter / JetBrains Mono) are self-hosted via next/font in
-   layout.tsx, exposed as --font-fraunces / --font-inter / --font-jetbrains-mono
-   and wired into --font-serif/sans/mono in theme.css. No external font request. */
+/* Fonts (Instrument Serif / Geist / Geist Mono) are self-hosted via next/font in
+   layout.tsx and wired into --font-serif/sans/mono in theme.css. Always use the
+   tokens: next/font hashes the family names, so a literal 'Geist Mono' never matches. */
 
 /* ============================================================================
    GLOBAL RESET & BASE
@@ -92,21 +92,8 @@ body {
   pointer-events: none;
   mix-blend-mode: soft-light;
   opacity: 0.7;
-  background:
-    /* Primary spotlight - warm golden */
-    radial-gradient(
-      ellipse 800px 600px at var(--light-x) var(--light-y),
-      rgba(255, 248, 230, 0.5) 0%,
-      rgba(255, 243, 220, 0.25) 30%,
-      transparent 70%
-    ),
-    /* Subtle ambient glow from opposite corner */
-    radial-gradient(
-      ellipse 600px 500px at calc(100% - var(--light-x)) calc(100% - var(--light-y)),
-      rgba(242, 235, 220, 0.15) 0%,
-      transparent 60%
-    );
-  transition: background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* --light-x/--light-y are written per frame from page.tsx */
+  background: radial-gradient(circle at var(--light-x) var(--light-y), rgba(255, 251, 239, 0.3), transparent 60%);
 }
 
 /* ============================================================================
@@ -124,11 +111,22 @@ body {
   pointer-events: none;
 }
 
+.brand-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1;
+}
+
 .brand .name {
   font-family: var(--font-serif);
-  font-size: var(--text-3xl);
+  font-size: 40px;
   font-weight: 400;
-  letter-spacing: -0.01em;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 
@@ -141,11 +139,10 @@ body {
 }
 
 .brand .sub {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
   color: var(--ink-secondary);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
 /* ============================================================================
@@ -160,10 +157,9 @@ body {
   display: flex;
   gap: 16px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ink-secondary);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
 
@@ -186,12 +182,16 @@ body {
   right: 16px;
   z-index: 1000;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--ink-secondary);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   pointer-events: none;
+  transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
   /* Full-strength muted brown clears WCAG AA (~5.5:1); opacity 0.6 sat ~2.6:1. */
+}
+
+.hint.hint-done {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 /* ============================================================================
@@ -233,7 +233,7 @@ body {
   }
 
   .brand .name {
-    font-size: 26px;
+    font-size: 28px;
   }
 
   .brand .dot {
@@ -241,15 +241,21 @@ body {
     height: 5px;
   }
 
+  /* Visually hidden, not display:none, so the h1 keeps its full name */
   .brand .sub {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 
   .corner {
     top: max(16px, env(safe-area-inset-top));
     right: max(16px, env(safe-area-inset-right));
     gap: 10px;
-    font-size: 10px;
+    font-size: 11px;
     background: rgba(250, 247, 239, 0.7);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -262,7 +268,7 @@ body {
     left: 50%;
     right: auto;
     transform: translateX(-50%);
-    font-size: 11px;
+    font-size: 12px;
     text-align: center;
     white-space: nowrap;
     /* Faint readability backdrop so the hint stays legible over stickers */
@@ -272,6 +278,10 @@ body {
     padding: 4px 10px;
     border-radius: 8px;
   }
+
+  .hint.hint-done {
+    transform: translateX(-50%) translateY(6px);
+  }
 }
 
 @media (max-width: 380px) {
@@ -280,12 +290,12 @@ body {
   }
 
   .corner {
-    font-size: 9px;
+    font-size: 11px;
     gap: 8px;
   }
 
   .hint {
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 

@@ -47,7 +47,7 @@
   transform: translateX(-50%) translateY(4px);
   background: rgba(26, 24, 22, 0.92);
   color: var(--card-ink, #faf7ef);
-  font-family: 'Geist Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1;
   padding: 4px 9px;

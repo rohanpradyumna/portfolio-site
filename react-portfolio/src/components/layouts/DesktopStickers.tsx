@@ -96,7 +96,7 @@ export function DesktopStickers({
         text="ai · strategist"
         initial={positions.tagAI || { x: 0, y: 0, rot: 0 }}
         zBase={5}
-        bg="#e85d3a"
+        bg="var(--accent-orange)"
         fg="#faf7ef"
         fontSize={s(13)}
         padX={s(14)}

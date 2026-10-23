@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useResponsive, DESIGN_W, DESIGN_H } from '@/hooks/useDimensions';
 import { useSongAudio } from '@/hooks/useAudio';
 import { CardStack } from '@/components/cards';
@@ -76,19 +76,37 @@ export default function Home() {
   // Audio
   const { togglePlay, stop } = useSongAudio('/assets/believer.m4a');
 
-  // Dynamic lighting state
-  const [lightPos, setLightPos] = useState({ x: 50, y: 40 });
-
-  // Track mouse for dynamic lighting
+  // Dynamic lighting: written straight to CSS vars on the light layer, once per
+  // frame. Holding the position in React state re-rendered every sticker on
+  // every mousemove.
+  const lightRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    let frame = 0;
     const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      setLightPos({ x, y });
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const el = lightRef.current;
+        if (!el) return;
+        el.style.setProperty('--light-x', `${(e.clientX / window.innerWidth) * 100}%`);
+        el.style.setProperty('--light-y', `${(e.clientY / window.innerHeight) * 100}%`);
+      });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  // The usage hint retires after the first real interaction: once someone has
+  // touched the board they know how it works, and on phones it sits on stickers.
+  const [hintDone, setHintDone] = useState(false);
+  useEffect(() => {
+    const retire = () => setHintDone(true);
+    window.addEventListener('pointerdown', retire, { once: true });
+    return () => window.removeEventListener('pointerdown', retire);
   }, []);
 
   // Easter egg: type "ai" to show AI showcase modal
@@ -269,19 +287,16 @@ export default function Home() {
     <>
       {/* Board background */}
       <div className="board">
-        <div
-          className="board-light"
-          style={{
-            background: `radial-gradient(circle at ${lightPos.x}% ${lightPos.y}%, rgba(255, 251, 239, 0.3), transparent 60%)`,
-          }}
-        />
+        <div className="board-light" ref={lightRef} />
       </div>
 
       {/* Brand header */}
       <header className="brand">
-        <span className="name">rohan</span>
-        <span className="dot" />
-        <span className="sub">a sticker board by rohan pradyumna</span>
+        <h1 className="brand-title">
+          <span className="name">rohan</span>
+          <span className="dot" aria-hidden="true" />
+          <span className="sub">a sticker board by rohan pradyumna</span>
+        </h1>
       </header>
 
       {/* Status corner */}
@@ -291,7 +306,9 @@ export default function Home() {
       </div>
 
       {/* Hint */}
-      <div className="hint">drag stickers · tap to interact · swipe cards</div>
+      <div className={`hint${hintDone ? ' hint-done' : ''}`} aria-hidden={hintDone}>
+        drag stickers · tap to interact · swipe cards
+      </div>
 
       {/* Persistent contact pill (appears after a short delay, outside the Stage) */}
       <FixedCTA />
@@ -306,7 +323,7 @@ export default function Home() {
                 marginTop: 'calc(64px + env(safe-area-inset-top))',
                 padding: '0 24px',
                 textAlign: 'center',
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: 'var(--font-mono)',
                 // The fixed .board background paints above plain in-flow text;
                 // a positioned stacking context keeps the hero visible.
                 position: 'relative',
@@ -314,34 +331,36 @@ export default function Home() {
               }}
             >
               <div
+                aria-hidden="true"
                 style={{
-                  fontFamily: "'Instrument Serif', serif",
+                  fontFamily: 'var(--font-serif)',
                   fontStyle: 'italic',
-                  fontSize: 32,
-                  lineHeight: 1.1,
+                  fontSize: 40,
+                  lineHeight: 1,
+                  letterSpacing: '-0.02em',
                   color: 'var(--ink)',
-                  marginBottom: 8,
+                  marginBottom: 10,
                 }}
               >
                 Rohan Pradyumna
               </div>
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.4,
+                  color: 'var(--ink)',
+                  textWrap: 'balance',
+                }}
+              >
+                founder · ai strategist
+                <br />
+                building yottaflex
+              </p>
               <div
                 style={{
                   fontSize: 12,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  color: 'var(--ink)',
-                }}
-              >
-                founder · ai strategist · building yottaflex
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  letterSpacing: '0.06em',
                   color: 'var(--ink-secondary)',
                   marginTop: 6,
-                  opacity: 0.7,
                 }}
               >
                 swipe to explore ›
@@ -373,7 +392,7 @@ export default function Home() {
         <div
           style={{
             fontSize: 28,
-            fontFamily: "'Geist Mono', monospace",
+            fontFamily: 'var(--font-mono)',
             letterSpacing: '0.05em',
             margin: '8px 0 14px',
             color: '#f2c230',
@@ -418,14 +437,14 @@ export default function Home() {
           style={{
             marginTop: 14,
             padding: '10px 20px',
-            background: musicPlaying ? 'rgba(245,242,232,0.15)' : '#e85d3a',
+            background: musicPlaying ? 'rgba(245,242,232,0.15)' : 'var(--accent-orange)',
             color: '#f5f2e8',
             border: 'none',
             borderRadius: 8,
             cursor: 'pointer',
             fontSize: 13,
             fontWeight: 600,
-            fontFamily: "'Geist Mono', monospace",
+            fontFamily: 'var(--font-mono)',
           }}
         >
           {musicPlaying ? '⏸ pause' : '▶ play'}
@@ -437,18 +456,18 @@ export default function Home() {
           masters from the robert h. smith school of business. disruptive innovation, digital business transformation,
           and machine learning. the stuff that got me building AI in d.c. fear the turtle.
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.92)', lineHeight: 1.6 }}>
           plenty of volleyball and good times in the startup shell, plus the wildest parties I could throw along the
           way. I loved my professors, and I&apos;d run the whole course all over again given the chance.
         </div>
       </Modal>
 
-      <Modal open={modal === 'charminar'} noAnimation={true} onClose={closeModal} title="hyderabad 🍛" color="#a8794a">
+      <Modal open={modal === 'charminar'} noAnimation={true} onClose={closeModal} title="hyderabad 🍛" color="#8a5f36">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
           home. my heart lives here even when I don&apos;t. the city that never sleeps, and neither did I when I was
           there.
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.92)', lineHeight: 1.6 }}>
           the biryani hits different. the nightlife hits different. the energy of the city hits different. someday
           I&apos;m going back to build things there. until then, I cope with phone calls home and food that&apos;s never
           quite the same.
@@ -461,7 +480,7 @@ export default function Home() {
           keep going back. they tell me stories.
         </div>
         <div style={{ fontSize: 12, color: 'rgba(245,242,232,0.7)', marginBottom: 12 }}>
-          <b style={{ color: '#e85d3a' }}>annapolis, maryland</b>: been there 10+ times and counting. idk what it is,
+          <b style={{ color: 'var(--accent-orange)' }}>annapolis, maryland</b>: been there 10+ times and counting. idk what it is,
           but that place has me.
         </div>
         <div style={{ fontSize: 11, color: 'rgba(245,242,232,0.5)', fontStyle: 'italic' }}>
@@ -469,7 +488,7 @@ export default function Home() {
         </div>
       </Modal>
 
-      <Modal open={modal === 'beach'} noAnimation={true} onClose={closeModal} title="beach brain" color="#2d6cdf">
+      <Modal open={modal === 'beach'} noAnimation={true} onClose={closeModal} title="beach brain" color="#2a63cf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef' }}>
           my best product ideas happen when I&apos;m 10 feet from the water and nowhere near a laptop. kerala backwaters
           &gt; boardrooms.
@@ -481,13 +500,13 @@ export default function Home() {
         noAnimation={true}
         onClose={closeModal}
         title="racket sports 🏓"
-        color="#3a7d44"
+        color="#34703d"
       >
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
           pickleball, tennis, badminton, TT. I play them all and I&apos;m weirdly decent at each? not pro level, but
           I&apos;ll make you work for it.
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.92)' }}>
           also trying golf now because apparently I needed another hobby. if you&apos;re in DC and want to play anything
           with a racket (or club), let&apos;s go.
         </div>
@@ -511,16 +530,16 @@ export default function Home() {
           yes, I&apos;m that guy who asks where the beans are from. black, or their specialty if I&apos;m feeling fancy,
           but always strong.
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, marginBottom: 10 }}>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.92)', lineHeight: 1.6, marginBottom: 10 }}>
           I drink based on the coffee belt: <b>Ethiopian · Colombian · Vietnamese · Indian · Peruvian</b>. Medium roast,
           proper brews, fine grinds for espresso. I have opinions.
         </div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontStyle: 'italic' }}>
           if we&apos;re getting coffee, I&apos;m 100% going to ask what you&apos;re building.
         </div>
       </Modal>
 
-      <Modal open={modal === 'gym'} noAnimation={true} onClose={closeModal} title="fitness arc 💪" color="#2d6cdf">
+      <Modal open={modal === 'gym'} noAnimation={true} onClose={closeModal} title="fitness arc 💪" color="#2a63cf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef' }}>
           currently in my &quot;get fit&quot; era. shipping products = sitting all day, so the gym is non-negotiable.
           compound effect works here too: small reps, big gains. (that&apos;s the plan anyway)
