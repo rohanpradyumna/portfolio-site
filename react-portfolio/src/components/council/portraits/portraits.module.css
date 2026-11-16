@@ -1,0 +1,260 @@
+/* Council portraits: mood-driven motion.
+   Only transform and opacity ever animate. Poses (glance, brows, head tilt,
+   dimming) are transitions so a mood change mid-flight retargets instead of
+   restarting; only true loops and the one-shot reaction use keyframes.
+   Inside an SVG, CSS px in transforms are viewBox units, so nothing here
+   depends on the rendered size. */
+
+.root {
+  display: block;
+  overflow: visible;
+  flex: none;
+}
+
+.figure {
+  transform-origin: 100px 232px;
+}
+
+.art {
+  transition: opacity 240ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+/* Pivot at the base of the neck so the head nods instead of sliding. */
+.head {
+  transform-origin: 100px 180px;
+  transition: transform 260ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.gaze,
+.brows {
+  transition: transform 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink var(--blink-dur, 5.2s) var(--blink-delay, 0s) infinite;
+}
+
+.mouthA,
+.mouthB {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Thought mark
+   --------------------------------------------------------------------------- */
+
+.thoughtPop {
+  opacity: 0;
+  transform: scale(0.9);
+  transform-origin: -30px 34px;
+  transition:
+    opacity 180ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+    transform 180ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.scribble1,
+.scribble2 {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Moods
+   --------------------------------------------------------------------------- */
+
+.root[data-mood='dimmed'] .art {
+  opacity: 0.5;
+}
+.root[data-mood='dimmed'] .eye {
+  animation: none;
+}
+
+.root[data-mood='thinking'] .gaze {
+  transform: translate(3px, -1.4px);
+}
+.root[data-mood='thinking'] .brows {
+  transform: translateY(-2px);
+}
+.root[data-mood='thinking'] .head {
+  transform: rotate(1.6deg);
+}
+.root[data-mood='thinking'] .thoughtPop {
+  opacity: 1;
+  transform: scale(1);
+}
+.root[data-mood='thinking'] .scribble0 {
+  animation: boil0 0.9s step-end infinite;
+}
+.root[data-mood='thinking'] .scribble1 {
+  animation: boil1 0.9s step-end infinite;
+}
+.root[data-mood='thinking'] .scribble2 {
+  animation: boil2 0.9s step-end infinite;
+}
+.root[data-mood='thinking'] .dot1 {
+  animation: dotPulse 1.8s step-end infinite;
+}
+.root[data-mood='thinking'] .dot2 {
+  animation: dotPulse 1.8s step-end -0.45s infinite;
+}
+
+.root[data-mood='speaking'] .head {
+  animation: bob 2.6s ease-in-out infinite;
+}
+.root[data-mood='speaking'] .mouthRest {
+  animation: talkRest 1.9s step-end infinite;
+}
+.root[data-mood='speaking'] .mouthA {
+  animation: talkA 1.9s step-end infinite;
+}
+.root[data-mood='speaking'] .mouthB {
+  animation: talkB 1.9s step-end infinite;
+}
+
+.root[data-mood='challenged'] .figure {
+  animation: wobble 720ms ease-in-out 1 both;
+}
+.root[data-mood='challenged'] .brows {
+  animation: browPop 900ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) 1 both;
+}
+.root[data-mood='challenged'] .eye {
+  animation:
+    widen 900ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) 1 both,
+    blink var(--blink-dur, 5.2s) 1.6s infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Keyframes
+   --------------------------------------------------------------------------- */
+
+@keyframes blink {
+  0%, 95.5%, 100% { transform: scaleY(1); }
+  97.5% { transform: scaleY(0.1); }
+}
+
+/* Mouth flipbook: three drawings, held on steps, in an uneven rhythm so it
+   reads as talk and not as a metronome. */
+@keyframes talkRest {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  22% { opacity: 0; }
+  46% { opacity: 1; }
+  58% { opacity: 0; }
+  70% { opacity: 1; }
+  78% { opacity: 0; }
+  90%, 100% { opacity: 1; }
+}
+@keyframes talkA {
+  0% { opacity: 1; }
+  12% { opacity: 0; }
+  36% { opacity: 1; }
+  46% { opacity: 0; }
+  78% { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+@keyframes talkB {
+  0% { opacity: 0; }
+  22% { opacity: 1; }
+  36% { opacity: 0; }
+  58% { opacity: 1; }
+  70%, 100% { opacity: 0; }
+}
+
+@keyframes bob {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-1.1deg) translateY(0.8px); }
+  75% { transform: rotate(1.1deg) translateY(0.8px); }
+}
+
+@keyframes boil0 {
+  0% { opacity: 1; }
+  33.3% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes boil1 {
+  0% { opacity: 0; }
+  33.3% { opacity: 1; }
+  66.6%, 100% { opacity: 0; }
+}
+@keyframes boil2 {
+  0%, 33.3% { opacity: 0; }
+  66.6%, 100% { opacity: 1; }
+}
+
+@keyframes dotPulse {
+  0% { opacity: 1; }
+  75% { opacity: 0.35; }
+  100% { opacity: 0.35; }
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg); }
+  18% { transform: rotate(-3.6deg); }
+  40% { transform: rotate(2.8deg); }
+  62% { transform: rotate(-1.6deg); }
+  82% { transform: rotate(0.7deg); }
+}
+
+@keyframes browPop {
+  0%, 100% { transform: translateY(0); }
+  22%, 68% { transform: translateY(-5px); }
+}
+
+@keyframes widen {
+  0%, 100% { transform: scale(1); }
+  22%, 68% { transform: scale(1.16); }
+}
+
+/* ---------------------------------------------------------------------------
+   Entry sticker
+   --------------------------------------------------------------------------- */
+
+.peek {
+  transition: transform 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  transition-delay: calc(var(--i, 0) * 30ms);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .entry:hover .peek {
+    transform: translateY(-3px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion: one still pose per mood, nothing loops.
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .root .eye,
+  .root .head,
+  .root .figure,
+  .root .brows,
+  .root .mouthRest,
+  .root .mouthA,
+  .root .mouthB,
+  .root .scribble0,
+  .root .scribble1,
+  .root .scribble2,
+  .root .dot1,
+  .root .dot2 {
+    animation: none !important;
+  }
+
+  .root[data-mood='speaking'] .mouthRest {
+    opacity: 0;
+  }
+  .root[data-mood='speaking'] .mouthA {
+    opacity: 1;
+  }
+  .root[data-mood='challenged'] .brows {
+    transform: translateY(-4px);
+  }
+  .root[data-mood='challenged'] .eye {
+    transform: scale(1.12);
+  }
+
+  .entry:hover .peek {
+    transform: none;
+  }
+}

@@ -1,0 +1,2392 @@
+/* The Council. A scrolling page on the same graph-paper board as the rest of
+   the site (fixed board + fixed scroller, because body is overflow: hidden).
+
+   Two voices, two materials: the visitor writes on the dark card in mono, the
+   council answers on cream paper notes in sans. Everything pressable is a
+   sticker or a slip of paper. */
+
+.board {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+    radial-gradient(ellipse 120% 100% at 50% 35%, #fffdf8 0%, #faf6ec 40%, #f5ede0 70%, #ebe3d5 100%);
+  background-size: 28px 28px, 28px 28px, 140px 140px, 140px 140px, 100% 100%;
+}
+
+.scroll {
+  --note-paper: #fffefb;
+  --legal-pad: #fdf3cf;
+  --note-shadow: 0 1px 1px rgba(40, 30, 10, 0.1), 0 6px 14px rgba(40, 30, 10, 0.11), 0 20px 30px -20px rgba(40, 30, 10, 0.28);
+
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(42, 37, 31, 0.28) transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 0 max(28px, env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(28px, env(safe-area-inset-left));
+  color: var(--ink);
+}
+
+.page ::selection {
+  background: rgba(230, 179, 42, 0.5);
+  color: var(--ink);
+}
+
+:where(.page) button,
+:where(.page) a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* :where keeps this reset weightless, so any button class below overrides it. */
+:where(.page) button {
+  font: inherit;
+  color: inherit;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Chrome: brand, hero, footer
+   --------------------------------------------------------------------------- */
+
+.brand {
+  position: absolute;
+  top: max(24px, env(safe-area-inset-top));
+  left: max(28px, env(safe-area-inset-left));
+  z-index: 40;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.brandName {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.brandDot {
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+}
+
+.hero {
+  padding-top: 56px;
+  text-align: center;
+}
+
+.page[data-mode='thread'] .hero {
+  /* The heading stays for assistive tech and document outline; the bench takes its place on screen. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.backLink::before {
+  content: '<-';
+}
+
+.title {
+  margin-top: 2px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(34px, 3.4vw, 46px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.intro {
+  margin: 8px auto 0;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  text-wrap: balance;
+}
+
+.heroDisclosure {
+  display: none;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: min(640px, 100%);
+  margin: auto auto 0;
+  padding-top: 30px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+  text-wrap: balance;
+}
+
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 18px;
+}
+
+/* Reads as a link, sized as a target: 44px tall on touch via the padding. */
+.footerButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.footerButton:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (pointer: coarse) {
+  .footer a,
+  .footerButton {
+    min-height: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The table: seats + card + everything said
+   --------------------------------------------------------------------------- */
+
+.table {
+  --arc-clear: 204px;
+
+  position: relative;
+  width: min(1120px, 100%);
+  margin: 12px auto 0;
+}
+
+.page[data-mode='thread'] .table {
+  margin-top: 10px;
+}
+
+.seatsAnchor[data-arrangement='arc'] {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 5;
+  height: 0;
+}
+
+.seats[data-arrangement='arc'] .seatRow {
+  position: relative;
+  height: 0;
+}
+
+/* Where each seat sits on the arc: horizontal centre as a share of the table,
+   top edge in px. Placed by eye and a little uneven on purpose, the way the
+   homepage stickers are. */
+.seats[data-arrangement='arc'] .seat {
+  position: absolute;
+  left: calc(var(--arc-x) - (var(--seat-size) + 16px) / 2);
+  top: var(--arc-y);
+}
+
+.seat:nth-child(1) { --arc-x: 7.5%; --arc-y: 172px; }
+.seat:nth-child(2) { --arc-x: 18.5%; --arc-y: 44px; }
+.seat:nth-child(3) { --arc-x: 38.5%; --arc-y: 4px; }
+.seat:nth-child(4) { --arc-x: 61%; --arc-y: 0px; }
+.seat:nth-child(5) { --arc-x: 81.5%; --arc-y: 40px; }
+.seat:nth-child(6) { --arc-x: 92.5%; --arc-y: 164px; }
+
+.seat {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  cursor: pointer;
+}
+
+.seat:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 4px;
+}
+
+.seat[data-selected],
+.seat[data-mood='speaking'],
+.seat:focus-visible {
+  z-index: 3;
+}
+
+.seatFigure {
+  position: relative;
+  display: block;
+}
+
+.seatLift {
+  position: relative;
+  display: block;
+  filter: var(--shadow-sticker);
+  transition: filter 0.18s ease-out;
+}
+
+.seat[data-selected] .seatLift,
+.seat[data-mood='speaking'] .seatLift {
+  filter: var(--shadow-sticker-hover);
+}
+
+.seatPortrait {
+  display: block;
+  width: var(--seat-size);
+  line-height: 0;
+  transition: transform 0.12s var(--ease-out);
+}
+
+/* Answers on pointer-down, before the click commits. */
+.seat:active .seatPortrait {
+  transform: scale(0.95);
+}
+
+/* The portrait is sized by its own `size` prop. This only stops it painting
+   wider than its seat for the one frame before that prop catches up on a phone. */
+.seatPortrait > svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.seatRing {
+  position: absolute;
+  inset: -9px -11px -7px;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.ringSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.scribblePath {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: scribble 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes scribble {
+  0% { stroke-dashoffset: 1; }
+  55%, 78% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1; }
+}
+
+/* The word-sticker under each seat. Always dark: selection is the ring, the
+   tick and the lift, never a color swap. */
+.seatTag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 2.5px solid var(--paper);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--card-ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  rotate: -1.5deg;
+  filter: drop-shadow(0 2px 3px rgba(40, 30, 10, 0.24));
+}
+
+.seat:nth-child(even) .seatTag {
+  rotate: 1.2deg;
+}
+
+/* Pinned to the tag's corner so choosing a seat never changes the tag's width. */
+.seatTick {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--accent-orange);
+  color: #fff;
+}
+
+/* Name, dates and one line, in the same dark chip the homepage stickers use. */
+.peek {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: max-content;
+  max-width: 250px;
+  padding: 8px 11px 9px;
+  border-radius: 8px;
+  background: rgba(26, 24, 22, 0.95);
+  color: var(--card-ink);
+  text-align: left;
+  opacity: 0;
+  pointer-events: none;
+  translate: -50% 4px;
+  transition: opacity 0.16s var(--ease-out), translate 0.16s var(--ease-out);
+}
+
+.seat:nth-child(1) .peek { left: 8px; translate: 0 4px; }
+.seat:nth-child(6) .peek { left: auto; right: 8px; translate: 0 4px; }
+
+.peekName {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.peekDates {
+  font-weight: 400;
+  color: var(--card-ink-secondary);
+}
+
+.peekIntro {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.seats[data-arrangement='arc'] .seat:focus-visible .peek {
+  opacity: 1;
+  translate: -50% 0;
+}
+.seats[data-arrangement='arc'] .seat:nth-child(1):focus-visible .peek,
+.seats[data-arrangement='arc'] .seat:nth-child(6):focus-visible .peek {
+  translate: 0 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .seat:hover .seatLift {
+    filter: var(--shadow-sticker-hover);
+  }
+  .seats[data-arrangement='arc'] .seat:hover {
+    z-index: 4;
+  }
+  .seats[data-arrangement='arc'] .seat:hover .peek {
+    opacity: 1;
+    translate: -50% 0;
+  }
+  .seats[data-arrangement='arc'] .seat:nth-child(1):hover .peek,
+  .seats[data-arrangement='arc'] .seat:nth-child(6):hover .peek {
+    translate: 0 0;
+  }
+  .backLink:hover {
+    color: var(--accent-orange);
+  }
+}
+
+/* --- The bench: six small seats pinned to the top while a thread is open --- */
+
+.seatsAnchor[data-arrangement='bench'] {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: max(10px, env(safe-area-inset-top)) 0 16px;
+}
+
+/* A full-bleed strip of paper the notes scroll under. It fades out along its
+   lower edge instead of drawing a divider. */
+.seatsAnchor[data-arrangement='bench']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  background: rgba(250, 246, 236, 0.84);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
+  pointer-events: none;
+}
+
+.seats[data-arrangement='bench'] {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 22px;
+}
+
+.seats[data-arrangement='bench'] .seatRow {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.seats[data-arrangement='bench'] .seat {
+  padding: 0 4px;
+}
+
+.seats[data-arrangement='bench'] .seatTag,
+.seats[data-arrangement='bench'] .peek {
+  display: none;
+}
+
+.seats[data-arrangement='bench'] .seatRing {
+  inset: -5px -6px -4px;
+}
+
+.benchStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-secondary);
+}
+
+.statusText[data-busy] {
+  color: var(--ink);
+}
+
+.stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 2.5px solid var(--paper);
+  border-radius: 11px;
+  background: var(--card-bg);
+  color: var(--card-ink);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(40, 30, 10, 0.28));
+  transition: transform 0.14s var(--ease-out);
+}
+
+.stop:active {
+  transform: scale(0.96);
+}
+
+.stancePopover {
+  --popover-w: min(560px, calc(100vw - 24px));
+
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  z-index: 35;
+  width: var(--popover-w);
+  margin-left: calc(var(--popover-w) / -2);
+  transform-origin: 50% 0;
+}
+
+/* ---------------------------------------------------------------------------
+   The dark card: the visitor's side of the table
+   --------------------------------------------------------------------------- */
+
+.card {
+  position: relative;
+  z-index: 2;
+  width: min(560px, 100%);
+  margin: var(--arc-clear) auto 0;
+  border-radius: var(--radius-xl);
+  background: var(--card-bg);
+  color: var(--card-ink);
+  box-shadow: var(--shadow-card);
+}
+
+/* The edge of a second card underneath, as on the homepage stack. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 12px 14px -9px;
+  z-index: -1;
+  border-radius: var(--radius-xl);
+  background: #100e0c;
+  box-shadow: 0 14px 22px rgba(20, 15, 5, 0.3);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--card-bg);
+}
+
+.card[data-mode='asked'] {
+  width: min(640px, 100%);
+  margin-top: 6px;
+}
+
+.card ::selection {
+  background: rgba(230, 179, 42, 0.4);
+  color: var(--card-ink);
+}
+
+.card :focus-visible {
+  outline-color: var(--accent-yellow);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 22px 20px;
+}
+
+.cardTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  min-height: 30px;
+}
+
+.recipient {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--card-ink-secondary);
+}
+
+.recipientChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+  background: var(--card-bg-elevated);
+  color: var(--card-ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.recipientDot {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--paper);
+  border-radius: 50%;
+  background: var(--seat-accent);
+}
+
+.recipientClear {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-right: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+/* 20px mark, 44px target. */
+.recipientClear::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
+
+.quota {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--card-ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.field {
+  display: block;
+  width: 100%;
+  max-height: 38dvh;
+  margin-top: 12px;
+  padding: 2px 0 10px;
+  border: 0;
+  border-bottom: 1.5px dashed rgba(245, 242, 232, 0.22);
+  border-radius: 0;
+  background: transparent;
+  color: var(--card-ink);
+  caret-color: var(--accent-yellow);
+  font-family: var(--font-mono);
+  /* 16px or more, or iOS zooms the page on focus. */
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.5;
+  resize: none;
+  overflow-y: auto;
+  scroll-margin: 96px 0 24px;
+  transition: border-color 0.18s ease;
+}
+
+.field::placeholder {
+  color: var(--card-ink-secondary);
+  opacity: 1;
+}
+
+/* The caret and this rule are the focus indicator: a ring around a field this
+   wide would outline the whole card. */
+.field:focus,
+.field:focus-visible {
+  outline: none;
+  border-bottom-style: solid;
+  border-bottom-color: var(--accent-yellow);
+}
+
+.fieldHint {
+  min-height: 20px;
+  padding-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--card-ink-secondary);
+}
+
+.fieldHint[data-tone='warn'] {
+  color: #ffc4b3;
+}
+
+.cardBottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.sendNotice {
+  flex: 1;
+  max-width: 34ch;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--card-ink-secondary);
+}
+
+.cardLink {
+  color: var(--card-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.asked {
+  font-family: var(--font-mono);
+  font-size: clamp(16px, 1.5vw, 19px);
+  font-weight: 500;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.askedScroll {
+  max-height: min(34dvh, 230px);
+  margin-top: 10px;
+  /* The fade says "there is more" for a long question. The padding below it
+     keeps a short one, and the last line of a long one, clear of the fade. */
+  padding-bottom: 18px;
+  margin-bottom: -10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 242, 232, 0.3) transparent;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
+}
+
+/* --- Buttons --- */
+
+/* The one loud button: an orange word-sticker, cream die-cut edge and all. */
+.primary {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 3px solid var(--paper);
+  border-radius: 13px;
+  background: var(--accent-orange);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  filter: drop-shadow(0 3px 5px rgba(20, 15, 5, 0.34));
+  transition: transform 0.14s var(--ease-out), filter 0.14s var(--ease-out);
+}
+
+.primary:active {
+  transform: scale(0.97);
+}
+
+.primary[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cardGhost {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill);
+  background: var(--card-bg-elevated);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-out), background-color 0.16s ease;
+}
+
+.cardGhost::before {
+  content: '';
+  position: absolute;
+  inset: -6px 0;
+}
+
+.cardGhost:active {
+  transform: scale(0.97);
+}
+
+.inkButton,
+.paperButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-out);
+}
+
+.inkButton {
+  background: var(--ink);
+}
+
+.inkButton {
+  color: var(--paper);
+}
+
+.paperButton {
+  background: var(--note-paper);
+}
+
+.inkButton:active,
+.paperButton:active {
+  transform: scale(0.97);
+}
+
+.textButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.textButton {
+  color: var(--ink-secondary);
+}
+
+.iconButton {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px -10px 0 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .primary:hover:not([aria-disabled='true']) {
+    transform: translateY(-1.5px) rotate(-1deg);
+    filter: drop-shadow(0 7px 10px rgba(20, 15, 5, 0.36));
+  }
+  .primary:active:not([aria-disabled='true']) {
+    transform: scale(0.97);
+  }
+  .cardGhost:hover {
+    background: #322e2a;
+  }
+  .textButton:hover {
+    color: var(--ink);
+  }
+  .iconButton:hover {
+    background: rgba(42, 37, 31, 0.07);
+  }
+  .inkButton:hover,
+  .paperButton:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* --- New question confirmation --- */
+
+.newWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.confirm {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  width: min(300px, calc(100vw - 48px));
+  padding: 14px;
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: 0 14px 30px rgba(20, 15, 5, 0.3), 0 3px 8px rgba(20, 15, 5, 0.16);
+  transform-origin: 100% 0;
+}
+
+.tray .confirm {
+  right: auto;
+  left: 50%;
+  margin-left: calc(min(300px, 100vw - 48px) / -2);
+  transform-origin: 50% 0;
+}
+
+.confirmTitle {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.confirmBody {
+  margin-top: 4px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+   Under the card, before a thread: notices, starters, the stance card
+   --------------------------------------------------------------------------- */
+
+.below {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(760px, 100%);
+  margin: 26px auto 0;
+}
+
+.slip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 12px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--legal-pad);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  rotate: -0.4deg;
+  box-shadow: var(--note-shadow);
+}
+
+.slip[data-tone='error'] {
+  background: #fde6dd;
+}
+
+.slip > p {
+  flex: 1 1 220px;
+}
+
+.slipActions:empty {
+  display: none;
+}
+
+.table > .slip {
+  margin-top: 28px;
+}
+
+.starters {
+  text-align: center;
+}
+
+.startersLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.startersNote {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink);
+}
+
+.starterList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+  margin-top: 12px;
+  list-style: none;
+}
+
+.starter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  min-height: 52px;
+  padding: 8px 14px 8px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--note-paper);
+  text-align: left;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 1px 1px rgba(40, 30, 10, 0.1), 0 5px 10px rgba(40, 30, 10, 0.1);
+  transition: transform 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out), background-color 0.16s ease;
+}
+
+.starterList > li:nth-child(odd) .starter { rotate: -0.5deg; }
+.starterList > li:nth-child(even) .starter { rotate: 0.45deg; }
+
+.starter > svg {
+  flex: none;
+  color: var(--ink-secondary);
+  transition: transform 0.16s var(--ease-out);
+}
+
+.starter:active {
+  transform: scale(0.98);
+}
+
+.starterList[data-nudge] .starter {
+  animation: nudge 0.52s var(--ease-out) both;
+}
+.starterList[data-nudge] > li:nth-child(2) .starter { animation-delay: 0.05s; }
+.starterList[data-nudge] > li:nth-child(3) .starter { animation-delay: 0.1s; }
+.starterList[data-nudge] > li:nth-child(4) .starter { animation-delay: 0.15s; }
+
+@keyframes nudge {
+  0% { transform: scale(1); background-color: var(--note-paper); }
+  35% { transform: scale(1.025); background-color: var(--legal-pad); }
+  100% { transform: scale(1); background-color: var(--note-paper); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .starter:hover {
+    transform: translateY(-2px);
+    background: var(--legal-pad);
+    box-shadow: 0 2px 2px rgba(40, 30, 10, 0.1), 0 10px 18px rgba(40, 30, 10, 0.14);
+  }
+  .starter:hover > svg {
+    transform: translateX(3px);
+    color: var(--ink);
+  }
+}
+
+/* --- Stance card --- */
+
+.pager {
+  /* Clip sideways so neighbouring cards stay hidden, but let shadows fall below. */
+  overflow-x: clip;
+  overflow-y: visible;
+  /* Horizontal swipes are ours. Vertical ones still scroll the page. */
+  touch-action: pan-y;
+}
+
+.pagerTrack {
+  display: flex;
+  align-items: stretch;
+  will-change: transform;
+}
+
+.stance {
+  position: relative;
+  display: flex;
+  flex: 0 0 100%;
+  flex-direction: column;
+  min-width: 0;
+  padding: 18px 20px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  background: var(--note-paper);
+  text-align: left;
+  box-shadow: var(--note-shadow);
+}
+
+.stancePopover .stance {
+  box-shadow: 0 2px 4px rgba(40, 30, 10, 0.12), 0 18px 34px rgba(40, 30, 10, 0.24);
+}
+
+.stanceHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.stancePortrait {
+  flex: none;
+  margin-top: -2px;
+  line-height: 0;
+  rotate: -4deg;
+  filter: var(--shadow-sticker);
+}
+
+.stanceTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.stanceSchool {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.stanceFace {
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-secondary);
+}
+
+.stanceFaceLabel {
+  margin-right: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.stanceIntro {
+  margin-top: 12px;
+  font-size: 15.5px;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+.stanceLabel,
+.pickerLabel,
+.questionBackLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.stanceLabel {
+  margin-top: 14px;
+}
+
+.stanceQuestion {
+  margin-top: 3px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.reading {
+  margin-top: 8px;
+}
+
+.readingToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.readingChevron {
+  width: 7px;
+  height: 7px;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  rotate: -45deg;
+  transition: rotate 0.18s var(--ease-out);
+}
+
+.readingToggle[aria-expanded='true'] .readingChevron {
+  rotate: 45deg;
+}
+
+.readingNote {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.readingList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+  list-style: none;
+}
+
+.readingList a {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.readingAuthor,
+.readingWhy {
+  display: block;
+}
+
+.readingAuthor {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-secondary);
+}
+
+.readingWhy {
+  margin-top: 2px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.stanceFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 16px;
+  margin-top: auto;
+  padding-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.stanceFoot > p {
+  flex: 1 1 220px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .readingList a:hover {
+    color: var(--accent-orange);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The conversation
+   --------------------------------------------------------------------------- */
+
+.transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  margin-top: 22px;
+}
+
+.exchange {
+  /* Clear of the pinned bench when a follow-up is scrolled into view. */
+  scroll-margin-top: 132px;
+}
+
+/* It takes focus from script so reading continues from here. It is not a control, so it shows no ring. */
+.exchange:focus {
+  outline: none;
+}
+
+.exchangeStamp {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.exchangeStamp::before,
+.exchangeStamp::after {
+  content: '';
+  flex: 1;
+  border-top: 1.5px dashed rgba(42, 37, 31, 0.28);
+}
+
+.exchangeStamp > span {
+  padding: 5px 11px;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  rotate: -1.2deg;
+}
+
+.routing {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  width: min(640px, 100%);
+  margin: 0 auto;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+}
+
+.routing strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.routingIcon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--ink);
+}
+
+.routingScribble {
+  flex: none;
+  width: 34px;
+  height: 20px;
+  color: var(--ink);
+}
+
+.visitorSlip {
+  width: min(540px, 100%);
+  margin: 0 auto;
+  padding: 14px 18px 16px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  color: var(--card-ink);
+  rotate: 0.4deg;
+  box-shadow: 0 12px 24px rgba(20, 15, 5, 0.3), 0 4px 8px rgba(20, 15, 5, 0.2);
+}
+
+.visitorSlip ::selection {
+  background: rgba(230, 179, 42, 0.4);
+  color: var(--card-ink);
+}
+
+.visitorLabel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--card-ink-secondary);
+}
+
+.visitorLabel strong {
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--card-bg-elevated);
+  color: var(--card-ink);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.visitorText {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 15.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.notes {
+  display: grid;
+  align-items: start;
+  gap: 58px 24px;
+  /* Room for the portraits that stand up out of each note's top edge. */
+  margin-top: 62px;
+}
+
+.notes[data-count='1'] {
+  grid-template-columns: minmax(0, 620px);
+  justify-content: center;
+}
+
+.notes[data-count='2'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(880px, 100%);
+  margin-inline: auto;
+}
+
+.notes[data-count='3'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.note {
+  position: relative;
+  min-width: 0;
+  padding: 0 20px 20px;
+  border: 1px solid rgba(42, 37, 31, 0.1);
+  border-radius: 3px 3px 6px 5px;
+  background: var(--note-paper);
+  box-shadow: var(--note-shadow);
+  transition: box-shadow 0.2s ease;
+}
+
+.blankNote {
+  min-height: 150px;
+  padding: 26px 20px 22px;
+  border: 1.5px dashed rgba(42, 37, 31, 0.3);
+  border-radius: 4px;
+}
+
+.note[data-kind='synthesis'],
+.note[data-kind='council'] {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(640px, 100%);
+  padding-top: 20px;
+}
+
+.note[data-kind='synthesis'] {
+  background: var(--legal-pad);
+}
+
+/* The council answering as one: plain paper, no seat, no doodle. */
+.note[data-kind='council'] .noteGlyph {
+  display: none;
+}
+
+.note[data-kind='council'] .noteHead {
+  margin-left: 0;
+}
+
+/* The seat picked on the bench: an ink outline, so it is not color alone. */
+.note[data-focused] {
+  box-shadow: var(--note-shadow), 0 0 0 2px var(--ink);
+}
+
+.tape {
+  position: absolute;
+  top: -11px;
+  right: 26px;
+  width: 62px;
+  height: 21px;
+  background: color-mix(in srgb, var(--seat-accent) 64%, transparent);
+  rotate: 4deg;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+}
+
+.note:nth-child(even) .tape {
+  right: 34px;
+  rotate: -3deg;
+}
+
+.noteHead {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 0 0 12px -8px;
+}
+
+.note[data-kind='seat'] .noteHead {
+  margin-top: -34px;
+}
+
+.notePortrait {
+  flex: none;
+  line-height: 0;
+  rotate: -5deg;
+  filter: var(--shadow-sticker);
+}
+
+.note:nth-child(even) .notePortrait {
+  rotate: 4deg;
+}
+
+.noteGlyph {
+  flex: none;
+  width: 38px;
+  margin-left: 8px;
+  line-height: 0;
+}
+
+.noteTitle {
+  min-width: 0;
+  padding-bottom: 3px;
+}
+
+.noteLens {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+}
+
+.noteMeta {
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--ink-secondary);
+}
+
+.noteBody {
+  max-width: 64ch;
+  font-size: 15.5px;
+  line-height: 1.62;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Fresh words arrive in lighter ink and settle. Opacity only. */
+.fresh {
+  animation: inkIn 0.34s var(--ease-out) both;
+}
+
+@keyframes inkIn {
+  from { opacity: 0.08; }
+  to { opacity: 1; }
+}
+
+.caret {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 3px;
+  border-radius: 50%;
+  background: var(--seat-accent);
+  box-shadow: 0 0 0 1.5px var(--ink);
+  animation: caretBreathe 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes caretBreathe {
+  from { opacity: 1; }
+  to { opacity: 0.35; }
+}
+
+.notePending {
+  padding: 2px 0 8px;
+}
+
+.pendingLine {
+  display: block;
+  height: 2px;
+  margin-top: 15px;
+  border-radius: 2px;
+  background: rgba(42, 37, 31, 0.16);
+  transform-origin: 0 50%;
+  animation: pencilLine 2.2s var(--ease-out) infinite;
+}
+
+.pendingLine:nth-of-type(2) { animation-delay: 0.22s; }
+.pendingLine:nth-of-type(3) { animation-delay: 0.44s; }
+
+/* Each rule is drawn left to right, held, then lifted, like a pencil trying a line. */
+@keyframes pencilLine {
+  0% { transform: scaleX(0); opacity: 0; }
+  12% { opacity: 1; }
+  45%, 82% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+.pendingLine:nth-of-type(1) { width: 92%; }
+.pendingLine:nth-of-type(2) { width: 100%; }
+.pendingLine:nth-of-type(3) { width: 58%; }
+
+.noteCut {
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1.5px dashed rgba(42, 37, 31, 0.3);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--accent-orange);
+}
+
+.questionBack {
+  width: min(600px, 100%);
+  margin: 40px auto 0;
+  text-align: center;
+}
+
+.questionBackText {
+  display: inline;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.1vw, 27px);
+  line-height: 1.32;
+  /* A stroke of highlighter under each line. */
+  background: linear-gradient(transparent 58%, rgba(230, 179, 42, 0.5) 58%, rgba(230, 179, 42, 0.5) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 4px;
+}
+
+.questionBackLabel {
+  margin-bottom: 8px;
+}
+
+.scriptedMark {
+  margin-top: 26px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   The move tray: one follow-up, armed then spent
+   --------------------------------------------------------------------------- */
+
+.tray {
+  width: min(960px, 100%);
+  margin: 52px auto 0;
+  text-align: center;
+}
+
+.trayTitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(26px, 2.6vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.trayNote {
+  margin: 8px auto 0;
+  max-width: 62ch;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  text-wrap: balance;
+}
+
+.tickets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+  list-style: none;
+}
+
+.tickets > li {
+  flex: 1 1 168px;
+  max-width: 220px;
+}
+
+.ticketsLabel {
+  margin-top: 34px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-secondary);
+}
+
+.ticketsLabel + .tickets {
+  margin-top: 12px;
+}
+
+.trayLead {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.ticket {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  min-height: 92px;
+  padding: 12px 14px 13px;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--note-paper);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 1px rgba(40, 30, 10, 0.1), 0 5px 10px rgba(40, 30, 10, 0.1);
+  transition: transform 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out), background-color 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+}
+
+.tickets > li:nth-child(odd) .ticket { rotate: -0.6deg; }
+.tickets > li:nth-child(even) .ticket { rotate: 0.5deg; }
+
+.ticketLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ticketHint {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-secondary);
+}
+
+.ticket[data-dim] {
+  opacity: 0.72;
+}
+
+/* Armed: inverted to the visitor's dark card, lifted off the board. */
+.ticket[aria-pressed='true'] {
+  background: var(--card-bg);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 6px rgba(20, 15, 5, 0.2), 0 14px 22px rgba(20, 15, 5, 0.24);
+}
+
+.ticket[aria-pressed='true'] {
+  color: var(--card-ink);
+}
+
+.ticket[aria-pressed='true'] .ticketHint {
+  color: var(--card-ink-secondary);
+}
+
+.ticket:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ticket:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 2px rgba(40, 30, 10, 0.1), 0 10px 18px rgba(40, 30, 10, 0.14);
+  }
+  .ticket[aria-pressed='true']:hover {
+    transform: translateY(-3px);
+  }
+}
+
+.armed {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(580px, 100%);
+  margin: 18px auto 0;
+  padding: 16px 18px;
+  border: 1.5px dashed rgba(42, 37, 31, 0.5);
+  border-radius: 14px;
+  background: rgba(253, 251, 247, 0.72);
+  text-align: left;
+  transform-origin: 50% 0;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pickerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 3px 13px 3px 7px;
+  border: 1.5px solid rgba(42, 37, 31, 0.36);
+  border-radius: var(--radius-pill);
+  background: var(--note-paper);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-out), border-color 0.14s ease, background-color 0.14s ease;
+}
+
+.pick:active {
+  transform: scale(0.97);
+}
+
+.pick[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--legal-pad);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.pickPortrait {
+  line-height: 0;
+  filter: drop-shadow(0 1px 2px rgba(40, 30, 10, 0.25));
+}
+
+.pickTick {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.pickTick {
+  color: var(--paper);
+}
+
+.objection {
+  display: flex;
+  flex-direction: column;
+}
+
+.objectionLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.objectionLabel > span {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--ink-secondary);
+}
+
+.objectionField {
+  display: block;
+  width: 100%;
+  max-height: 38dvh;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--note-paper);
+  color: var(--ink);
+  caret-color: var(--accent-orange);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  resize: none;
+  overflow-y: auto;
+  scroll-margin: 110px 0 24px;
+}
+
+.objectionField::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+.objectionField:read-only {
+  border-style: dashed;
+  background: var(--paper-secondary);
+}
+
+.objectionHint {
+  min-height: 18px;
+  padding-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--accent-orange);
+}
+
+.objectionKept {
+  margin-top: 2px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink-secondary);
+}
+
+.suggestion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-secondary);
+}
+
+.suggestionChip {
+  min-height: 44px;
+  padding: 8px 13px;
+  border: 1.5px dashed rgba(42, 37, 31, 0.5);
+  border-radius: 10px;
+  background: var(--note-paper);
+  text-align: left;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-out), border-color 0.14s ease;
+}
+
+.suggestionChip:active {
+  transform: scale(0.98);
+}
+
+.armedActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 16px;
+}
+
+.objection .armedActions {
+  margin-top: 12px;
+}
+
+.debateSummary {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.trayEnd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  margin-top: 34px;
+}
+
+.trayEnd .starters {
+  width: min(760px, 100%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pick:hover,
+  .suggestionChip:hover {
+    border-color: var(--ink);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   /council/privacy
+   --------------------------------------------------------------------------- */
+
+.prose {
+  width: min(620px, 100%);
+  margin: 0 auto;
+  padding: 104px 0 40px;
+}
+
+.prose .title {
+  margin-top: 10px;
+}
+
+.prose p {
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.prose .proseLead {
+  margin-top: 18px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 25px;
+  line-height: 1.32;
+  text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------------------
+   Narrower desktops: a shallower arc, all six seats above the card
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .table {
+    --arc-clear: 216px;
+  }
+
+  .seat:nth-child(1) { --arc-x: 8.5%; --arc-y: 46px; }
+  .seat:nth-child(2) { --arc-x: 25%; --arc-y: 16px; }
+  .seat:nth-child(3) { --arc-x: 41.7%; --arc-y: 2px; }
+  .seat:nth-child(4) { --arc-x: 58.3%; --arc-y: 0px; }
+  .seat:nth-child(5) { --arc-x: 75%; --arc-y: 14px; }
+  .seat:nth-child(6) { --arc-x: 91.5%; --arc-y: 42px; }
+
+  .seats[data-arrangement='arc'] .seatTagSuffix {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .notes[data-count='3'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Phones and small tablets
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 0 max(16px, env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+
+  .brand {
+    top: max(14px, env(safe-area-inset-top));
+    left: max(16px, env(safe-area-inset-left));
+  }
+
+  .brandName {
+    font-size: 28px;
+  }
+
+  .hero {
+    padding-top: calc(54px + env(safe-area-inset-top));
+  }
+
+  .intro {
+    font-size: 14.5px;
+  }
+
+  .heroDisclosure {
+    display: block;
+    margin: 8px auto 0;
+    max-width: 38ch;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--ink-secondary);
+    text-wrap: balance;
+  }
+
+  .page[data-mode='empty'] .footerDisclosure {
+    display: none;
+  }
+
+  .table {
+    margin-top: 18px;
+  }
+
+  .page[data-mode='thread'] .table {
+    /* The brand keeps the first row to itself; the bench pins below it. */
+    margin-top: calc(52px + env(safe-area-inset-top));
+  }
+
+  /* Two rows of three. Every seat visible, every seat a thumb-sized target. */
+  .seatsAnchor[data-arrangement='arc'] {
+    position: static;
+    height: auto;
+  }
+
+  .seats[data-arrangement='arc'] .seatRow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-items: center;
+    gap: 16px 4px;
+    width: min(400px, 100%);
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .seats[data-arrangement='arc'] .seat {
+    position: relative;
+    left: auto;
+    top: auto;
+    padding: 0 4px;
+  }
+
+  .seats[data-arrangement='arc'] .peek {
+    display: none;
+  }
+
+  /* The server renders desktop-sized portraits. This holds them to the phone
+     size for the frame before hydration corrects the number. */
+  .seats[data-arrangement='arc'] .seatPortrait {
+    width: min(var(--seat-size), 86px);
+  }
+
+  .seatTag {
+    padding: 4px 7px;
+    letter-spacing: 0.02em;
+  }
+
+  .seatsAnchor[data-arrangement='bench'] {
+    padding-top: 6px;
+    padding-bottom: 14px;
+  }
+
+  .seats[data-arrangement='bench'] {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .seats[data-arrangement='bench'] .seatRow {
+    gap: 4px;
+  }
+
+  .seats[data-arrangement='bench'] .seat {
+    padding: 0 2px;
+  }
+
+  .benchStatus {
+    justify-content: center;
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .card {
+    margin-top: 22px;
+  }
+
+  .card[data-mode='asked'] {
+    margin-top: 4px;
+  }
+
+  .cardBody {
+    padding: 16px 16px 18px;
+  }
+
+  .cardBottom {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  /* "Ask the Existentialist lens" is wider than a 320px card: let it wrap. */
+  .primary {
+    min-width: 0;
+    padding: 10px 14px;
+    line-height: 1.35;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .primary > svg {
+    flex: none;
+  }
+
+  .sendNotice {
+    max-width: none;
+  }
+
+  .below {
+    margin-top: 28px;
+  }
+
+  .starterList {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .starter {
+    font-size: 18px;
+  }
+
+  .stanceSchool {
+    font-size: 27px;
+  }
+
+  .transcript {
+    gap: 40px;
+    margin-top: 20px;
+  }
+
+  .routing {
+    justify-content: flex-start;
+  }
+
+  .notes,
+  .notes[data-count='1'],
+  .notes[data-count='2'],
+  .notes[data-count='3'] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 52px;
+    margin-top: 54px;
+  }
+
+  .note {
+    /* On a tablet a full-width note runs to 90 characters a line. Hold the
+       measure and let the notes step left and right down the board instead. */
+    width: min(100%, 580px);
+    padding: 0 16px 18px;
+  }
+
+  .note:nth-child(odd) {
+    margin-right: auto;
+  }
+
+  .note:nth-child(even) {
+    margin-left: auto;
+  }
+
+  .note[data-kind='synthesis'],
+  .note[data-kind='council'] {
+    margin-inline: auto;
+  }
+
+  .note[data-kind='synthesis'],
+  .note[data-kind='council'] {
+    padding-top: 18px;
+  }
+
+  .noteLens {
+    font-size: 23px;
+  }
+
+  .noteBody {
+    font-size: 16px;
+  }
+
+  .tray {
+    margin-top: 44px;
+  }
+
+  .tickets {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tickets > li {
+    flex: none;
+    max-width: none;
+  }
+
+  .ticket {
+    min-height: 0;
+  }
+
+  .armed {
+    margin-top: 10px;
+    padding: 14px;
+  }
+
+  .armedActions {
+    justify-content: space-between;
+  }
+
+  .prose {
+    padding-top: 84px;
+  }
+
+  .prose .proseLead {
+    font-size: 23px;
+  }
+}
+
+/* The narrowest phones: the lens name alone, in a face that fits the column. */
+@media (max-width: 359px) {
+  .seats[data-arrangement='arc'] .seatTagSuffix {
+    display: none;
+  }
+
+  .seats[data-arrangement='arc'] .seatPortrait {
+    width: min(var(--seat-size), 70px);
+  }
+
+  .seatTag {
+    padding: 4px 6px;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  .starter {
+    font-size: 17px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Preferences
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* The global rule would park these loops on their last (invisible) frame. */
+  .scribblePath {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .caret,
+  .pendingLine {
+    animation: none;
+  }
+  .fresh,
+  .starterList[data-nudge] .starter {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .seatsAnchor[data-arrangement='bench']::before {
+    background: #faf6ec;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .seatsAnchor[data-arrangement='bench']::before {
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1.5px solid var(--ink);
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .note,
+  .pick {
+    border-color: var(--ink);
+  }
+}

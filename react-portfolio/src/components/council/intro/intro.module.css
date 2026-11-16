@@ -1,0 +1,805 @@
+/* The council intro: a full-viewport overlay on the paper board. Positions
+   come from layout.ts as inline styles and transforms; this file is surface,
+   type and the few one-shot reveals no finger ever drives. */
+
+.root {
+  --note-paper: #fffefb;
+
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  /* The overlay is its own scroller, because the site's body never scrolls.
+     Scrolling is left entirely to the browser: native momentum and native
+     rubber band. No CSS scroll-snap: in Chrome even proximity snapping drags
+     a short wheel scroll back to where it began (see settleScroll). */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* No scrollbar: the cue and the lineup are the progress, and a gutter would
+     leave a strip of the scene showing beside the paper. */
+  scrollbar-width: none;
+  outline: none;
+  color: var(--ink);
+  touch-action: pan-y pinch-zoom;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+.root::-webkit-scrollbar {
+  display: none;
+}
+
+/* Flat paper on the scroller itself, which stays put while the content
+   rubber-bands. Without it, bouncing off either end would slide the stage
+   away and show a strip of the scene behind. */
+.root[data-papered] {
+  background-color: #f8f2e6;
+}
+
+.root[data-exiting] {
+  pointer-events: none;
+}
+
+/* As tall as the viewport plus every step's worth of scroll (set inline). */
+.track {
+  position: relative;
+  min-height: 100%;
+}
+
+/* The board itself: pinned for the whole scroll. */
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* The same board the scene draws, so the overlay reads as the board itself, emptied. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+    radial-gradient(ellipse 120% 100% at 50% 35%, #fffdf8 0%, #faf6ec 40%, #f5ede0 70%, #ebe3d5 100%);
+  background-size: 28px 28px, 28px 28px, 140px 140px, 140px 140px, 100% 100%;
+}
+
+/* Reads the safe-area insets for layout.ts, which cannot see env() from script. */
+.safeProbe {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.content,
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.layer {
+  pointer-events: none;
+}
+
+:where(.layer) button {
+  pointer-events: auto;
+  font: inherit;
+  color: inherit;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------------------------------------------------------------------------
+   Top bar
+   --------------------------------------------------------------------------- */
+
+.topBar {
+  position: absolute;
+  top: env(safe-area-inset-top, 0px);
+  left: max(16px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.iconButton,
+.skip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+}
+
+.iconButton {
+  color: var(--ink-secondary);
+}
+
+.iconButton svg {
+  display: block;
+  transition: transform 0.12s var(--ease-out);
+}
+
+.skip {
+  padding: 0 8px;
+}
+
+.skipPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 13px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 254, 251, 0.7);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  transition:
+    transform 0.12s var(--ease-out),
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.iconButton:active svg,
+.skip:active .skipPill {
+  transform: scale(0.94);
+}
+
+.root :focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+.iconButton:focus-visible,
+.skip:focus-visible {
+  outline-offset: -4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .slot:hover .slotOutline {
+    opacity: 1;
+  }
+  .skip:hover .skipPill {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .iconButton:hover {
+    color: var(--ink);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Lineup: six places along the top. Empty, they are the progress marks.
+   --------------------------------------------------------------------------- */
+
+.lineup {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.place {
+  position: absolute;
+}
+
+.slot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  cursor: pointer;
+}
+
+/* A kiss-cut outline waiting for its sticker. */
+.slotOutline {
+  position: absolute;
+  inset: 12% 8% 2%;
+  border: 1.5px dashed var(--seat-accent);
+  border-radius: 46% 46% 18% 18% / 40% 40% 14% 14%;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.place[data-state='locked'] .slotOutline {
+  opacity: 0.55;
+}
+
+.place[data-state='now'] .slotOutline {
+  border-style: solid;
+  opacity: 0.9;
+}
+
+.place[data-state='done'] .slotOutline {
+  opacity: 0;
+}
+
+/* The stroke under each place. It draws the scroll that unlocks its member. */
+.mark {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--seat-accent) 26%, transparent);
+}
+
+.markFill {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: var(--seat-accent);
+  transform-origin: 0 50%;
+}
+
+/* ---------------------------------------------------------------------------
+   Stickers
+   --------------------------------------------------------------------------- */
+
+/* A zero-size anchor at the centre of the portrait. The seat box hangs from
+   it, centred by flex overflow, so no box here needs a centring transform. */
+.sticker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 0;
+  height: 0;
+}
+
+/* Everything in here is sized in "seat pixels" divided by --k, the scale of
+   the assembled pose. At that pose the box measures exactly what a seat in the
+   scene measures: portrait, 7px gap, 11px lens tag, 8px side padding. */
+.seatBox {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(7px / var(--k));
+  margin-top: calc(var(--r) * -0.6);
+  padding: 0 calc(8px / var(--k));
+}
+
+.tilt {
+  position: relative;
+  display: block;
+  width: var(--r);
+  line-height: 0;
+}
+
+.shadow {
+  position: absolute;
+  inset: 0;
+  /* Behind the portrait, inside the tilt's own stacking context. */
+  z-index: -1;
+  /* Blurred once and cached. About 4.5px of blur at seat size, softer on the stage. */
+  filter: brightness(0) blur(calc(4.5px / var(--k)));
+}
+
+.shadowArt,
+.shadowArt * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: calc(4px / var(--k)) calc(9px / var(--k));
+  border: calc(2.5px / var(--k)) solid var(--paper);
+  border-radius: calc(8px / var(--k));
+  background: var(--card-bg);
+  color: var(--card-ink);
+  font-family: var(--font-mono);
+  font-size: calc(11px / var(--k));
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  rotate: -1.5deg;
+}
+
+.tag[data-odd] {
+  rotate: 1.2deg;
+}
+
+/* ---------------------------------------------------------------------------
+   Speech bubbles
+   --------------------------------------------------------------------------- */
+
+.bubbleTrack {
+  position: absolute;
+}
+
+/* Nothing here is dragged any more, so the words can be selected like any text. */
+.bubble[data-current][data-level='2'] {
+  pointer-events: auto;
+}
+
+.bubbleAnchor[data-tail='left'] {
+  transform: translateY(-50%);
+}
+
+.bubble {
+  position: relative;
+  padding: 15px 18px 18px;
+  border: 2.5px solid var(--seat-accent);
+  border-radius: 20px;
+  background: var(--note-paper);
+  box-shadow:
+    0 1px 1px rgba(40, 30, 10, 0.1),
+    0 6px 14px rgba(40, 30, 10, 0.11),
+    0 20px 30px -20px rgba(40, 30, 10, 0.28);
+  transform-origin: 50% 0;
+  transition:
+    transform 0.44s var(--ease-bounce),
+    opacity 0.14s ease-out;
+}
+
+.bubbleAnchor[data-tail='left'] .bubble {
+  transform-origin: 0 50%;
+}
+
+.bubble[data-level='0'] {
+  opacity: 0;
+  transform: scale(0.9) translateY(8px);
+  transition: none;
+}
+
+.bubbleAnchor[data-tail='left'] .bubble[data-level='0'] {
+  transform: scale(0.9) translateX(-8px);
+}
+
+/* The tail: a paper square turned on its corner, wearing two sides of the border. */
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: -9.5px;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  margin-left: -7.5px;
+  border-top: 2.5px solid var(--seat-accent);
+  border-left: 2.5px solid var(--seat-accent);
+  border-top-left-radius: 4px;
+  background: var(--note-paper);
+  transform: rotate(45deg);
+}
+
+.bubbleAnchor[data-tail='left'] .bubble::before {
+  top: 50%;
+  left: -9.5px;
+  margin: -7.5px 0 0;
+  transform: rotate(-45deg);
+}
+
+.hello {
+  display: flex;
+  gap: 9px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ink-secondary);
+}
+
+/* The seat's colour as a fill, never as text: the yellow could not carry words. */
+.hello::before {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-top: 4.5px;
+  border-radius: 50%;
+  background: var(--seat-accent);
+}
+
+.worldview {
+  margin: 9px 0 0;
+  font-family: var(--font-serif);
+  font-size: 27px;
+  line-height: 1.13;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+  transition:
+    opacity 0.34s var(--ease-out),
+    transform 0.34s var(--ease-out);
+}
+
+.bubble:not([data-level='2']) .worldview {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: none;
+}
+
+/* ---------------------------------------------------------------------------
+   The beat card: the board's dark card, standing where the composer will be
+   --------------------------------------------------------------------------- */
+
+.cardTrack {
+  position: absolute;
+}
+
+.card {
+  position: relative;
+  padding: 17px 20px 20px;
+  border-radius: var(--radius-xl);
+  background: var(--card-bg);
+  color: var(--card-ink);
+  box-shadow: var(--shadow-card);
+}
+
+/* The next card in the stack, peeking out underneath, as on the homepage. */
+.card::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: auto 14px -9px;
+  height: 30px;
+  border-radius: 0 0 16px 16px;
+  background: #100f0e;
+  box-shadow: 0 10px 18px rgba(20, 15, 5, 0.25);
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--card-ink-secondary);
+}
+
+.cardCount b {
+  font-weight: 700;
+  color: var(--card-ink);
+}
+
+/* The three beats share one cell and slide through it with the finger. The
+   negative margin lets a sliding line run to the card's edge before it clips. */
+.beats {
+  display: grid;
+  align-items: start;
+  min-height: 4.7em;
+  margin: 12px -20px -6px;
+  padding: 0 20px 6px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.52;
+}
+
+.beat {
+  grid-area: 1 / 1;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* The invitation is the line the whole intro has been walking toward. */
+.beat[data-invite] {
+  font-size: 1.3em;
+  font-weight: 600;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+}
+
+/* ---------------------------------------------------------------------------
+   The scroll cue: keep scrolling, and who that unlocks. At the end, the invitation.
+   --------------------------------------------------------------------------- */
+
+.cueDock {
+  position: absolute;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  left: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.cue {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 0 18px 0 14px;
+  overflow: hidden;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--note-paper);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: left;
+  cursor: pointer;
+  filter: drop-shadow(0 3px 5px rgba(40, 30, 10, 0.16));
+  transition:
+    transform 0.12s var(--ease-out),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.cue:active {
+  transform: scale(0.97);
+}
+
+/* The seat colour of whoever is next, poured in from the left as the scroll
+   closes on them. This is the part of the cue that answers every pixel. */
+.cueFill {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--seat-accent) 34%, transparent);
+  transform-origin: 0 50%;
+}
+
+.cueGlyph,
+.cueText {
+  position: relative;
+}
+
+.cueGlyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  transition: opacity 0.2s ease;
+}
+
+.cueGlyph svg {
+  display: block;
+  animation: cueBob 1.6s ease-in-out infinite;
+}
+
+.cueText {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 7px;
+  min-width: 0;
+}
+
+.cueVerb {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cueDot {
+  color: var(--ink-secondary);
+}
+
+.cueNext {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A finger swipes content up, so on touch the arrow points and moves up. */
+.forPointer {
+  display: none;
+}
+
+.cueGlyph svg {
+  rotate: 180deg;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .forTouch {
+    display: none;
+  }
+  .forPointer {
+    display: inline;
+  }
+  .cueGlyph svg {
+    rotate: none;
+  }
+  .cue:not([data-final]):hover {
+    background: #fff;
+  }
+}
+
+/* While the visitor is scrolling the cue gets out of the way: no loop, a
+   fainter arrow. The fill is doing the talking. */
+.root[data-activity='active'] .cueGlyph {
+  opacity: 0.45;
+}
+
+.root[data-activity='active'] .cueGlyph svg {
+  animation-play-state: paused;
+}
+
+/* Stopped for a while: it asks. A bigger, quicker bob, and the whole pill hops. */
+.root[data-activity='idle'] .cueGlyph svg {
+  animation: cueBobWide 1.1s ease-in-out infinite;
+}
+
+.root[data-activity='idle'] .cue:not([data-final]) {
+  animation: cueHop 2.4s var(--ease-out) infinite;
+}
+
+/* translate, not transform: the arrow's direction is set with rotate, and the
+   hop must not fight the press scale. */
+@keyframes cueBob {
+  0%, 100% { translate: 0 -2px; }
+  50% { translate: 0 3px; }
+}
+
+@keyframes cueBobWide {
+  0%, 100% { translate: 0 -3px; }
+  50% { translate: 0 5px; }
+}
+
+@keyframes cueHop {
+  0%, 62%, 100% { translate: 0 0; }
+  72% { translate: 0 -7px; }
+  82% { translate: 0 0; }
+  89% { translate: 0 -3px; }
+  96% { translate: 0 0; }
+}
+
+/* The last step: the same control, now the way in. */
+.cue[data-final] {
+  justify-content: center;
+  gap: 10px;
+  min-width: min(300px, 100%);
+  min-height: 52px;
+  padding: 0 24px;
+  border: 2.5px solid var(--paper);
+  border-radius: 13px;
+  background: var(--accent-orange);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  filter: drop-shadow(0 4px 6px rgba(20, 15, 5, 0.3));
+}
+
+.cue[data-final]:focus-visible {
+  outline-offset: 4px;
+}
+
+.cue[data-final] svg {
+  flex: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cue[data-final]:hover {
+    transform: translateY(-1.5px) rotate(-0.6deg);
+  }
+  .cue[data-final]:hover:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Larger screens
+   --------------------------------------------------------------------------- */
+
+@media (min-width: 600px) {
+  .topBar {
+    left: max(28px, env(safe-area-inset-left, 0px));
+    right: max(18px, env(safe-area-inset-right, 0px));
+    height: 56px;
+  }
+  .title {
+    font-size: 28px;
+  }
+  .bubble {
+    padding: 20px 24px 24px;
+  }
+  .hello {
+    font-size: 13px;
+  }
+  .worldview {
+    font-size: 32px;
+  }
+  .card {
+    padding: 20px 24px 24px;
+  }
+  .beats {
+    margin: 14px -24px 0;
+    padding: 0 24px;
+    font-size: 17px;
+    min-height: 3.2em;
+  }
+}
+
+@media (min-width: 900px) {
+  .worldview {
+    font-size: 37px;
+    line-height: 1.1;
+  }
+}
+
+/* The narrowest phones. */
+@media (max-width: 359px) {
+  /* No room for one line, so the cue is two on purpose: the verb, then the name. */
+  .cueText {
+    flex-direction: column;
+    row-gap: 2px;
+  }
+  .cueDot {
+    display: none;
+  }
+  .tag {
+    padding: calc(4px / var(--k)) calc(6px / var(--k));
+  }
+  .title {
+    font-size: 21px;
+  }
+  .worldview {
+    font-size: 24px;
+  }
+  .beats {
+    font-size: 14.5px;
+  }
+}

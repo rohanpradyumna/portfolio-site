@@ -15,6 +15,7 @@ import {
   FolderSticker,
   CoffeeMachineSticker,
   WheelSticker,
+  CouncilSticker,
 } from '@/components/stickers';
 
 // First-visit wake-up wave timing (mirrors DesktopStickers). On touch this is the
@@ -41,6 +42,7 @@ interface MobileDragCanvasProps {
     openWork: () => void;
     openWriting: () => void;
     openWheel: () => void;
+    openCouncil: () => void;
     brewCoffee: () => void;
   };
 }
@@ -76,8 +78,9 @@ const LAYOUT: LayoutItem[] = [
   { id: 'gym', xFrac: 0.42, y: 796, w: 88, h: 88, rot: -4 },
   { id: 'pickleball', xFrac: 0.74, y: 784, w: 90, h: 94, rot: 6 },
   { id: 'terrapin', xFrac: 0.5, y: 892, w: 96, h: 96, rot: -3 },
-  { id: 'wheel', xFrac: 0.5, y: 1010, w: 96, h: 120, rot: -2 },
+  { id: 'wheel', xFrac: 0.2, y: 1010, w: 96, h: 120, rot: -2 },
   { id: 'coffeeMachine', xFrac: 0.5, y: 1160, w: 100, h: 130, rot: 2 },
+  { id: 'council', xFrac: 0.8, y: 1012, w: 116, h: 116, rot: 3 },
 ];
 
 const CANVAS_MIN_HEIGHT = 1340;
@@ -386,6 +389,21 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           snapBackHome
           wake={wake}
           wakeDelay={wakeDelayFor('wheel')}
+        />
+
+        <CouncilSticker
+          id="council-m"
+          initial={pos(LAYOUT[18])}
+          zBase={7}
+          onClick={handlers.openCouncil}
+          entranceDelay={delayFor('council')}
+          dragConstraints={canvasRef}
+          disableSnap
+          allowPageScroll
+          snapBackHome
+          title="the council · question everything"
+          wake={wake}
+          wakeDelay={wakeDelayFor('council')}
         />
 
         {/* Easter egg label + coffee machine, tucked at the bottom of the canvas */}

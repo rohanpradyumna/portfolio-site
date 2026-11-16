@@ -15,6 +15,7 @@ import {
   FolderSticker,
   CoffeeMachineSticker,
   WheelSticker,
+  CouncilSticker,
 } from '@/components/stickers';
 
 // First-visit wake-up wave: content stickers breathe once in a gentle stagger,
@@ -31,6 +32,7 @@ const WAKE_ORDER = [
   'laptop',
   'folder',
   'wheel',
+  'council',
   'airpods',
   'beach',
   'camera',
@@ -62,6 +64,7 @@ interface DesktopStickersProps {
     openWork: () => void;
     openWriting: () => void;
     openWheel: () => void;
+    openCouncil: () => void;
     brewCoffee: () => void;
   };
 }
@@ -287,6 +290,19 @@ export function DesktopStickers({
         peekLabel="spin for a topic →"
         wake={wake}
         wakeDelay={wakeDelayFor('wheel')}
+      />
+
+      {/* The Council */}
+      <CouncilSticker
+        id="council"
+        initial={positions.council || { x: 0, y: 0, rot: 0 }}
+        zBase={7}
+        onClick={handlers.openCouncil}
+        entranceDelay={1025}
+        title="the council · question everything"
+        peekLabel="the council has opinions →"
+        wake={wake}
+        wakeDelay={wakeDelayFor('council')}
       />
 
       {/* Easter Egg: Coffee Machine, tucked into the bottom-left corner */}

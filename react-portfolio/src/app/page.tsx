@@ -173,6 +173,7 @@ export default function Home() {
       { id: 'laptop', ...placeOrbital(-58, od(150), s(100), s(90), 0, config) },
       { id: 'folder', ...placeOrbital(122, od(160), s(100), s(80), 0, config) },
       { id: 'wheel', ...placeOrbital(-78, od(190), s(96), s(120), 0, config) },
+      { id: 'council', ...placeOrbital(-24, od(120), s(116), s(116), 0, config) },
     ];
 
     // True on-screen sizes per sticker (some components render a different size
@@ -195,6 +196,7 @@ export default function Home() {
       laptop: [s(100), s(90)],
       folder: [s(100), s(80)],
       wheel: [s(96), s(120)],
+      council: [s(116), s(116)],
     };
 
     // Immovable obstacles: the center card and the bottom-left coffee machine
@@ -266,6 +268,7 @@ export default function Home() {
       openWork: () => setModal('work'),
       openWriting: () => (window.location.href = '/blog.html'),
       openWheel: () => (window.location.href = '/wheel'),
+      openCouncil: () => (window.location.href = '/council'),
       brewCoffee: () => {
         const randomQuote = STOIC_QUOTES[Math.floor(Math.random() * STOIC_QUOTES.length)];
         setStoicQuote(randomQuote);
