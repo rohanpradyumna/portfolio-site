@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PORTRAIT_ASPECT } from './constants';
 import { TAG_BLOCK, computeLayout, sceneSeatSize } from './layout';
+import { viewScale } from '../scale';
 
 const VIEWPORTS = [
   { name: 'small phone', w: 320, h: 568 },
@@ -11,6 +12,21 @@ const VIEWPORTS = [
   { name: 'short laptop', w: 1280, h: 620 },
   { name: 'wide monitor', w: 2560, h: 1300 },
 ];
+
+describe('sceneSeatSize at the size the scene renders', () => {
+  it('fits the first view to the window height on a desktop, and leaves phones alone', () => {
+    expect(sceneSeatSize(1512, 860)).toBe(Math.round(124 * (860 / 1020)));
+    expect(sceneSeatSize(2560, 1300)).toBe(Math.round(124 * (1300 / 1020)));
+    // A short laptop window shrinks, down to the readable floor.
+    expect(sceneSeatSize(1280, 720)).toBe(Math.round(124 * (720 / 1020)));
+    expect(sceneSeatSize(1280, 600)).toBe(Math.round(124 * 0.68));
+    // Growth needs width as well as height, and stops at the cap.
+    expect(sceneSeatSize(1512, 2000)).toBe(124);
+    expect(sceneSeatSize(3840, 2160)).toBe(Math.round(124 * 1.7));
+    expect(sceneSeatSize(390, 844)).toBe(86);
+    expect(sceneSeatSize(768, 1024)).toBe(86);
+  });
+});
 
 describe('sceneSeatSize', () => {
   it('mirrors the scene breakpoints', () => {
@@ -64,7 +80,7 @@ describe.each(VIEWPORTS)('computeLayout on a $name', (viewport) => {
     const lowest = Math.max(...layout.assembly.map((pose) => pose.cy + (pose.width * PORTRAIT_ASPECT) / 2));
     expect(lowest + TAG_BLOCK).toBeLessThanOrEqual(layout.card.top);
     for (const pose of layout.assembly) {
-      expect(pose.width).toBeLessThanOrEqual(sceneSeatSize(viewport.w));
+      expect(pose.width).toBeLessThanOrEqual(sceneSeatSize(viewport.w, viewport.h));
       expect(pose.cx - pose.width / 2).toBeGreaterThanOrEqual(0);
       expect(pose.cx + pose.width / 2).toBeLessThanOrEqual(viewport.w);
       expect(pose.cy - (pose.width * PORTRAIT_ASPECT) / 2).toBeGreaterThanOrEqual(top);
@@ -84,7 +100,8 @@ describe.each(VIEWPORTS)('computeLayout on a $name', (viewport) => {
 
   it('keeps the bottom band clear for the scroll cue', () => {
     const floor = viewport.h - (viewport.safeBottom ?? 0) - layout.cueBand;
-    expect(layout.cueBand).toBeGreaterThanOrEqual(48 + 18);
+    // The cue is drawn in design pixels, so the band is measured in them too.
+    expect(layout.cueBand).toBeGreaterThanOrEqual((48 + 18) * viewScale(viewport.w, viewport.h));
     expect(layout.stage.cy + (layout.stage.width * PORTRAIT_ASPECT) / 2).toBeLessThanOrEqual(floor);
     expect(layout.card.top).toBeLessThan(floor);
   });
@@ -108,6 +125,7 @@ describe('computeLayout arrangement', () => {
 
   it('uses the scene seat size for the assembly when there is room, so the handoff does not rescale', () => {
     expect(computeLayout({ w: 390, h: 844 }).assembly[0].width).toBe(86);
-    expect(computeLayout({ w: 1440, h: 900 }).assembly[0].width).toBe(124);
+    expect(computeLayout({ w: 1440, h: 900 }).assembly[0].width).toBe(sceneSeatSize(1440, 900));
+    expect(computeLayout({ w: 2560, h: 1300 }).assembly[0].width).toBe(sceneSeatSize(2560, 1300));
   });
 });

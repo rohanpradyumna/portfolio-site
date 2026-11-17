@@ -14,6 +14,7 @@ import { useFeelMuted } from './feel';
 import { formatResetAt, useEscape, useMediaQuery, usePrefersReducedMotion } from './hooks';
 import { DURATIONS, FADE, FADE_OUT, SPRINGS, STAGGER } from './motion';
 import { MoveTray } from './MoveTray';
+import { useViewScale } from './scale';
 import { Asked, Composer, NewQuestionButton } from './QuestionCard';
 import { StancePager } from './StanceCard';
 import { StarterQuestions } from './StarterQuestions';
@@ -155,8 +156,10 @@ export function CouncilScene({
     () => true,
   );
 
-  const seatSize = thread ? (compact ? 40 : 54) : compact ? (narrow ? 70 : 86) : mid ? 104 : 124;
-  const notePortrait = compact ? 56 : 72;
+  // Drawn at laptop size, grown on bigger screens in step with the stylesheet's --u.
+  const scale = useViewScale();
+  const seatSize = Math.round((thread ? (compact ? 40 : 54) : compact ? (narrow ? 70 : 86) : mid ? 104 : 124) * scale);
+  const notePortrait = Math.round((compact ? 56 : 72) * scale);
   const moods = useMemo(() => seatMoods(state, challenged), [state, challenged]);
 
   useEffect(() => () => clearTimeout(challengeTimer.current), []);
@@ -379,9 +382,6 @@ export function CouncilScene({
           </Link>
 
           <header className={styles.hero}>
-            <Link className={styles.backLink} href="/">
-              {COPY.backToBoard}
-            </Link>
             <h1 className={styles.title}>{COPY.heading}</h1>
             <p className={styles.intro}>{COPY.intro}</p>
             {/* On a phone the footer is two screens down, so the disclosure also sits here (CSS shows one or the other). */}

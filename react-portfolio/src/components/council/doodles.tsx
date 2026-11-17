@@ -40,7 +40,7 @@ export function ScribbleDoodle({ className }: { className?: string }) {
 
 export function TickIcon() {
   return (
-    <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
+    <svg viewBox="0 0 12 12" style={{ width: `calc(10 * var(--u, 1px))`, height: `calc(10 * var(--u, 1px))` }} aria-hidden="true">
       <path d="M2.2 6.4 5 9l5-6.2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -48,7 +48,7 @@ export function TickIcon() {
 
 export function CloseIcon() {
   return (
-    <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
+    <svg viewBox="0 0 12 12" style={{ width: `calc(10 * var(--u, 1px))`, height: `calc(10 * var(--u, 1px))` }} aria-hidden="true">
       <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
@@ -56,7 +56,7 @@ export function CloseIcon() {
 
 export function ArrowIcon() {
   return (
-    <svg viewBox="0 0 16 12" width="15" height="11" aria-hidden="true">
+    <svg viewBox="0 0 16 12" style={{ width: `calc(15 * var(--u, 1px))`, height: `calc(11 * var(--u, 1px))` }} aria-hidden="true">
       <path d="M1.5 6h12M9.5 1.8 13.8 6l-4.3 4.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -64,7 +64,7 @@ export function ArrowIcon() {
 
 export function StopIcon() {
   return (
-    <svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true">
+    <svg viewBox="0 0 10 10" style={{ width: `calc(9 * var(--u, 1px))`, height: `calc(9 * var(--u, 1px))` }} aria-hidden="true">
       <rect x="1" y="1" width="8" height="8" rx="1.5" fill="currentColor" />
     </svg>
   );
@@ -72,7 +72,7 @@ export function StopIcon() {
 
 export function PencilIcon() {
   return (
-    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+    <svg viewBox="0 0 16 16" style={{ width: `calc(14 * var(--u, 1px))`, height: `calc(14 * var(--u, 1px))` }} aria-hidden="true">
       <path
         d="m2.5 13.5.7-3.2 7.6-7.6a1.4 1.4 0 0 1 2 0l.5.5a1.4 1.4 0 0 1 0 2l-7.6 7.6-3.2.7ZM9.6 3.9l2.5 2.5"
         fill="none"

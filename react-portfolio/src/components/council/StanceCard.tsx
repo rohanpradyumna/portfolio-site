@@ -10,10 +10,11 @@ import { SeatPortrait } from '@/components/council/portraits';
 import { CloseIcon } from './doodles';
 import { feedback } from './feedback';
 import { usePrefersReducedMotion } from './hooks';
+import { useViewScale } from './scale';
 import { GESTURE, SPRINGS, projectMomentum, rubberBand } from './motion';
 import styles from './council.module.css';
 
-const GAP = 16;
+const BASE_GAP = 16;
 
 interface StanceIntroProps {
   seat: Seat;
@@ -25,7 +26,7 @@ interface StanceIntroProps {
   onDismiss: () => void;
 }
 
-function StanceIntro({ seat, active, readingOpen, onToggleReading, variant, onDismiss }: StanceIntroProps) {
+function StanceIntro({ seat, active, readingOpen, onToggleReading, variant, onDismiss, scale }: StanceIntroProps & { scale: number }) {
   const headingId = useId();
   const readingId = useId();
   const copy = COUNCIL_COPY.stance;
@@ -36,7 +37,7 @@ function StanceIntro({ seat, active, readingOpen, onToggleReading, variant, onDi
     <article className={styles.stance} aria-labelledby={headingId} inert={!active} aria-hidden={!active}>
       <header className={styles.stanceHead}>
         <span className={styles.stancePortrait}>
-          <SeatPortrait seatId={seat.id} size={58} mood="idle" />
+          <SeatPortrait seatId={seat.id} size={Math.round(58 * scale)} mood="idle" />
         </span>
         <div className={styles.stanceTitle}>
           <h2 id={headingId} className={styles.stanceSchool}>
@@ -130,6 +131,12 @@ interface Drag {
  */
 export function StancePager({ id, seatId, variant, onChange, onDismiss }: StancePagerProps) {
   const reduced = usePrefersReducedMotion();
+  const scale = useViewScale();
+  const gap = BASE_GAP * scale;
+  const gapRef = useRef(gap);
+  useLayoutEffect(() => {
+    gapRef.current = gap;
+  }, [gap]);
   const viewportRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const stride = useRef(0);
@@ -160,7 +167,7 @@ export function StancePager({ id, seatId, variant, onChange, onDismiss }: Stance
     const viewport = viewportRef.current;
     if (!viewport) return;
     const measure = () => {
-      stride.current = viewport.clientWidth + GAP;
+      stride.current = viewport.clientWidth + gapRef.current;
       if (!drag.current) {
         settling.current?.stop();
         x.set(-Math.max(0, settledIndex.current) * stride.current);
@@ -265,9 +272,10 @@ export function StancePager({ id, seatId, variant, onChange, onDismiss }: Stance
       onPointerUp={onPointerEnd}
       onPointerCancel={onPointerEnd}
     >
-      <motion.div className={styles.pagerTrack} style={{ x, gap: GAP }}>
+      <motion.div className={styles.pagerTrack} style={{ x, gap }}>
         {SEAT_LIST.map((seat) => (
           <StanceIntro
+            scale={scale}
             key={seat.id}
             seat={seat}
             active={seat.id === seatId}

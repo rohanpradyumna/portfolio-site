@@ -1,4 +1,5 @@
 import { PORTRAIT_ASPECT } from './constants';
+import { viewScale } from '../scale';
 
 // Where everything sits, computed from the viewport instead of measured from
 // the DOM, so the stickers can be driven by transforms alone and the whole
@@ -58,15 +59,50 @@ export const TAG_BLOCK = 31;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-/** The scene's own seat sizes for the empty state (see seatSize in CouncilScene). */
-export function sceneSeatSize(w: number): number {
-  if (w <= 359) return 70;
-  if (w <= 768) return 86;
-  if (w <= 1100) return 104;
-  return 124;
+/**
+ * The scene's own seat sizes for the empty state (see seatSize in CouncilScene),
+ * at design scale. Pass the height too to get the size the scene actually
+ * renders on a screen bigger than the laptop it was drawn on.
+ */
+export function sceneSeatSize(w: number, h?: number): number {
+  const base = w <= 359 ? 70 : w <= 768 ? 86 : w <= 1100 ? 104 : 124;
+  return h === undefined ? base : Math.round(base * viewScale(w, h));
 }
 
-export function computeLayout({ w, h, safeTop = 0, safeBottom = 0 }: Viewport): IntroLayout {
+/**
+ * The intro is laid out at the scene's design scale and grown with it on a
+ * big screen, so the stickers land on seats of the size the scene renders.
+ */
+export function computeLayout(viewport: Viewport): IntroLayout {
+  const k = viewScale(viewport.w, viewport.h);
+  if (k === 1) return computeDesignLayout(viewport);
+  const base = computeDesignLayout({
+    w: viewport.w / k,
+    h: viewport.h / k,
+    safeTop: (viewport.safeTop ?? 0) / k,
+    safeBottom: (viewport.safeBottom ?? 0) / k,
+  });
+  const pose = (p: Pose): Pose => ({ ...p, cx: p.cx * k, cy: p.cy * k, width: p.width * k });
+  const box = <B extends Box>(b: B): B => ({ ...b, left: b.left * k, top: b.top * k, width: b.width * k });
+  return {
+    ...base,
+    w: viewport.w,
+    h: viewport.h,
+    // Rounded up, so no pose is ever drawn larger than the portrait is rendered.
+    renderSize: Math.ceil(base.stage.width * k),
+    stage: pose(base.stage),
+    waiting: pose(base.waiting),
+    slots: base.slots.map(pose),
+    // The scene rounds its seat size; land on exactly that so the handoff does not resize.
+    assembly: base.assembly.map((p) => ({ ...pose(p), width: Math.min(p.width * k, sceneSeatSize(viewport.w, viewport.h)) })),
+    bubble: box(base.bubble),
+    card: box(base.card),
+    marksTop: base.marksTop * k,
+    cueBand: base.cueBand * k,
+  };
+}
+
+function computeDesignLayout({ w, h, safeTop = 0, safeBottom = 0 }: Viewport): IntroLayout {
   const wide = w >= 900 && w / h >= 1.1;
   const pad = w < 360 ? 12 : w < 600 ? 16 : 28;
   const topBar = 48;

@@ -20,7 +20,6 @@ export const COUNCIL_COPY = {
     askSeat: (lensLabel: string) => `Ask the ${lensLabel}`,
     disclosure: 'AI interpretations of six traditions, not the real words of these thinkers. Fallible. Argue back.',
     startersLabel: 'Or start with one of these',
-    backToBoard: 'back to the board',
     newQuestion: 'New question',
     stop: 'Stop',
     stopped: 'Stopped here.',

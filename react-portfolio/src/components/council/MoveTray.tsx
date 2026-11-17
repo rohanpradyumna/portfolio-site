@@ -12,6 +12,7 @@ import { useAutoGrow, useKeepVisibleWhileFocused } from './QuestionCard';
 import { PushBackDraft } from './state/reducer';
 import { ThreadOptions } from './state/selectors';
 import { SendResult } from './state/useCouncil';
+import { useViewScale } from './scale';
 import styles from './council.module.css';
 
 const ACTIONS: FollowUpAction[] = ['push_back', 'say_more', 'differ', 'debate', 'hear_everyone'];
@@ -27,6 +28,7 @@ interface SeatPickerProps {
 }
 
 function SeatPicker({ label, seatIds, value, onPick }: SeatPickerProps) {
+  const scale = useViewScale();
   const labelId = useId();
   return (
     <div className={styles.picker}>
@@ -47,7 +49,7 @@ function SeatPicker({ label, seatIds, value, onPick }: SeatPickerProps) {
               onClick={() => onPick(seatId)}
             >
               <span className={styles.pickPortrait}>
-                <SeatPortrait seatId={seatId} size={34} mood="idle" />
+                <SeatPortrait seatId={seatId} size={Math.round(34 * scale)} mood="idle" />
               </span>
               <span>{seat.lensLabel}</span>
               {picked && (
