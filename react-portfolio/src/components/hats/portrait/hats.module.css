@@ -1,0 +1,60 @@
+/* Hallmark · checked: 2026-11-16 · genre: playful (inferred: a sticker board) · house: the board and The Council
+ * floor: 0 FAIL in this file · fixed: 20 · built: the project · redesign: polish · v2.0.0 */
+
+/* The hat drop: falls from above, squashes on landing, settles. Inside an SVG
+   these px are viewBox units. The origin is the brim line. */
+.drop {
+  transform-origin: 100px 80px;
+  animation: hatDrop 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes hatDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-80px) rotate(-10deg);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(4px) rotate(1deg) scale(1.06, 0.9);
+  }
+  70% {
+    transform: translateY(-4px) scale(0.98, 1.04);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* Dragged on by hand: it's already in place, so it just squashes and settles. */
+.settle {
+  transform-origin: 100px 80px;
+  animation: hatSettle 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes hatSettle {
+  0% {
+    transform: scale(1.04, 0.9);
+  }
+  55% {
+    transform: scale(0.98, 1.03);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settle {
+    animation: none;
+  }
+
+  .drop {
+    animation: hatFade 160ms linear both;
+  }
+}
+
+@keyframes hatFade {
+  from {
+    opacity: 0;
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "captions": {
+    "conflicted": "Conflicted about something?",
+    "six": "See it through six philosophies.",
+    "bring": "Bring a real question.",
+    "smallPrint": "AI interpretations. Historical faces, not their words.",
+    "three": "Three of them weigh in.",
+    "worldview": "Each from its own worldview.",
+    "push": "Want to go deeper? Push back.",
+    "answer": "It answers you directly."
+  },
+  "voice": {
+    "conflicted": "Conflicted about something? Don’t ask one person.",
+    "six": "See it through six philosophies.",
+    "bring": "Bring a real question.",
+    "stoic": "A Roman emperor.",
+    "pragmatist": "A Harvard psychologist.",
+    "existentialist": "A Paris existentialist.",
+    "absurdist": "A goalkeeper turned novelist.",
+    "advaita": "An eighth-century monk.",
+    "marxist": "And Karl Marx.",
+    "schools": "Six schools of thought. Six ways to see the same problem.",
+    "three": "Ask, and three of them weigh in.",
+    "worldview": "Each one answers from its own worldview.",
+    "push": "Want to go deeper? Push back, or let two of them debate.",
+    "answer": "And it answers you directly.",
+    "end": "The Council. Bring a thought. Leave with a better question."
+  }
+}

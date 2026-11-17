@@ -7,8 +7,10 @@
   -webkit-user-select: none;
 }
 
-.sticker:hover {
-  filter: drop-shadow(0 16px 24px rgba(40,30,10,0.30)) drop-shadow(0 6px 10px rgba(40,30,10,0.22));
+@media (hover: hover) and (pointer: fine) {
+  .sticker:hover {
+    filter: drop-shadow(0 16px 24px rgba(40,30,10,0.30)) drop-shadow(0 6px 10px rgba(40,30,10,0.22));
+  }
 }
 
 .sticker:active {

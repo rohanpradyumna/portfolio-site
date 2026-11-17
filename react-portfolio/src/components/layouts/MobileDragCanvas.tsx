@@ -16,6 +16,7 @@ import {
   CoffeeMachineSticker,
   WheelSticker,
   CouncilSticker,
+  HatRackSticker,
 } from '@/components/stickers';
 
 // First-visit wake-up wave timing (mirrors DesktopStickers). On touch this is the
@@ -40,6 +41,7 @@ interface MobileDragCanvasProps {
     toggleMusic: () => void;
     terrapinFact: () => void;
     openWork: () => void;
+    openHats: () => void;
     openWriting: () => void;
     openWheel: () => void;
     openCouncil: () => void;
@@ -81,6 +83,7 @@ const LAYOUT: LayoutItem[] = [
   { id: 'wheel', xFrac: 0.2, y: 1010, w: 96, h: 120, rot: -2 },
   { id: 'coffeeMachine', xFrac: 0.5, y: 1160, w: 100, h: 130, rot: 2 },
   { id: 'council', xFrac: 0.8, y: 1012, w: 116, h: 116, rot: 3 },
+  { id: 'hats', xFrac: 0.86, y: 896, w: 110, h: 124, rot: 4 },
 ];
 
 const CANVAS_MIN_HEIGHT = 1340;
@@ -404,6 +407,21 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           title="the council · question everything"
           wake={wake}
           wakeDelay={wakeDelayFor('council')}
+        />
+
+        <HatRackSticker
+          id="hats-m"
+          initial={pos(LAYOUT[19])}
+          zBase={8}
+          onClick={handlers.openHats}
+          entranceDelay={delayFor('hats')}
+          dragConstraints={canvasRef}
+          disableSnap
+          allowPageScroll
+          snapBackHome
+          title="what you get · pick a hat"
+          wake={wake}
+          wakeDelay={wakeDelayFor('hats')}
         />
 
         {/* Easter egg label + coffee machine, tucked at the bottom of the canvas */}

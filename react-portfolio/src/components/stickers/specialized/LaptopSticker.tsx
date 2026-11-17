@@ -23,7 +23,7 @@ export function LaptopSticker(props: Omit<StickerProps, 'children'>) {
       >
         <img
           src="/assets/icons/programming.png"
-          alt="My Work"
+          alt="What I've shipped"
           draggable="false"
           loading="lazy"
           style={{
@@ -52,7 +52,7 @@ export function LaptopSticker(props: Omit<StickerProps, 'children'>) {
             border: '2px solid #fff',
           }}
         >
-          MY WORK
+          WHAT I&apos;VE SHIPPED
         </div>
       </div>
     </Sticker>

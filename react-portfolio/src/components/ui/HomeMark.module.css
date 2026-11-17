@@ -1,0 +1,93 @@
+/* Hallmark · checked: 2026-11-16 · genre: playful (inferred: a sticker board) · house: the board and The Council
+ * built: the project · redesign: polish · v2.0.0 */
+
+/* The "rohan ·" wordmark as the way home, set exactly like the board's own
+   header (globals.css .brand) so it never moves when a takeover opens. */
+
+.mark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* Pinned where the board's header sits. */
+.pinned {
+  position: absolute;
+  top: 24px;
+  left: 28px;
+  z-index: 5;
+}
+
+.name {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+  transition: transform 160ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mark:hover .dot {
+    transform: scale(1.6);
+  }
+}
+
+.mark:active {
+  transform: scale(0.97);
+}
+
+.mark:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 6px;
+  border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+  /* The board's phone header: smaller, on a faint backdrop, since content scrolls under it. */
+  .pinned {
+    top: max(16px, env(safe-area-inset-top));
+    left: max(16px, env(safe-area-inset-left));
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: var(--glass-paper);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .name {
+    font-size: 28px;
+  }
+
+  .dot {
+    width: 5px;
+    height: 5px;
+  }
+}
+
+@media (max-width: 380px) {
+  .name {
+    font-size: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    transition: none;
+  }
+}

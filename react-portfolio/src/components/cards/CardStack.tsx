@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, PanInfo, AnimatePresence } from 'framer-motion';
 import { CARDS } from '@/data/cards';
 import { useResponsive, useCardDimensions } from '@/hooks/useDimensions';
 import { useAudio } from '@/hooks/useAudio';
@@ -39,7 +39,9 @@ const cardSpring = {
 
 export function CardStack() {
   const [idx, setIdx] = useState(0);
-  const [shuffling, setShuffling] = useState<'next' | 'prev' | null>(null);
+  // Which way the last shuffle went; the exiting card reads it (via
+  // AnimatePresence's custom) to leave in the direction it was swiped.
+  const [dir, setDir] = useState<1 | -1>(1);
 
   const { isMobile } = useResponsive();
   const { cardW, cardH, cardMinH, cardPadding } = useCardDimensions();
@@ -65,35 +67,24 @@ export function CardStack() {
   }
 
   const DRAG_THRESHOLD = 80;
-  const SHUFFLE_MS = 350;
 
+  // No input lock: cards are keyed by identity, so a rapid second click just
+  // retargets the springs mid-flight instead of being swallowed.
   const next = useCallback(() => {
-    if (shuffling) return;
     playShuffleSound();
     if (isMobile) triggerHaptic(15);
-    setShuffling('next');
-
-    setTimeout(() => {
-      setIdx((i) => (i + 1) % CARDS.length);
-      setShuffling(null);
-    }, SHUFFLE_MS);
-  }, [shuffling, playShuffleSound, isMobile, triggerHaptic]);
+    setDir(1);
+    setIdx((i) => (i + 1) % CARDS.length);
+  }, [playShuffleSound, isMobile, triggerHaptic]);
 
   const prev = useCallback(() => {
-    if (shuffling) return;
     playShuffleSound();
     if (isMobile) triggerHaptic(15);
-    setShuffling('prev');
-
-    setTimeout(() => {
-      setIdx((i) => (i - 1 + CARDS.length) % CARDS.length);
-      setShuffling(null);
-    }, SHUFFLE_MS);
-  }, [shuffling, playShuffleSound, isMobile, triggerHaptic]);
+    setDir(-1);
+    setIdx((i) => (i - 1 + CARDS.length) % CARDS.length);
+  }, [playShuffleSound, isMobile, triggerHaptic]);
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (shuffling) return;
-
     const velocity = info.velocity.x;
     const offset = info.offset.x;
 
@@ -109,6 +100,9 @@ export function CardStack() {
   // Keyboard navigation
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Don't shuffle the board behind an open dialog or while typing.
+      if (document.querySelector('[aria-modal="true"]')) return;
+      if ((e.target as HTMLElement | null)?.closest?.('input, textarea, [contenteditable]')) return;
       if (e.key === 'ArrowRight' || e.key === 'j') next();
       if (e.key === 'ArrowLeft' || e.key === 'k') prev();
     };
@@ -118,39 +112,43 @@ export function CardStack() {
 
   const stackOffset = isMobile ? 6 : 10;
 
-  // Calculate card transforms for non-dragging states
-  const getCardTransform = (stackPos: number, isTop: boolean) => {
-    // Both directions share the same quick "snap" feel: the top card gives a
-    // subtle directional tilt (no travel) while the cards behind settle one notch
-    // deeper, then the incoming card pops in on top. The rotate sign is the only
-    // difference between next (right) and prev (left).
-    if (shuffling && isTop) {
-      return {
-        scale: 1,
-        rotate: shuffling === 'next' ? 2 : -2,
-        opacity: 1,
-        yOffset: 0,
-      };
-    }
+  const getCardTransform = (stackPos: number) => ({
+    scale: 1 - stackPos * 0.03,
+    rotate: 0,
+    opacity: stackPos === 0 ? 1 : stackPos === 1 ? 0.95 : 0.6,
+    y: stackPos * stackOffset,
+    x: 0,
+  });
 
-    if (shuffling && !isTop) {
-      const newStackPos = stackPos + 1;
-      return {
-        scale: 1 - newStackPos * 0.03,
-        rotate: 0,
-        opacity: 0.7,
-        yOffset: newStackPos * stackOffset,
-      };
-    }
-
-    // Default state
-    return {
-      scale: 1 - stackPos * 0.03,
-      rotate: 0,
-      opacity: isTop ? 1 : stackPos === 1 ? 0.95 : 0.6,
-      yOffset: stackPos * stackOffset,
-    };
+  // Where a card goes when it leaves the visible three. Next: the top card is
+  // thrown off to the left (the way it was swiped), staying opaque while it
+  // travels and fading only at the tail, so it never ghosts over the new top
+  // card. Prev: the back card sinks one notch deeper and fades.
+  const deepest = getCardTransform(3);
+  const easeOut = [0.23, 1, 0.32, 1] as const;
+  const thrown = { x: -cardW * 1.15, rotate: -8 };
+  // Reduced motion: no travel, just a quick crossfade (MotionConfig's
+  // reducedMotion doesn't reach AnimatePresence exits).
+  const cardVariants = {
+    exit: (d: 1 | -1) =>
+      reducedMotion
+        ? { opacity: 0, transition: { duration: 0.15 } }
+        : d === 1
+        ? {
+            ...thrown,
+            opacity: 0,
+            zIndex: 101,
+            transition: {
+              x: { duration: 0.3, ease: easeOut },
+              rotate: { duration: 0.3, ease: easeOut },
+              opacity: { duration: 0.12, delay: 0.16 },
+            },
+          }
+        : { ...deepest, opacity: 0, transition: { duration: 0.2, ease: easeOut } },
   };
+  // Opacity settles faster than the spring so a returning card is solid by the
+  // time it overlaps the one it covers.
+  const cardTransition = { ...cardSpring, opacity: { duration: 0.12 } };
 
   const animateEntrance = isMobile && !reducedMotion;
 
@@ -197,21 +195,27 @@ export function CardStack() {
         />
       ))}
 
+      <AnimatePresence initial={false} custom={dir}>
       {cardOrder.map((cardIdx, stackPos) => {
         const card = CARDS[cardIdx];
         const isTop = stackPos === 0;
-        const transform = getCardTransform(stackPos, isTop);
 
         return (
           <motion.div
-            key={`card-${cardIdx}-${stackPos}`}
-            animate={{
-              scale: transform.scale,
-              rotate: transform.rotate,
-              opacity: transform.opacity,
-              y: transform.yOffset,
-              x: 0,
-            }}
+            key={`card-${cardIdx}`}
+            custom={dir}
+            variants={cardVariants}
+            // Newcomers: on next one rises from deep in the pile; on prev the
+            // returning card comes back from the left, where it was thrown.
+            initial={
+              reducedMotion
+                ? { ...getCardTransform(stackPos), opacity: 0 }
+                : isTop
+                  ? { ...thrown, opacity: 0, scale: 1, y: 0 }
+                  : { ...deepest, opacity: 0 }
+            }
+            animate={getCardTransform(stackPos)}
+            exit="exit"
             style={{
               position: 'absolute',
               left: '50%',
@@ -225,18 +229,18 @@ export function CardStack() {
               borderRadius: isMobile ? 14 : 18,
               padding: cardPadding,
               boxSizing: 'border-box',
-              boxShadow: isTop && !shuffling
+              boxShadow: isTop
                 ? '0 25px 50px rgba(20,15,5,0.4), 0 12px 24px rgba(20,15,5,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset'
                 : '0 10px 20px rgba(20,15,5,0.25)',
               zIndex: 100 - stackPos,
-              cursor: isTop && !shuffling ? 'grab' : 'default',
+              cursor: isTop ? 'grab' : 'default',
               touchAction: 'none',
               display: 'flex',
               flexDirection: 'column',
-              pointerEvents: isTop && !shuffling ? 'auto' : 'none',
+              pointerEvents: isTop ? 'auto' : 'none',
             }}
-            transition={cardSpring}
-            drag={isTop && !shuffling ? 'x' : false}
+            transition={cardTransition}
+            drag={isTop ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.9}
             dragMomentum={false}
@@ -313,6 +317,7 @@ export function CardStack() {
           </motion.div>
         );
       })}
+      </AnimatePresence>
 
       {/* First-visit swipe hint: a chevron that sweeps left once, then never again */}
       {showSwipeHint && (

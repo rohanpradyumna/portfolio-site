@@ -16,6 +16,7 @@ import {
   CoffeeMachineSticker,
   WheelSticker,
   CouncilSticker,
+  HatRackSticker,
 } from '@/components/stickers';
 
 // First-visit wake-up wave: content stickers breathe once in a gentle stagger,
@@ -30,6 +31,7 @@ const WAKE_ORDER = [
   'email',
   'plane',
   'laptop',
+  'hats',
   'folder',
   'wheel',
   'council',
@@ -62,6 +64,7 @@ interface DesktopStickersProps {
     toggleMusic: () => void;
     terrapinFact: () => void;
     openWork: () => void;
+    openHats: () => void;
     openWriting: () => void;
     openWheel: () => void;
     openCouncil: () => void;
@@ -264,6 +267,19 @@ export function DesktopStickers({
         entranceDelay={900}
         wake={wake}
         wakeDelay={wakeDelayFor('laptop')}
+      />
+
+      {/* What you get - Hat rack sticker */}
+      <HatRackSticker
+        id="hats"
+        initial={positions.hats || { x: 0, y: 0, rot: 0 }}
+        zBase={8}
+        onClick={handlers.openHats}
+        entranceDelay={925}
+        title="what you get · pick a hat"
+        peekLabel="try on a hat →"
+        wake={wake}
+        wakeDelay={wakeDelayFor('hats')}
       />
 
       {/* Writing - Folder sticker */}

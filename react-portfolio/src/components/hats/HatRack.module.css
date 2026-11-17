@@ -1,0 +1,732 @@
+/* Hallmark · checked: 2026-11-16 · genre: playful (inferred: a sticker board) · house: the board and The Council
+ * floor: 0 FAIL · fixed: 7a, 11 (card in a card), 48, 54, 62, 63, 67 · structural: printed, not rebuilt
+ * finish-review: subagent · fix · 5 findings · 5 resolved · plus 2 minor (card dims on pull-off, labels wrap) resolved
+ * built: the project · redesign: polish · v2.0.0 */
+/* Hallmark · waive 64 · mono only on short labels and tags, never on body copy · Geist Mono is this board's label face: the card stack foot, the Council speaker line and every sticker chip */
+/* Hallmark · waive 26b · no control on these screens can be unavailable, so nothing carries disabled or aria-disabled · the Dock and the hat rack never lock a button, every product and hat is always open */
+
+/* "What you get": the hat rack takeover. Outside the Stage, true scale. */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  color: var(--ink);
+}
+
+/* The paper fades in on its own layer first, then the content rises onto it.
+   Fading the whole overlay at once double-exposes the busy board underneath. */
+.overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    var(--takeover-wash);
+  background-size: 28px 28px, 28px 28px, 100% 100%;
+  animation: paperIn 160ms linear both;
+}
+
+@keyframes paperIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.inner {
+  animation: rackIn 340ms var(--ease-out) 110ms both;
+}
+
+@keyframes rackIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+.panel {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  /* Clears the home mark pinned at the top left. */
+  padding: 96px clamp(16px, 4vw, 48px) 48px;
+}
+
+/* Nothing on the page starts a text selection while a hat is in hand. */
+.carrying {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grabbing;
+}
+
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.overlay :focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+/* ---- Header ---- */
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(40px, 5vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.sub {
+  max-width: 56ch;
+  margin: 12px 0 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+/* ---- Stage: portrait and footer on the left, rack over card on the right ----
+   The footer sits under the bust, so the card can grow with nothing below it to push. */
+.stage {
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+  grid-template-areas:
+    'portrait side'
+    'foot side';
+  grid-template-rows: auto 1fr;
+  column-gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+}
+
+.portrait {
+  grid-area: portrait;
+}
+
+.side {
+  grid-area: side;
+}
+
+.footer {
+  grid-area: foot;
+}
+
+.portrait {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+  filter: var(--shadow-sticker);
+}
+
+.portraitSvg {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+.side {
+  min-width: 0;
+}
+
+/* ---- The rack: hats sit on pegs along a wooden rail ---- */
+.rack {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.rail {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 85px;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(var(--wood-light), var(--wood));
+  box-shadow: 0 0 0 2.5px var(--ink);
+}
+
+.slot {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Vertical drags lift a hat; horizontal swipes still scroll the rail on touch. */
+.hatButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 120px;
+  padding: 0 0 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 12px;
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.hatArt svg {
+  display: block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hatButton {
+    cursor: grab;
+  }
+
+  .hatButton:hover .hatArt {
+    transform: translateY(-6px) rotate(0deg);
+  }
+}
+
+.hatButton:active {
+  cursor: grabbing;
+}
+
+.hatArt {
+  display: block;
+  height: 82px;
+  padding-top: 8px;
+  filter: var(--shadow-lift);
+  transform: rotate(-4deg);
+  transform-origin: 50% 100%;
+  transition: transform 220ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+
+.slot:nth-child(even) .hatArt {
+  transform: rotate(5deg);
+}
+
+.hatButton:active .hatArt {
+  transform: translateY(-2px) scale(0.96);
+}
+
+/* The worn hat leaves an empty peg behind. */
+.worn .hatArt {
+  opacity: 0.16;
+  transform: translateY(-4px) rotate(0deg);
+}
+
+/* The peg empties while its hat is in the air. */
+.lifted .hatArt {
+  opacity: 0;
+  transition: none;
+}
+
+.peg {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--wood-dark);
+  box-shadow: 0 0 0 2.5px var(--ink);
+}
+
+.hatLabel {
+  max-width: 100%;
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-secondary);
+  text-align: center;
+  text-wrap: balance;
+  hyphens: auto;
+}
+
+/* The hat on the head, or on its way there. */
+.chosen .hatLabel {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+/* ---- Drag and drop ---- */
+.dragging {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  line-height: 0;
+  pointer-events: none;
+  /* Pivots like the hats on the pegs; the flight maths solves x/y for this origin. */
+  transform-origin: 50% 100%;
+  filter: var(--shadow-carry);
+  will-change: transform;
+}
+
+.ghost svg {
+  display: block;
+}
+
+/* The bust and everything pinned to it share this box. */
+.figure {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* A grab area over whatever hat is on the head, so it can be pulled off. */
+.headHandle {
+  position: absolute;
+  user-select: none;
+  -webkit-user-select: none;
+  left: 14%;
+  top: -10%;
+  width: 72%;
+  height: 48%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.headHandle:active {
+  cursor: grabbing;
+}
+
+/* What Rohan says when a hat lands: the Council's speech bubble, over the shirt. */
+.bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: max-content;
+  max-width: min(260px, 92%);
+  margin: 0;
+  padding: 12px 16px;
+  transform: translateX(-50%);
+  transform-origin: 50% 0;
+  background: var(--note-paper);
+  border: 2.5px solid var(--hat, var(--ink));
+  border-radius: 16px;
+  box-shadow: var(--shadow-note);
+  font-family: var(--font-serif);
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--ink);
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;
+  animation: bubbleIn 320ms var(--ease-bounce) 120ms both;
+}
+
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  background: var(--note-paper);
+  border-top: 2.5px solid var(--hat, var(--ink));
+  border-left: 2.5px solid var(--hat, var(--ink));
+  transform: rotate(45deg);
+}
+
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.85);
+  }
+}
+
+/* Only mounted while a hat is in the air, so nothing waits hidden at rest. */
+.dropHint {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: hintIn 160ms var(--ease-out);
+  transition: background-color 160ms var(--ease-out);
+}
+
+@keyframes hintIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+}
+
+.dropHintHot {
+  background: var(--accent-orange);
+}
+
+/* ---- Card: the Council's speech-bubble paper, outlined in the worn hat's colour ---- */
+.card {
+  position: relative;
+  padding: 24px 28px;
+  background: var(--note-paper);
+  border: 2.5px solid var(--hat, var(--ink));
+  border-radius: 20px;
+  box-shadow: var(--shadow-note);
+  transition: border-color 240ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+
+/* A hat pulled off the head: the card shows it is about to empty. */
+.cardLeaving {
+  opacity: 0.45;
+}
+
+/* Hatless: a dashed outline, like the empty seats above the Council. */
+.cardEmpty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--ink-muted);
+  box-shadow: none;
+}
+
+.cardStack {
+  display: grid;
+}
+
+.layer {
+  grid-area: 1 / 1;
+  min-width: 0;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.layerOn {
+  visibility: visible;
+  opacity: 1;
+  animation: cardIn 260ms var(--ease-out);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.cardTitle {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1;
+}
+
+.kicker {
+  margin: 0 0 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.youGet {
+  margin: 0 0 20px;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+/* A rule, not a box: the card never holds a second card. */
+.receipt {
+  margin-bottom: 20px;
+  padding-left: 16px;
+  border-left: 3px solid var(--hat, var(--ink));
+}
+
+.receiptText {
+  margin: 0 0 8px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.proof {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-orange);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.proof:hover {
+  color: var(--ink);
+}
+
+.skills {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.skill {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  background: var(--paper-secondary);
+  border: 1px solid var(--grid-strong);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.emptyCard {
+  margin: 0;
+  padding: 32px 0;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 24px;
+  line-height: 1.3;
+  color: var(--ink-secondary);
+  text-wrap: balance;
+}
+
+/* ---- Footer CTA, under the bust ---- */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--grid-strong);
+}
+
+.footText {
+  flex-basis: 100%;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  text-align: center;
+}
+
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 20px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 120ms var(--ease-out);
+}
+
+.ctaPrimary {
+  background: var(--accent-orange);
+  color: var(--paper);
+  border: 1.5px solid var(--accent-orange);
+}
+
+.ctaPrimary:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.ctaSecondary {
+  background: var(--note-paper);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+
+.ctaSecondary:hover {
+  background: var(--paper-secondary);
+}
+
+.ctaPrimary:active,
+.ctaSecondary:active {
+  transform: scale(0.96);
+}
+
+/* ---- Phone ---- */
+@media (max-width: 768px) {
+  .inner {
+    padding-top: 72px;
+  }
+
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'portrait'
+      'side'
+      'foot';
+    grid-template-rows: auto;
+    row-gap: 8px;
+  }
+
+  .portrait {
+    padding-top: 32px;
+  }
+
+  .portraitSvg {
+    max-width: 180px;
+  }
+
+  .figure {
+    max-width: 180px;
+  }
+
+  .bubble {
+    bottom: -4%;
+    max-width: 168px;
+    padding: 4px 12px 8px;
+    border-radius: 12px;
+    font-size: 15px;
+  }
+
+  .header {
+    margin-bottom: 4px;
+  }
+
+  /* All five hats across, no hidden choice off the edge. */
+  .rail {
+    padding: 0;
+    gap: 2px;
+  }
+
+  .hatButton {
+    max-width: none;
+  }
+
+  .hatArt {
+    height: 62px;
+  }
+
+  .hatArt svg {
+    width: 60px;
+    height: auto;
+  }
+
+  .bar {
+    top: 65px;
+  }
+
+  .hatLabel {
+    margin-top: 12px;
+    font-size: 11px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .emptyCard {
+    font-size: 20px;
+  }
+
+  .cardTitle {
+    font-size: 32px;
+  }
+}
+
+/* ---- Desktop: one fixed canvas, scaled to fit (HatRack.tsx sets --k, --ox, --oy) ---- */
+@media (min-width: 769px) {
+  .panel {
+    overflow: hidden;
+  }
+
+  .inner {
+    position: absolute;
+    top: var(--oy, 0);
+    left: var(--ox, 0);
+    width: 1120px;
+    max-width: none;
+    height: 800px;
+    margin: 0;
+    padding: 88px 40px 0;
+    transform: scale(var(--k, 1));
+    transform-origin: 0 0;
+    /* transform belongs to the scale here, so the entrance only fades. */
+    animation-name: rackFade;
+  }
+}
+
+@keyframes rackFade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay::before,
+  .inner,
+  .back,
+  .dropHint,
+  .layerOn,
+  .bubble {
+    animation: none;
+  }
+
+  .hatArt,
+  .back,
+  .ctaPrimary,
+  .ctaSecondary {
+    transition: none;
+  }
+}

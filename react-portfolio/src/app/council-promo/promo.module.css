@@ -1,0 +1,564 @@
+/* The promo film's own surfaces: the camera wrapper and everything drawn over
+   the product (captions, the stand-in pointer and caret, the end card). The
+   director writes positions and opacities inline, once per frame. Nothing here
+   transitions or animates by itself, so a frame is always exactly its time. */
+
+.film {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+/* The scene's fixed layers (board, scroller, intro) live inside this box. It
+   is its own stacking context, so the intro's z-index stays under the captions. */
+.camera {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  transform-origin: 0 0;
+}
+
+/* The real caret blinks on the real clock. The film draws its own. */
+.camera textarea {
+  caret-color: transparent;
+}
+
+/* --- Dip to paper --------------------------------------------------------- */
+
+/* An empty board, the same one the scene and the intro draw. */
+.dip {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+    radial-gradient(ellipse 120% 100% at 50% 35%, #fffdf8 0%, #faf6ec 40%, #f5ede0 70%, #ebe3d5 100%);
+  background-size: 28px 28px, 28px 28px, 140px 140px, 140px 140px, 100% 100%;
+}
+
+/* --- What the film leaves out ---------------------------------------------- */
+
+/* The product limits a question to two exchanges and says so in several
+   places. The film does not mention the limit, so those places are kept off
+   screen here, for this page only: nothing below touches the product. The
+   selectors are structural because the product's class names are hashed. The
+   director checks the painted frame for these words on every run
+   (LEFT_OUT in timeline.ts), so a change upstream cannot slip through. */
+
+/* The intro's second card ("Two exchanges per question..."), and the
+   "01 / 03" counter that would give the gap away. Hidden, not removed: the
+   card keeps its size and the other two lines keep their places. */
+.camera [data-council-intro] section[aria-label] > div > div:last-child > p:nth-child(2),
+.camera [data-council-intro] section[aria-label] > div > div:first-child > span:last-child {
+  visibility: hidden;
+}
+
+/* The scroll cue's "next: the one rule" while the assembly card is up. */
+.camera [data-council-intro]:is([data-step='6'], [data-step='7']) button[style*='--seat-accent']:not([data-final]) > span:last-child > span:not(:first-child) {
+  display: none;
+}
+
+/* "4 live questions left today" on the question card. */
+.camera [data-council-scroll] main > div > form > div:first-child > p + p {
+  visibility: hidden;
+}
+
+/* "1 exchange left" beside the bench. The status stays whenever someone is
+   thinking or replying: its text is then marked data-busy. On the desktop page
+   it is a line of its own beside the six and is taken out. On the phone's it
+   is the bench's lower half, and the bench keeps its height. */
+.film[data-format='landscape'] .camera [data-council-scroll] section[data-arrangement='bench'] > div:has(> span:not([data-busy])) {
+  display: none;
+}
+
+.film[data-format='vertical'] .camera [data-council-scroll] section[data-arrangement='bench'] > div:has(> span:not([data-busy])) {
+  visibility: hidden;
+}
+
+/* The tray's heading ("One follow-up left. Choose it well.", "That's the
+   round...") and the note under it about the two exchanges. The tickets move
+   up into the space. */
+.camera [data-council-scroll] section[aria-labelledby] > header {
+  display: none;
+}
+
+/* The hero's "...They rarely agree." Not about the limit: the film no longer
+   frames the six as disagreeing, and this sentence would say it for it. */
+.camera [data-council-scroll] header > h1 + p {
+  visibility: hidden;
+}
+
+/* --- Opening -------------------------------------------------------------- */
+
+/* The six on a clean board, before any interface. Over the camera, under the captions. */
+.opening {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.openingBoard {
+  position: absolute;
+  inset: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+    radial-gradient(ellipse 120% 100% at 50% 35%, #fffdf8 0%, #faf6ec 40%, #f5ede0 70%, #ebe3d5 100%);
+  background-size: 28px 28px, 28px 28px, 140px 140px, 140px 140px, 100% 100%;
+}
+
+.openingOverline {
+  position: absolute;
+  top: 76px;
+  right: 0;
+  left: 0;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.openingSeat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.openingSticker {
+  line-height: 0;
+  filter: var(--shadow-sticker);
+}
+
+/* The scene's lens tag, a size up. */
+.openingTag {
+  padding: 6px 11px;
+  border: 3px solid var(--paper);
+  border-radius: 9px;
+  background: var(--card-bg);
+  color: var(--card-ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  rotate: -1.5deg;
+  filter: drop-shadow(0 2px 3px rgba(40, 30, 10, 0.24));
+}
+
+.openingTag[data-odd] {
+  rotate: 1.2deg;
+}
+
+/* --- Captions ------------------------------------------------------------- */
+
+.captions {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Paper rising from the foot of the frame. The interface fades out under it
+   instead of being boxed over. Stops are eased so no edge shows. */
+.wash {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 204px;
+  opacity: 0;
+  background: linear-gradient(
+    to top,
+    rgb(246, 239, 227) 0%,
+    rgb(246, 239, 227) 56%,
+    rgba(246, 239, 227, 0.92) 65%,
+    rgba(246, 239, 227, 0.72) 74%,
+    rgba(246, 239, 227, 0.42) 84%,
+    rgba(246, 239, 227, 0.15) 93%,
+    rgba(246, 239, 227, 0) 100%
+  );
+}
+
+.caption {
+  position: absolute;
+  right: 0;
+  bottom: 44px;
+  left: 0;
+  padding: 0 60px;
+  text-align: center;
+  visibility: hidden;
+}
+
+.caption[data-place='head'] {
+  top: 112px;
+  bottom: auto;
+}
+
+/* The hook over the six. Sized to read in a thumbnail. */
+.caption[data-place='poster'] {
+  top: 118px;
+  bottom: auto;
+}
+
+.caption[data-place='poster'] .captionLine {
+  font-size: 84px;
+  letter-spacing: -0.02em;
+}
+
+/* Small print on its own, in the clear strip above the intro's scroll cue. */
+.caption[data-place='aside'] {
+  bottom: 92px;
+}
+
+.caption[data-place='aside'] .captionSmall {
+  margin: 0;
+}
+
+.captionLine {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 56px;
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.captionWord {
+  display: inline-block;
+  margin: 0 0.115em;
+  opacity: 0;
+}
+
+.captionSmall {
+  margin: 12px 0 0;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: var(--ink-secondary);
+  opacity: 0;
+}
+
+/* --- Pointer and caret ---------------------------------------------------- */
+
+.pointerLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* The arrow's tip is the hotspot. */
+  margin: -3px 0 0 -4px;
+  transform-origin: 4px 3px;
+  filter: drop-shadow(0 2px 3px rgba(20, 15, 5, 0.32));
+  opacity: 0;
+}
+
+.cursor svg {
+  display: block;
+}
+
+.ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border: 2px solid var(--accent-orange);
+  border-radius: 50%;
+  background: rgba(196, 71, 42, 0.16);
+  opacity: 0;
+}
+
+.caret {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 1px;
+  opacity: 0;
+}
+
+/* Measures where a field's text ends. Laid out, never painted. */
+.mirror {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  visibility: hidden;
+  pointer-events: none;
+  border-color: transparent;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* --- End card ------------------------------------------------------------- */
+
+.end {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 44px;
+  visibility: hidden;
+  pointer-events: none;
+  color: var(--ink);
+  /* The same board the scene draws. */
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+    radial-gradient(ellipse 120% 100% at 50% 35%, #fffdf8 0%, #faf6ec 40%, #f5ede0 70%, #ebe3d5 100%);
+  background-size: 28px 28px, 28px 28px, 140px 140px, 140px 140px, 100% 100%;
+}
+
+.endArt {
+  filter: var(--shadow-sticker);
+  opacity: 0;
+}
+
+.endArt svg {
+  display: block;
+}
+
+.endTitle {
+  margin: 6px 0 0;
+  font-family: var(--font-serif);
+  font-size: 112px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.endWord {
+  display: inline-block;
+  margin: 0 0.1em;
+  opacity: 0;
+}
+
+.endPromise {
+  margin: 14px 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 31px;
+  line-height: 1.2;
+  color: var(--ink-secondary);
+}
+
+.endSentence {
+  display: inline-block;
+  margin: 0 0.16em;
+  opacity: 0;
+}
+
+.endUrl {
+  display: inline-flex;
+  align-items: baseline;
+  margin: 34px 0 0;
+  padding: 15px 24px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+  box-shadow: 0 16px 30px rgba(20, 15, 5, 0.26), 0 6px 12px rgba(20, 15, 5, 0.2);
+  font-family: var(--font-mono);
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  opacity: 0;
+}
+
+.endHost {
+  color: var(--card-ink-secondary);
+}
+
+.endPath {
+  color: var(--card-ink);
+}
+
+.endSmall {
+  position: absolute;
+  right: 0;
+  bottom: 30px;
+  left: 0;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--ink-muted);
+  opacity: 0;
+}
+
+/* --- The vertical cut (9:16, for Reels) -------------------------------------- */
+
+/* The stage is 432 by 768 and the frame is that 2.5 times over, so 11px here
+   is 27px in the film. Instagram draws over a Reel: a header across the top
+   14% (108px here), the caption and buttons across the bottom 20% (154px), a
+   row of actions down the right 52px of the lower half. Every line the film
+   sets is placed in what is left, and the director checks it (SAFE in
+   timeline.ts). So in this cut the captions live at the top, under the bench,
+   and the product gets the middle of the frame. */
+
+.film[data-format='vertical'] .openingOverline {
+  top: 127px;
+  font-size: 12px;
+}
+
+.film[data-format='vertical'] .openingSeat {
+  gap: 7px;
+}
+
+.film[data-format='vertical'] .openingTag {
+  padding: 5px 8px;
+  border-width: 2.5px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+/* 'over': a box two lines tall. A line that fits on one sits in the middle of it. */
+.film[data-format='vertical'] .caption {
+  top: 114px;
+  bottom: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 92px;
+  padding: 0 34px;
+}
+
+.film[data-format='vertical'] .captionLine {
+  font-size: 44px;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.film[data-format='vertical'] .caption[data-place='poster'] {
+  top: 148px;
+  padding: 0 14px;
+}
+
+.film[data-format='vertical'] .caption[data-place='poster'] .captionLine {
+  font-size: 55px;
+  line-height: 1.02;
+}
+
+.film[data-format='vertical'] .caption[data-place='head'] {
+  top: 138px;
+}
+
+.film[data-format='vertical'] .caption[data-place='head'] .captionLine {
+  font-size: 52px;
+}
+
+.film[data-format='vertical'] .caption[data-place='aside'] {
+  top: 150px;
+  padding: 0 70px;
+}
+
+.film[data-format='vertical'] .captionSmall {
+  font-size: 11.5px;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+/* A band of paper under the bench instead of a wash at the foot: the same
+   paper the bench's own strip is made of, so the two read as one. It starts
+   where that strip ends and stops just short of where a reply's top edge is
+   put (NOTE_TOP in timeline.ts). */
+.film[data-format='vertical'] .wash {
+  top: 86px;
+  bottom: auto;
+  height: 172px;
+  background: linear-gradient(
+    to bottom,
+    rgba(250, 246, 236, 0) 0%,
+    rgba(250, 246, 236, 0.86) 7%,
+    rgb(250, 246, 236) 12%,
+    rgb(250, 246, 236) 86%,
+    rgba(250, 246, 236, 0.8) 91%,
+    rgba(250, 246, 236, 0.35) 96%,
+    rgba(250, 246, 236, 0) 100%
+  );
+}
+
+/* A fingertip: a soft dot, pressed where the arrow would click. */
+.cursor[data-pointer='touch'] {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  transform-origin: 50% 50%;
+  border: 2px solid rgba(255, 254, 251, 0.94);
+  border-radius: 50%;
+  background: rgba(26, 24, 22, 0.36);
+  filter: drop-shadow(0 2px 4px rgba(20, 15, 5, 0.3));
+}
+
+.film[data-format='vertical'] .end {
+  justify-content: flex-start;
+  padding: 120px 0 0;
+}
+
+.film[data-format='vertical'] .endTitle {
+  margin-top: 2px;
+  font-size: 78px;
+}
+
+/* A sentence to a line. */
+.film[data-format='vertical'] .endPromise {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 25px;
+  line-height: 1.22;
+}
+
+/* The address on two lines, so it can be set big enough to read on a phone. */
+.film[data-format='vertical'] .endUrl {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 15px 18px 16px;
+  font-size: 19px;
+}
+
+.film[data-format='vertical'] .endSmall {
+  position: static;
+  max-width: 300px;
+  margin-top: 20px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  text-wrap: balance;
+}

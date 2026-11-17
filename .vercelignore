@@ -1,0 +1,8 @@
+# The site builds from react-portfolio/ (the project's Root Directory). Keep the
+# deploy upload to that: skip local tooling and the promo film's renders.
+video/
+.hallmark/
+.taste-skill/
+.claude/
+.conductor/
+.DS_Store

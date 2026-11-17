@@ -11,7 +11,7 @@ import { SoundName } from './events';
 // the moment the visitor first taps.
 
 /** Overall level. Every sound below is mixed against this, so one number turns the feature up or down. */
-const MASTER_GAIN = 0.55;
+export const MASTER_GAIN = 0.55;
 /** A sound that could not start within this many milliseconds of its cause is no longer feedback. */
 const STALE_MS = 180;
 
@@ -21,6 +21,7 @@ let context: AudioContext | null = null;
 let master: GainNode | null = null;
 let noise: AudioBuffer | null = null;
 let unlockInstalled = false;
+let tap: ((name: SoundName, level: number) => void) | null = null;
 
 function contextCtor(): AudioContextCtor | null {
   if (typeof window === 'undefined') return null;
@@ -63,7 +64,7 @@ export function installSoundUnlock(shouldCreate: () => boolean): void {
   window.addEventListener('keydown', onGesture, { capture: true, passive: true });
 }
 
-function noiseBuffer(ctx: AudioContext): AudioBuffer {
+function noiseBuffer(ctx: BaseAudioContext): AudioBuffer {
   if (noise && noise.sampleRate === ctx.sampleRate) return noise;
   const length = Math.floor(ctx.sampleRate * 0.5);
   noise = ctx.createBuffer(1, length, ctx.sampleRate);
@@ -72,8 +73,9 @@ function noiseBuffer(ctx: AudioContext): AudioBuffer {
   return noise;
 }
 
-interface Voice {
-  ctx: AudioContext;
+export interface Voice {
+  /** Live, or an OfflineAudioContext when the palette is rendered to a file. */
+  ctx: BaseAudioContext;
   out: AudioNode;
   /** Start time on the context clock. */
   t: number;
@@ -165,17 +167,32 @@ const PALETTE: Record<SoundName, (voice: Voice) => void> = {
   },
 };
 
+/** Schedules `name` on any context, at `voice.t` on that context's clock. The one way into the palette. */
+export function scheduleSound(name: SoundName, voice: Voice): void {
+  PALETTE[name](voice);
+}
+
+/**
+ * Reports every sound as it is asked for, whether or not audio can play it.
+ * The promo film uses this to log cues and render them offline. Pass null to remove it.
+ */
+export function setSoundTap(listener: ((name: SoundName, level: number) => void) | null): void {
+  tap = listener;
+}
+
 /**
  * Plays `name` now. `level` scales loudness (a harder landing is a louder
  * slap). Returns false, having done nothing, when audio is not available yet.
  */
 export function playSound(name: SoundName, level = 1): boolean {
   try {
+    const loudness = Math.min(1, Math.max(0.05, level));
+    tap?.(name, loudness);
     // No context yet means no gesture yet. It is created by the unlock listeners, never here.
     const ctx = context;
     const out = master;
     if (!ctx || !out) return false;
-    const play = () => PALETTE[name]({ ctx, out, t: ctx.currentTime, level: Math.min(1, Math.max(0.05, level)) });
+    const play = () => scheduleSound(name, { ctx, out, t: ctx.currentTime, level: loudness });
     if (ctx.state !== 'running') {
       // The very first tap lands here: the context is still waking up. Play
       // if it wakes within the same breath, otherwise let the sound go.

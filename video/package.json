@@ -1,0 +1,19 @@
+{
+  "name": "council-promo-video",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Films the live Council feature frame by frame under a virtual clock and encodes the promo video.",
+  "scripts": {
+    "render": "node render.mjs",
+    "render:vertical": "node render.mjs --format vertical",
+    "stills": "node render.mjs --stills",
+    "spike": "node spike.mjs",
+    "verify": "node lib/verify.mjs",
+    "voiceover": "node voiceover.mjs"
+  },
+  "dependencies": {
+    "ffmpeg-static": "5.3.0",
+    "playwright-core": "1.65.1"
+  }
+}

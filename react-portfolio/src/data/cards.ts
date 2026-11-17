@@ -13,7 +13,7 @@ export const CARDS: Card[] = [
       'Build AI products at Yottaflex.ai',
       "Get teams from 'we should use AI' to actually shipping",
       'Translate messy requirements into code that runs',
-      'Make engineers reviewers instead of typists',
+      'Hats on the rack, receipts on the laptop. Go poke them.',
     ],
   },
   {

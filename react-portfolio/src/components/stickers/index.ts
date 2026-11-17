@@ -24,3 +24,4 @@ export { CoffeeMachineSticker } from './specialized/CoffeeMachineSticker';
 export type { CoffeeMachineStickerProps } from './specialized/CoffeeMachineSticker';
 export { WheelSticker } from './specialized/WheelSticker';
 export { CouncilSticker } from './specialized/CouncilSticker';
+export { HatRackSticker } from './specialized/HatRackSticker';

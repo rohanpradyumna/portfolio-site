@@ -7,3 +7,7 @@ skills-lock.json
 
 # taste-skill working files (screenshots, reports)
 .taste-skill/
+
+# Council promo film tooling (see video/README.md)
+video/node_modules/
+video/out/

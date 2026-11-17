@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { useResponsive, DESIGN_W, DESIGN_H } from '@/hooks/useDimensions';
 import { useSongAudio } from '@/hooks/useAudio';
 import { CardStack } from '@/components/cards';
 import { Modal, StoicWisdomModal, AIShowcaseModal } from '@/components/modals';
-import { ExperienceTakeover } from '@/components/experience/ExperienceTakeover';
+import { WorkDesktop } from '@/components/experience/WorkDesktop';
+import { HatRack } from '@/components/hats/HatRack';
 import { EqBars } from '@/components/ui/EqBars';
 import { FixedCTA } from '@/components/ui/FixedCTA';
 import { DesktopStickers, Stage, MobileDragCanvas } from '@/components/layouts';
@@ -26,12 +28,14 @@ type ModalType =
   | 'gym'
   | 'portrait'
   | 'work'
+  | 'hats'
   | 'stoic'
   | null;
 
 export default function Home() {
   // Modal state
   const [modal, setModal] = useState<ModalType>(null);
+  const [workFocus, setWorkFocus] = useState<string | undefined>(undefined);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [stoicQuote, setStoicQuote] = useState<StoicQuote | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
@@ -174,6 +178,7 @@ export default function Home() {
       { id: 'folder', ...placeOrbital(122, od(160), s(100), s(80), 0, config) },
       { id: 'wheel', ...placeOrbital(-78, od(190), s(96), s(120), 0, config) },
       { id: 'council', ...placeOrbital(-24, od(120), s(116), s(116), 0, config) },
+      { id: 'hats', ...placeOrbital(-158, od(215), s(110), s(124), 0, config) },
     ];
 
     // True on-screen sizes per sticker (some components render a different size
@@ -197,6 +202,7 @@ export default function Home() {
       folder: [s(100), s(80)],
       wheel: [s(96), s(120)],
       council: [s(116), s(116)],
+      hats: [s(110), s(124)],
     };
 
     // Immovable obstacles: the center card and the bottom-left coffee machine
@@ -265,7 +271,11 @@ export default function Home() {
         setModal('music');
       },
       terrapinFact: () => setModal('terrapin'),
-      openWork: () => setModal('work'),
+      openWork: () => {
+        setWorkFocus(undefined);
+        setModal('work');
+      },
+      openHats: () => setModal('hats'),
       openWriting: () => (window.location.href = '/blog.html'),
       openWheel: () => (window.location.href = '/wheel'),
       openCouncil: () => (window.location.href = '/council'),
@@ -287,7 +297,9 @@ export default function Home() {
   }, [modal, stop]);
 
   return (
-    <>
+    // reducedMotion="user": the CSS reduced-motion rule can't reach framer's JS
+    // springs, so this drops their transform motion and keeps the opacity fades.
+    <MotionConfig reducedMotion="user">
       {/* Board background */}
       <div className="board">
         <div className="board-light" ref={lightRef} />
@@ -555,15 +567,25 @@ export default function Home() {
         </div>
       </Modal>
 
-      {/* My Experience: full-screen takeover (rendered outside the Stage) */}
-      <ExperienceTakeover open={modal === 'work'} onClose={closeModal} />
+      {/* What I've shipped: Mac-style desktop takeover (rendered outside the Stage) */}
+      <WorkDesktop open={modal === 'work'} onClose={closeModal} initialProjectId={workFocus} />
+
+      {/* What you get: the hat rack takeover (rendered outside the Stage) */}
+      <HatRack
+        open={modal === 'hats'}
+        onClose={closeModal}
+        onOpenProject={(id) => {
+          setWorkFocus(id);
+          setModal('work');
+        }}
+      />
 
       {/* Stoic Wisdom Modal */}
       <StoicWisdomModal open={modal === 'stoic'} onClose={closeModal} quote={stoicQuote} />
 
       {/* AI Showcase Easter Egg Modal */}
       <AIShowcaseModal open={aiModalOpen} onClose={() => setAiModalOpen(false)} />
-    </>
+    </MotionConfig>
   );
 }
 

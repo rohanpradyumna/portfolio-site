@@ -36,6 +36,10 @@
   --font-serif: var(--font-instrument-serif), Georgia, serif;
   --font-sans: var(--font-geist), -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: var(--font-geist-mono), 'SF Mono', monospace;
+  /* Roles: mono is a material here (the card stack's body, every sticker chip and UI label) */
+  --font-display: var(--font-serif);
+  --font-body: var(--font-sans);
+  --font-outlier: var(--font-mono);
 
   /* Font Sizes */
   --text-xs: 10px;
@@ -69,6 +73,26 @@
   --shadow-sticker-drag: drop-shadow(0 24px 32px rgba(40,30,10,0.35)) drop-shadow(0 8px 12px rgba(40,30,10,0.25));
   --shadow-card: 0 25px 50px rgba(20,15,5,0.4), 0 12px 24px rgba(20,15,5,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset;
   --shadow-modal: 0 -10px 40px rgba(20,10,0,0.3), 0 30px 60px rgba(20,10,0,0.4);
+  /* The Council's speech-bubble lift, shared by every note-paper card. */
+  --shadow-note: 0 1px 1px rgba(40,30,10,0.1), 0 6px 14px rgba(40,30,10,0.11), 0 20px 30px -20px rgba(40,30,10,0.28);
+  --shadow-lift: drop-shadow(0 4px 6px rgba(40,30,10,0.18));
+  --shadow-carry: drop-shadow(0 18px 18px rgba(40,30,10,0.28));
+
+  /* Full-screen takeovers (hat rack, Dock): the board's paper, without the stickers */
+  --note-paper: #fffefb;
+  --takeover-wash: radial-gradient(ellipse at 50% 40%, #fffbef 0%, #faf5e4 55%, #f2e9cf 100%);
+  --wood: #8b6140;
+  --wood-light: #a8784e;
+  --wood-dark: #6f4c31;
+  --glass-paper: rgba(253, 251, 247, 0.78);
+  --glass-paper-thin: rgba(253, 251, 247, 0.6);
+  --glass-edge: rgba(255, 255, 255, 0.7);
+  --ink-veil: rgba(42, 37, 31, 0.88);
+  --tile-bevel: inset 0 -3px 0 rgba(0,0,0,0.14), 0 4px 10px rgba(40,30,10,0.2);
+  --dock-lift: 0 10px 30px rgba(40,30,10,0.16), inset 0 0 0 1px rgba(42,37,31,0.06);
+  --mac-close: #ff5f57;
+  --mac-minimize: #febc2e;
+  --mac-zoom: #28c840;
 
   /* Transitions */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);

@@ -108,13 +108,27 @@ export type Card = IntroCard | BulletsCard | QuoteCard | CtaCard;
 // PROJECT TYPES
 // ============================================================================
 
+/** PM one-pager shown in a Dock window. */
+export interface ProjectBrief {
+  problem: string;
+  owned: string;
+  call: string;
+  result: string;
+  differently?: string;
+}
+
 export interface Project {
   id: string;
   name: string;
   subtitle?: string;
   tagline: string;
   color: string;
-  /** Legacy emoji (unused by ExperienceTakeover; kept optional for old components). */
+  /** Company the product was built at, shown in the window title bar. */
+  company?: string;
+  /** Optional logo image path; the Dock falls back to the monogram tile. */
+  logo?: string;
+  brief?: ProjectBrief;
+  /** Legacy emoji (kept optional for old components). */
   icon?: string;
   /** Typographic monogram rendered on the accent color (e.g. "YB", "In", "Fl"). */
   monogram?: string;
@@ -126,15 +140,6 @@ export interface Project {
   highlights?: string[];
   link?: { label: string; href: string };
   rotation?: number;
-}
-
-// ============================================================================
-// SKILL TYPES
-// ============================================================================
-
-export interface SkillGroup {
-  label: string;
-  items: string[];
 }
 
 // ============================================================================
