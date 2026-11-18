@@ -65,8 +65,8 @@ interface LayoutItem {
 
 const LAYOUT: LayoutItem[] = [
   { id: 'portrait', xFrac: 0.5, y: 0, w: 150, h: 226, rot: -2 },
-  { id: 'tagFounder', xFrac: 0.14, y: 250, w: 108, h: 40, rot: -3 },
-  { id: 'tagAI', xFrac: 0.58, y: 258, w: 150, h: 40, rot: 2 },
+  { id: 'tagFounder', xFrac: 0.04, y: 250, w: 108, h: 40, rot: -3 },
+  { id: 'tagAI', xFrac: 0.7, y: 258, w: 166, h: 40, rot: 2 },
   { id: 'linkedin', xFrac: 0.16, y: 322, w: 88, h: 88, rot: -4 },
   { id: 'email', xFrac: 0.62, y: 330, w: 100, h: 74, rot: 3 },
   { id: 'charminar', xFrac: 0.08, y: 430, w: 104, h: 104, rot: -3 },
@@ -80,7 +80,7 @@ const LAYOUT: LayoutItem[] = [
   { id: 'gym', xFrac: 0.42, y: 796, w: 88, h: 88, rot: -4 },
   { id: 'pickleball', xFrac: 0.74, y: 784, w: 90, h: 94, rot: 6 },
   { id: 'terrapin', xFrac: 0.5, y: 892, w: 96, h: 96, rot: -3 },
-  { id: 'wheel', xFrac: 0.2, y: 1010, w: 96, h: 120, rot: -2 },
+  { id: 'wheel', xFrac: 0.2, y: 1010, w: 104, h: 120, rot: -2 },
   { id: 'coffeeMachine', xFrac: 0.5, y: 1160, w: 100, h: 130, rot: 2 },
   { id: 'council', xFrac: 0.8, y: 1012, w: 116, h: 116, rot: 3 },
   { id: 'hats', xFrac: 0.86, y: 896, w: 110, h: 124, rot: 4 },
@@ -159,7 +159,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
 
         <WordSticker
           id="tag-founder-m"
-          text="founder"
+          text="ex-founder"
           initial={pos(LAYOUT[1])}
           zBase={5}
           bg="#1a1a1a"
@@ -175,7 +175,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
         />
         <WordSticker
           id="tag-ai-m"
-          text="ai · strategist"
+          text="ai product manager"
           initial={pos(LAYOUT[2])}
           zBase={5}
           bg="var(--accent-orange)"

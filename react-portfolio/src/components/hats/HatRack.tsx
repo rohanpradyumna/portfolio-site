@@ -451,8 +451,8 @@ function OpenRack({ open, onClose, onOpenProject }: HatRackProps) {
               What you get
             </h1>
             <p className={styles.sub}>
-              Pick a hat: drag one onto my head, or just tap it. Five versions of me, one hire, and each hat comes with
-              a receipt.
+              The hats an AI product manager wears. Drag one onto my head, or just tap it. Each one comes with a
+              receipt.
             </p>
           </header>
 

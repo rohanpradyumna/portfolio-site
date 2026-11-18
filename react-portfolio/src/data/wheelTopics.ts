@@ -725,7 +725,7 @@ export const WHEEL_CATEGORIES: WheelCategory[] = [
   {
     id: 'psychology',
     label: 'Psychology',
-    color: 'var(--accent-orange)',
+    color: 'var(--accent-plum)',
     topics: [
       // Cognitive biases
       { id: 'psychology-confirmation-bias', text: 'What is confirmation bias?' },
@@ -902,7 +902,7 @@ export const WHEEL_CATEGORIES: WheelCategory[] = [
   {
     id: 'science',
     label: 'Science',
-    color: 'var(--accent-blue)',
+    color: 'var(--accent-teal)',
     topics: [
       // Physics
       { id: 'science-entropy', text: 'What is entropy?' },
@@ -1081,7 +1081,7 @@ export const WHEEL_CATEGORIES: WheelCategory[] = [
   {
     id: 'culture-art',
     label: 'Culture & Art',
-    color: 'var(--accent-green)',
+    color: 'var(--accent-rose)',
     topics: [
       // Art movements
       { id: 'culture-art-impressionism-art-movement', text: 'What was Impressionism as an art movement?' },
@@ -1263,7 +1263,7 @@ export const WHEEL_CATEGORIES: WheelCategory[] = [
   {
     id: 'politics-law',
     label: 'Politics & Law',
-    color: 'var(--accent-yellow)',
+    color: 'var(--accent-coffee)',
     topics: [
       // Political theory
       { id: 'politics-law-difference-between-classical-modern', text: 'What\'s the difference between classical and modern liberalism?' },

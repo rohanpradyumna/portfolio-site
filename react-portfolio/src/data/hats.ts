@@ -20,7 +20,7 @@ export interface Hat {
 export const HAT_LIST: Hat[] = [
   {
     id: 'pm',
-    label: 'Product manager',
+    label: 'Product',
     accent: '#3d6fa8',
     line: 'Okay. What are we not building?',
     youGet: 'Someone who turns a fuzzy "we should" into a roadmap a team can actually ship.',
@@ -37,7 +37,7 @@ export const HAT_LIST: Hat[] = [
   },
   {
     id: 'ai',
-    label: 'AI builder',
+    label: 'AI',
     accent: '#c9951a',
     line: 'Cool demo. Where are the evals?',
     youGet: 'Someone who knows where AI actually works, and how to prove that it does.',
@@ -54,11 +54,10 @@ export const HAT_LIST: Hat[] = [
   },
   {
     id: 'entrepreneur',
-    // Soft hyphen: on a phone the rack slot is narrower than the word.
-    label: 'Entre\u00ADpreneur',
+    label: 'Founder',
     accent: '#2f8f8a',
     line: 'Ship the ugly version first.',
-    youGet: 'Someone who has taken an idea from zero to real users and investors, and still thinks like an owner.',
+    youGet: 'A PM who has been the founder: took an idea from zero to real users and investors, and still owns the whole product.',
     receipt: 'Co-founded Intripid, an AI travel app: 15K travelers and Antler backing.',
     proof: { projectId: 'intripid', label: 'open Intripid' },
     skills: [
@@ -66,12 +65,12 @@ export const HAT_LIST: Hat[] = [
       'Pitching (Antler-backed)',
       'Building a first team',
       'User problems over clever solutions',
-      'Immigrant founder visa math',
+      'Owning the whole product',
     ],
   },
   {
     id: 'designer',
-    label: 'Designer',
+    label: 'Design',
     accent: '#c4472a',
     line: 'It works. Does it feel right?',
     youGet: 'Someone who cares how it feels, not just whether it works.',
@@ -88,7 +87,7 @@ export const HAT_LIST: Hat[] = [
   },
   {
     id: 'data',
-    label: 'Data wizard',
+    label: 'Data',
     accent: '#6b4fa0',
     line: 'Is it better? Show me.',
     youGet: 'Someone who measures before guessing, so "is it better?" has an actual answer.',

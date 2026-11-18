@@ -3,85 +3,53 @@ import { Card } from '@/types';
 export const CARDS: Card[] = [
   {
     kind: 'intro',
-    body: "Yo, I'm Rohan. There's too much broken in the world and I keep trying to build my way out of it. Probably should see someone about that.",
-    foot: 'founder · ai builder · hyderabad kid in DC',
+    body: "Yo, I'm Rohan, an AI product manager. There's too much broken in the world and I keep trying to build my way out of it. Probably should see someone about that.",
+    foot: 'former founder · hyderabad kid in DC',
   },
   {
     kind: 'bullets',
     title: 'what I do',
     items: [
-      'Build AI products at Yottaflex.ai',
-      "Get teams from 'we should use AI' to actually shipping",
-      'Translate messy requirements into code that runs',
+      'PM at Yottaflex, building YottaBuilder: AI for the boring parts of dev',
+      'Turn fuzzy AI asks into specs engineers can actually build',
+      'Make "it feels better" measurable with evals',
       'Hats on the rack, receipts on the laptop. Go poke them.',
     ],
   },
   {
     kind: 'bullets',
-    title: 'currently',
-    items: [
-      'Building YottaBuilder, AI that handles the boring parts of dev',
-      'Turning Yottaflex from dev shop into an actual AI company',
-      'Living in DC, craving Hyderabad biryani at odd hours',
-    ],
-  },
-  {
-    kind: 'bullets',
-    title: 'lore',
+    title: 'how I got here',
     items: [
       'Founded Intripid: AI travel app, 15K users, Antler-backed',
-      "Built 'What's Next', still convinced it's a billion dollar idea",
-      'First startup job at Flock, learned to ship fast',
-      'Smith School at UMD. would redo the whole thing. Go Terps.',
+      'AI consultant on voicebots and IVRs at NSP',
+      'First startup job at Flock, where I learned to ship fast',
+      'Smith School at UMD. Would redo the whole thing. Go Terps.',
     ],
   },
   {
     kind: 'bullets',
-    title: 'making a difference',
+    title: 'how I work',
     items: [
-      'Ran national campaigns and a camp for kids in foster homes',
-      'Argued in the Hyderabad Youth Assembly, lobbied funds for girls and digital education',
-      'With Blood Warriors India, built donor chains for thalassemia kids',
-    ],
-  },
-  {
-    kind: 'quote',
-    body: '"Ship the ugly version first. You can fix it once it exists."',
-    foot: 'something I have to keep reminding myself',
-  },
-  {
-    kind: 'bullets',
-    title: 'lessons',
-    items: [
+      'Ship the ugly version first. You can fix it once it exists.',
+      "Users' problems matter more than my clever solution",
       'Nobody cares how you built it. They care that it works.',
-      "Your users' problems matter more than your clever solution",
-      'Immigrant founder visa math will humble you',
       'Small things compound. Annoyingly true.',
     ],
   },
   {
     kind: 'bullets',
-    title: 'when not building',
+    title: 'off the clock',
     items: [
-      'Losing at pickleball, tennis, badminton, table tennis',
-      'Researching coffee bean origins for no professional reason',
-      'Reading stoic philosophy, connecting it to everything',
-      'Driving to Annapolis again for some reason',
-    ],
-  },
-  {
-    kind: 'bullets',
-    title: 'beliefs',
-    items: [
-      'Knowledge is freedom. An idle mind will find trouble.',
-      "You don't have to be in the Valley to build something real",
-      'Someday: move back to Hyderabad, keep building, eat biryani daily',
+      'Losing at pickleball, tennis, badminton and table tennis',
+      'Researching coffee origins and reading the Stoics, for no professional reason',
+      'Ran a camp for kids in foster homes',
+      'Built blood donor chains for thalassemia kids with Blood Warriors India',
     ],
   },
   {
     kind: 'cta',
     title: "let's talk",
-    body: 'Building with AI and need someone who ships? Navigating immigrant founder logistics? Want to argue about coffee or stoicism? My inbox is open, and I actually reply.',
+    body: 'Building with AI and need a PM who ships? Want an AI consultant to pressure-test an idea? Or just want to argue about coffee? My inbox is open, and I actually reply.',
     foot: 'pradyumnarohan@gmail.com',
   },
 ];

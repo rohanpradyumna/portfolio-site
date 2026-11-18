@@ -21,6 +21,9 @@
   --accent-yellow: #e6b32a;
   --accent-coffee: #8b6b4a;
   --accent-taupe: #8b7355;
+  --accent-plum: #7d4a78;
+  --accent-teal: #2e7d78;
+  --accent-rose: #c25d78;
 
   /* Card Colors */
   --card-bg: #1a1816;
@@ -93,6 +96,10 @@
   --mac-close: #ff5f57;
   --mac-minimize: #febc2e;
   --mac-zoom: #28c840;
+  --highlighter: rgba(230, 179, 42, 0.5);
+  --reel-rule: rgba(42, 37, 31, 0.14);
+  --tape-yellow: rgba(230, 179, 42, 0.75);
+  --tape-blue: rgba(61, 111, 168, 0.55);
 
   /* Transitions */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);

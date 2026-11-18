@@ -57,14 +57,12 @@ export function LeverHandle({ onPull, disabled }: LeverHandleProps) {
           dragMomentum={false}
           onDragEnd={handleDragEnd}
           whileTap={disabled ? undefined : { scale: 1.05 }}
-          role="button"
-          tabIndex={-1}
           aria-hidden="true"
         />
       </div>
       {/* WCAG 2.2 dragging-movements: a single-pointer alternative to the drag gesture. */}
-      <button type="button" className={styles.fallbackButton} onClick={handleFallbackClick} disabled={disabled}>
-        tap to pull
+      <button type="button" className={styles.pullButton} onClick={handleFallbackClick} aria-disabled={disabled}>
+        Pull
       </button>
     </div>
   );

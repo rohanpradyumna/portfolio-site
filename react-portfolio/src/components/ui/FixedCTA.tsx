@@ -22,9 +22,9 @@ export function FixedCTA() {
   if (!visible) return null;
 
   return (
-    <a href="mailto:pradyumnarohan@gmail.com" className={styles.pill} aria-label="Email Rohan">
+    <a href="mailto:pradyumnarohan@gmail.com" className={styles.pill} aria-label="Email Rohan about AI product or consulting work">
       <span className={styles.dot} aria-hidden="true" />
-      <span>let&apos;s build something</span>
+      <span>open to AI consulting</span>
       <span className={styles.arrow} aria-hidden="true">
         →
       </span>

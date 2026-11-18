@@ -87,7 +87,7 @@ export function DesktopStickers({
       {/* Word tags at top */}
       <WordSticker
         id="tag-founder"
-        text="founder"
+        text="ex-founder"
         initial={positions.tagPM || { x: 0, y: 0, rot: 0 }}
         zBase={5}
         bg="#1a1a1a"
@@ -99,7 +99,7 @@ export function DesktopStickers({
       />
       <WordSticker
         id="tag-ai"
-        text="ai · strategist"
+        text="ai product manager"
         initial={positions.tagAI || { x: 0, y: 0, rot: 0 }}
         zBase={5}
         bg="var(--accent-orange)"
@@ -296,14 +296,14 @@ export function DesktopStickers({
         wakeDelay={wakeDelayFor('folder')}
       />
 
-      {/* Spin the Wheel */}
+      {/* Rabbit holes: the topic machine */}
       <WheelSticker
         id="wheel"
         initial={positions.wheel || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.openWheel}
         entranceDelay={875}
-        peekLabel="spin for a topic →"
+        peekLabel="find something to learn →"
         wake={wake}
         wakeDelay={wakeDelayFor('wheel')}
       />

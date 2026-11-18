@@ -161,8 +161,8 @@ export default function Home() {
     // math below uses the true RENDER sizes so spacing is visually correct.
     const raw = [
       { id: 'plane', ...placeOrbital(-98, od(110), s(110), s(76), 0, config) },
-      { id: 'tagPM', ...placeOrbital(-150, od(95), s(160), s(36), 0, config) },
-      { id: 'tagAI', ...placeOrbital(5, od(80), s(140), s(36), 0, config) },
+      { id: 'tagPM', ...placeOrbital(-150, od(95), s(117), s(39), 0, config) },
+      { id: 'tagAI', ...placeOrbital(5, od(80), s(181), s(39), 0, config) },
       { id: 'charminar', ...placeOrbital(-128, od(160), s(120), s(110), 0, config) },
       { id: 'portrait', ...placeOrbital(162, od(155), s(215), s(323), 0, config) },
       { id: 'linkedin', ...placeOrbital(200, od(80), s(90), s(90), 0, config) },
@@ -176,7 +176,7 @@ export default function Home() {
       { id: 'gym', ...placeOrbital(300, od(115), s(96), s(96), 0, config) },
       { id: 'laptop', ...placeOrbital(-58, od(150), s(100), s(90), 0, config) },
       { id: 'folder', ...placeOrbital(122, od(160), s(100), s(80), 0, config) },
-      { id: 'wheel', ...placeOrbital(-78, od(190), s(96), s(120), 0, config) },
+      { id: 'wheel', ...placeOrbital(-78, od(190), s(104), s(120), 0, config) },
       { id: 'council', ...placeOrbital(-24, od(120), s(116), s(116), 0, config) },
       { id: 'hats', ...placeOrbital(-158, od(215), s(110), s(124), 0, config) },
     ];
@@ -185,8 +185,8 @@ export default function Home() {
     // than the anchor width/height above). Used for collision + bounding box.
     const renderSize: Record<string, [number, number]> = {
       plane: [s(104), s(104)],
-      tagPM: [s(92), s(39)],
-      tagAI: [s(157), s(39)],
+      tagPM: [s(117), s(39)],
+      tagAI: [s(181), s(39)],
       charminar: [s(116), s(116)],
       portrait: [portraitW, portraitH],
       linkedin: [s(92), s(92)],
@@ -200,7 +200,7 @@ export default function Home() {
       gym: [s(96), s(96)],
       laptop: [s(100), s(90)],
       folder: [s(100), s(80)],
-      wheel: [s(96), s(120)],
+      wheel: [s(104), s(120)],
       council: [s(116), s(116)],
       hats: [s(110), s(124)],
     };
@@ -367,9 +367,9 @@ export default function Home() {
                   textWrap: 'balance',
                 }}
               >
-                founder · ai strategist
+                ai product manager
                 <br />
-                building yottaflex
+                building YottaBuilder
               </p>
               <div
                 style={{

@@ -1,81 +1,125 @@
+/* Hallmark · checked: 2026-11-17 · genre: playful (inferred: a sticker board) · house: the board and The Council
+ * built: the project · redesign: full · v2.0.0 */
+
 .leverWrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .rail {
   position: relative;
   width: 16px;
-  height: 190px;
+  height: 172px;
   background: var(--paper);
   border: 4px solid var(--ink);
   border-radius: 8px;
 }
+
 .rail::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: 10px;
-  transform: translateX(-50%);
-  width: 9px;
-  height: 9px;
+  bottom: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--ink);
+  transform: translateX(-50%);
 }
 
 .knob {
   position: absolute;
   top: -4px;
-  left: 50%;
+  left: calc(50% - 26px);
   width: 52px;
   height: 52px;
-  margin-left: -26px;
   border-radius: 50%;
   background: var(--accent-yellow);
   border: 4px solid var(--ink);
   cursor: grab;
   touch-action: none;
 }
+
 .knob:active {
   cursor: grabbing;
-}
-.knob:focus-visible {
-  outline: 3px solid var(--accent-blue);
-  outline-offset: 3px;
 }
 
 .knobDisabled {
   cursor: default;
   pointer-events: none;
-  animation: leverBusyPulse 1s ease-in-out infinite;
+  animation: leverBusy 1s ease-in-out infinite;
 }
 
-@keyframes leverBusyPulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.06); }
+@keyframes leverBusy {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
 }
 
-.fallbackButton {
-  background: none;
-  border: none;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-secondary);
-  text-decoration: underline;
+.pullButton {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--accent-yellow);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  padding: 4px;
+  box-shadow: 0 3px 0 var(--ink);
+  transition: background-color 150ms ease, transform 120ms var(--ease-out), box-shadow 120ms var(--ease-out);
 }
-.fallbackButton:hover:not(:disabled) {
-  color: var(--accent-orange);
+
+@media (hover: hover) and (pointer: fine) {
+  .pullButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 var(--ink);
+  }
 }
-.fallbackButton:focus-visible {
-  outline: 2px solid var(--accent-blue);
-  outline-offset: 2px;
+
+.pullButton:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
 }
-.fallbackButton:disabled {
-  opacity: 0.4;
-  cursor: default;
-  text-decoration: none;
+
+.pullButton:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+.pullButton[aria-disabled='true'] {
+  cursor: progress;
+}
+
+/* Phones get the button alone, full width: a drag lever is a desktop toy. */
+@media (max-width: 768px) {
+  .leverWrap {
+    width: 100%;
+  }
+
+  .rail {
+    display: none;
+  }
+
+  .pullButton {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knobDisabled {
+    animation: none;
+  }
+
+  .pullButton {
+    transition: none;
+  }
 }

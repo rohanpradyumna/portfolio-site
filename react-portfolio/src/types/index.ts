@@ -202,21 +202,6 @@ export interface WheelTopicFlat extends WheelTopic {
   categoryColor: string;
 }
 
-export type WheelSubmissionStatus = 'pending' | 'approved' | 'rejected';
-
-export interface WheelSubmission {
-  id: number;
-  topicId: string;
-  category: string;
-  topicText: string;
-  authorName: string | null;
-  isAnonymous: boolean;
-  body: string;
-  status: WheelSubmissionStatus;
-  createdAt: string;
-  reviewedAt: string | null;
-}
-
 // ============================================================================
 // LAYOUT TYPES
 // ============================================================================
