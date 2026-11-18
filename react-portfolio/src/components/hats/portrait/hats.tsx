@@ -4,24 +4,12 @@ import { Blob, CREAM, DETAIL, Fill, Line, circ } from '@/components/council/port
 // Five hats drawn in the portrait's 200x240 space so they sit on the hair
 // cloud as-is. Each one carries its own die-cut silhouette (`sil`).
 
-export type HatId = 'pm' | 'ai' | 'entrepreneur' | 'designer' | 'data';
+export type HatId = 'pm' | 'ai' | 'consulting' | 'designer' | 'entrepreneur';
 
 export interface HatDef {
   sil: string[];
   art: React.ReactNode;
 }
-
-const r1 = (n: number) => Math.round(n * 10) / 10;
-
-/** Five-point star centred on (cx, cy). */
-const star = (cx: number, cy: number, r: number) => {
-  const pts = Array.from({ length: 10 }, (_, i) => {
-    const a = (Math.PI / 5) * i - Math.PI / 2;
-    const rr = i % 2 === 0 ? r : r * 0.45;
-    return `${r1(cx + rr * Math.cos(a))} ${r1(cy + rr * Math.sin(a))}`;
-  });
-  return `M${pts.join('L')}Z`;
-};
 
 // ---- Product manager: a ball cap with a roadmap patch ----
 const CAP_CROWN = 'M50 76C50 38 72 18 100 18C128 18 150 38 150 76Z';
@@ -41,9 +29,11 @@ const TOP_BRIM = 'M32 74Q100 60 168 74Q172 87 152 89Q100 79 48 89Q28 87 32 74Z';
 // ---- Designer: a tilted beret with paint dots ----
 const BERET = 'M44 70C38 50 62 32 98 30C138 28 164 44 160 62C157 76 132 82 100 82C72 82 48 80 44 70Z';
 
-// ---- Data wizard: a pointy hat with a bar chart and stars ----
-const WIZ_CONE = 'M58 78Q82 42 96 8Q104 -14 128 -18Q114 -4 113 14Q118 48 142 78Z';
-const WIZ_BRIM = 'M32 80Q100 64 168 80Q171 93 152 93Q100 84 48 93Q29 93 32 80Z';
+// ---- Consulting: a fedora with a speech-bubble pin, for the client calls ----
+const FED_CROWN = 'M62 76C58 52 64 28 80 18Q100 28 120 18C136 28 142 52 138 76Z';
+const FED_BAND = 'M61 56Q100 63 139 56L138 72Q100 78 62 72Z';
+const FED_BRIM = 'M26 78Q100 60 174 78Q178 90 156 92Q100 81 44 92Q22 90 26 78Z';
+const FED_BUBBLE = 'M112 59H128Q132 59 132 63V67Q132 71 128 71H121L117 75L117 71H112Q108 71 108 67V63Q108 59 112 59Z';
 
 export const HATS: Record<HatId, HatDef> = {
   pm: {
@@ -110,16 +100,21 @@ export const HATS: Record<HatId, HatDef> = {
       </>
     ),
   },
-  data: {
-    sil: [WIZ_CONE, WIZ_BRIM],
+  consulting: {
+    sil: [FED_CROWN, FED_BRIM],
     art: (
       <>
-        <Blob parts={[WIZ_CONE]} fill="#6b4fa0" />
-        <Fill d="M113 14Q118 48 142 78L124 78Q108 46 106 10Z" fill="#55397f" />
-        <Blob parts={['M84 64H91V52H84Z', 'M94 64H101V42H94Z', 'M104 64H111V48H104Z']} fill={CREAM} w={2.5} />
-        <Blob parts={[star(116, 30, 7)]} fill="#f2c94c" w={2.5} />
-        <Blob parts={[star(86, 30, 4.5)]} fill="#f2c94c" w={2.5} />
-        <Blob parts={[WIZ_BRIM]} fill="#55397f" />
+        <Blob parts={[FED_CROWN]} fill="#5b6b7d" />
+        <Fill d="M120 18C136 28 142 52 138 76L126 76Q128 46 116 21Z" fill="#4a5867" />
+        <Line d="M100 28L100 50" w={2.6} color="#4a5867" />
+        <Line d="M76 30C72 38 70 46 70 54" w={3} color="#7c8c9e" />
+        <Fill d={FED_BAND} fill="#7d4a78" />
+        <Line d="M61 56Q100 63 139 56" w={DETAIL} />
+        <Blob parts={[FED_BUBBLE]} fill={CREAM} w={2.2} />
+        {[115, 120, 125].map((x) => (
+          <Fill key={x} d={circ(x, 65, 1.4)} fill="#7d4a78" />
+        ))}
+        <Blob parts={[FED_BRIM]} fill="#4a5867" />
       </>
     ),
   },
