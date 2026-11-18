@@ -36,14 +36,23 @@ export function useDimensions(): Dimensions {
       timeoutId = setTimeout(() => {
         cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(() => {
-          setDims({ w: window.innerWidth, h: window.innerHeight });
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          // The root also resizes when content grows; skip re-renders when the viewport didn't change.
+          setDims((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
         });
       }, DEBOUNCE_MS);
     };
 
     window.addEventListener('resize', handleResize);
+    // On a phone narrower than the hydrating markup, the layout viewport briefly
+    // widens (360 reads as 401) and then snaps back without firing `resize`, which
+    // left the card too wide for the screen. Watching the root element catches it.
+    const ro = new ResizeObserver(handleResize);
+    ro.observe(document.documentElement);
 
     return () => {
+      ro.disconnect();
       window.removeEventListener('resize', handleResize);
       clearTimeout(timeoutId);
       cancelAnimationFrame(rafId);
@@ -56,7 +65,9 @@ export function useDimensions(): Dimensions {
 export function useResponsive() {
   const dims = useDimensions();
 
-  const isMobile = dims.w <= 768;
+  // A phone on its side is wide but short: the desktop board can't fit 390px of
+  // height, so short landscape screens get the phone layout too.
+  const isMobile = dims.w <= 768 || (dims.h <= 500 && dims.w <= 1024);
   const isSmallMobile = dims.w <= 380;
   const isTablet = dims.w > 768 && dims.w <= 1024;
   const isDesktop = dims.w > 1024;

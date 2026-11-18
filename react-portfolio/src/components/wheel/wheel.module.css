@@ -440,6 +440,13 @@
   border: 0;
 }
 
+@media (pointer: coarse) {
+  .hold {
+    min-height: 44px;
+    padding: 0 20px;
+  }
+}
+
 @media (max-width: 768px) {
   .wrap {
     padding: 88px 16px 64px;

@@ -24,7 +24,16 @@
   align-items: baseline;
   gap: 10px;
 }
-.postBrand a { text-decoration: none; color: inherit; }
+.postBrand a {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: inherit;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 6px;
+}
+.postBrand a:focus-visible { outline: 2px solid var(--accent-orange); outline-offset: 6px; }
 .postBrand .name {
   font-family: var(--font-serif);
   font-size: 34px;
@@ -41,25 +50,9 @@
 }
 .postBrand .sub {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ink-secondary);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
-
-.postCorner {
-  position: fixed;
-  top: 24px;
-  right: 28px;
-  z-index: 1000;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-secondary);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.postCorner a { color: var(--ink-secondary); text-decoration: none; transition: color 0.2s; }
-.postCorner a:hover { color: var(--accent-orange); }
 
 .postScroll {
   position: fixed;
@@ -78,7 +71,6 @@
 .backLink {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--ink-secondary);
@@ -87,19 +79,17 @@
   transition: color 0.2s;
 }
 .backLink:hover { color: var(--accent-orange); }
-.backLink::before { content: "<-"; }
 
 .postHeader { margin-bottom: 40px; }
 
 .postTags { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .postTag {
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 4px;
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: lowercase;
 }
 .postTag.ai { background: var(--accent-orange-soft); color: var(--accent-orange); }
 .postTag.startups { background: var(--accent-blue-soft); color: var(--accent-blue); }
@@ -126,6 +116,7 @@
   font-size: 17px;
   line-height: 1.7;
   color: var(--ink);
+  overflow-wrap: break-word;
 }
 .postBody p { margin-bottom: 1.5em; }
 .postBody h2 {
@@ -199,9 +190,7 @@
 }
 .postBody th {
   font-family: var(--font-mono);
-  font-size: 0.78em;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-size: max(11px, 0.78em);
   color: var(--ink-secondary);
   border-bottom: 2px solid var(--ink);
 }
@@ -211,7 +200,6 @@
   .postBrand .name { font-size: 26px; }
   .postBrand .dot { width: 5px; height: 5px; }
   .postBrand .sub { display: none; }
-  .postCorner { top: 16px; right: 16px; font-size: 10px; }
   .postContentWrap { padding: 90px 16px 60px; }
   .postTitle { font-size: 32px; }
   .postBody { font-size: 16px; }
@@ -220,6 +208,16 @@
   .postBody pre { padding: 16px; font-size: 13px; border-radius: 8px; }
   .postBody table { font-size: 0.82em; }
   .postBody th, .postBody td { padding: 8px 10px; }
+}
+
+/* Touch: 44px hit areas with no visual change. Vertical padding on an inline
+   link grows its hit box without moving the line box, so prose keeps its rhythm. */
+@media (pointer: coarse) {
+  .postBrand a::after { content: ""; position: absolute; inset: -8px -10px; }
+  .backLink { padding-block: 14px; margin-block: -14px 18px; }
+  .postBody a { position: relative; padding-block: 14px; }
+  /* A list of links (a post's sources) is a stack of tap targets: give each row 44px. */
+  .postBody li:has(> a:only-child) { margin-bottom: 1.1em; }
 }
 
 @media (max-width: 380px) {

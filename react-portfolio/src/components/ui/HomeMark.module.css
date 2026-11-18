@@ -48,6 +48,23 @@
   }
 }
 
+/* Touch: the mark stays its size, but its tap area grows to 44px or more. */
+@media (pointer: coarse) {
+  .mark {
+    position: relative;
+  }
+
+  .pinned {
+    position: absolute;
+  }
+
+  .mark::after {
+    content: '';
+    position: absolute;
+    inset: -8px -10px;
+  }
+}
+
 .mark:active {
   transform: scale(0.97);
 }
@@ -58,7 +75,7 @@
   border-radius: 6px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1024px) {
   /* The board's phone header: smaller, on a faint backdrop, since content scrolls under it. */
   .pinned {
     top: max(16px, env(safe-area-inset-top));

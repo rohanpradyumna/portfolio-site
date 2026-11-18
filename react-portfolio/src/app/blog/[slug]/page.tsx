@@ -63,21 +63,17 @@ export default async function BlogPostPage({
       <div className="postBoard" />
 
       <div className="postBrand">
-        <a href="/">
+        <a href="/" aria-label="rohan, back to the board">
           <span className="name">rohan</span>
+          <span className="dot" aria-hidden="true" />
         </a>
-        <span className="dot" />
         <span className="sub">writing</span>
-      </div>
-
-      <div className="postCorner">
-        <a href="/blog.html">all posts</a>
       </div>
 
       <div className="postScroll">
       <article className="postContentWrap">
         <a href="/blog.html" className="backLink">
-          back to all posts
+          all posts
         </a>
 
         <header className="postHeader">

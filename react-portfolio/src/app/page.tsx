@@ -110,7 +110,13 @@ export default function Home() {
   useEffect(() => {
     const retire = () => setHintDone(true);
     window.addEventListener('pointerdown', retire, { once: true });
-    return () => window.removeEventListener('pointerdown', retire);
+    // On a phone, scrolling past the card is interaction too; the pinned hint
+    // shouldn't ride along over every sticker.
+    window.addEventListener('scroll', retire, { once: true, passive: true });
+    return () => {
+      window.removeEventListener('pointerdown', retire);
+      window.removeEventListener('scroll', retire);
+    };
   }, []);
 
   // Easter egg: type "ai" to show AI showcase modal

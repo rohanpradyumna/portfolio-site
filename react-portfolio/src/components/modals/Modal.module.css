@@ -67,7 +67,7 @@
 
 /* Trim the mobile blur cost (cheaper than desktop) and supply a solid fallback
    for browsers without backdrop-filter support. */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1024px) {
   .overlay {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);

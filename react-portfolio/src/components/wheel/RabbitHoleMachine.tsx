@@ -1,5 +1,6 @@
 'use client';
 
+import { PHONE_QUERY } from '@/utils/breakpoints';
 import React, { useRef, useState } from 'react';
 import { animate, MotionValue, useMotionValue } from 'framer-motion';
 import { WheelTopicFlat } from '@/types';
@@ -162,7 +163,7 @@ export function RabbitHoleMachine({ initial, printed }: MachineProps) {
         requestAnimationFrame(() =>
           trayRef.current?.scrollIntoView({
             // Phones bring the ticket up under the pinned mark; desktops scroll only as far as needed.
-            block: window.matchMedia('(max-width: 768px)').matches ? 'start' : 'nearest',
+            block: window.matchMedia(PHONE_QUERY).matches ? 'start' : 'nearest',
             behavior: reducedMotion ? 'auto' : 'smooth',
           })
         )

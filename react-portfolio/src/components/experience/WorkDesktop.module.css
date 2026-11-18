@@ -231,6 +231,25 @@
   background: var(--mac-minimize);
 }
 
+/* Touch: grow the hit areas to 44px without changing what you see. */
+@media (pointer: coarse) {
+  .lightRed::after {
+    inset: -16px;
+  }
+
+  .menuCta,
+  .menuLink {
+    position: relative;
+  }
+
+  .menuCta::after,
+  .menuLink::after {
+    content: '';
+    position: absolute;
+    inset: -8px -4px;
+  }
+}
+
 .lightGreen {
   background: var(--mac-zoom);
 }
@@ -452,7 +471,7 @@
 }
 
 /* ---- Phone: window becomes a sheet, Dock scrolls ---- */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1024px) {
   .menuItem,
   .menuLink,
   .menuTitle {
@@ -526,7 +545,7 @@
   overflow: hidden;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 769px) and (min-height: 501px), (min-width: 1025px) {
   .canvas {
     position: absolute;
     top: var(--oy, 0);
@@ -595,7 +614,7 @@
 
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1024px) {
   .stage {
     display: flex;
     flex-direction: column;

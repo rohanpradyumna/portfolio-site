@@ -56,7 +56,7 @@
 
 /* Mobile: the hint bar is centered at the very bottom, so lift the pill clear
    of it and respect the home-indicator safe area. */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1024px) {
   .pill {
     bottom: calc(52px + env(safe-area-inset-bottom));
     right: max(12px, env(safe-area-inset-right));

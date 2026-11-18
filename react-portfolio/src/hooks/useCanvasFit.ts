@@ -1,6 +1,7 @@
 'use client';
 
 import { RefObject, useLayoutEffect } from 'react';
+import { WIDE_QUERY } from '@/utils/breakpoints';
 
 interface CanvasFit {
   /** Design width and height the canvas is laid out at. */
@@ -8,8 +9,6 @@ interface CanvasFit {
   height: number;
   min: number;
   max: number;
-  /** Below this viewport width the canvas is off and content flows normally (phones). */
-  fromWidth?: number;
 }
 
 /**
@@ -22,13 +21,14 @@ interface CanvasFit {
 export function useCanvasFit(
   frame: RefObject<HTMLElement | null>,
   canvas: RefObject<HTMLElement | null>,
-  { width, height, min, max, fromWidth = 769 }: CanvasFit
+  { width, height, min, max }: CanvasFit
 ) {
   useLayoutEffect(() => {
     const f = frame.current;
     const c = canvas.current;
     if (!f || !c) return;
-    const wide = window.matchMedia(`(min-width: ${fromWidth}px)`);
+    // Phones (narrow, or on their side) get the flowing layout instead of the canvas.
+    const wide = window.matchMedia(WIDE_QUERY);
 
     const fit = () => {
       if (!wide.matches) {
@@ -54,5 +54,5 @@ export function useCanvasFit(
       ro.disconnect();
       wide.removeEventListener('change', fit);
     };
-  }, [frame, canvas, width, height, min, max, fromWidth]);
+  }, [frame, canvas, width, height, min, max]);
 }

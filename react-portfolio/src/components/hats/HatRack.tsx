@@ -1,5 +1,6 @@
 'use client';
 
+import { PHONE_QUERY } from '@/utils/breakpoints';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { animate, motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { PortraitMood } from '@/lib/council/contract';
@@ -199,7 +200,7 @@ function OpenRack({ open, onClose, onOpenProject }: HatRackProps) {
     triggerHaptic(12);
     speak();
     // On a phone the card sits below the fold: let the hat land, then bring the card up.
-    if (window.matchMedia('(max-width: 768px)').matches) {
+    if (window.matchMedia(PHONE_QUERY).matches) {
       window.setTimeout(() => cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 600);
     }
   };

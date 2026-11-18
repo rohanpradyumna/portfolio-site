@@ -605,7 +605,7 @@
 }
 
 /* ---- Phone ---- */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1024px) {
   .inner {
     padding-top: 72px;
   }
@@ -686,7 +686,7 @@
 }
 
 /* ---- Desktop: one fixed canvas, scaled to fit (HatRack.tsx sets --k, --ox, --oy) ---- */
-@media (min-width: 769px) {
+@media (min-width: 769px) and (min-height: 501px), (min-width: 1025px) {
   .panel {
     overflow: hidden;
   }
