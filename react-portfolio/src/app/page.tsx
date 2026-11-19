@@ -322,6 +322,73 @@ export default function Home() {
     }
   }, [modal, stop]);
 
+  // Back closes whatever is open (a phone's swipe-back is how people dismiss a
+  // sheet) instead of leaving the board. Opening an overlay adds one history
+  // entry; switching between overlays (hats -> work) reuses it.
+  const overlayOpen = modal !== null || aiModalOpen;
+  const ownsEntry = useRef(false);
+  const closeAllRef = useRef(() => {});
+  useEffect(() => {
+    closeAllRef.current = () => {
+      closeModal();
+      setAiModalOpen(false);
+    };
+  }, [closeModal]);
+  useEffect(() => {
+    if (overlayOpen && !ownsEntry.current) {
+      window.history.pushState({ ...window.history.state, pfOverlay: true }, '');
+      ownsEntry.current = true;
+    } else if (!overlayOpen && ownsEntry.current) {
+      // Closed from the UI: drop the entry we added so Back isn't a dead press.
+      ownsEntry.current = false;
+      if (window.history.state?.pfOverlay) window.history.back();
+    }
+  }, [overlayOpen]);
+  useEffect(() => {
+    const onPop = () => {
+      if (!ownsEntry.current) return;
+      ownsEntry.current = false;
+      closeAllRef.current();
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  // Phones: the board first renders at the desktop size and only then swaps to
+  // the tall phone layout, so the browser's own scroll restore on Back runs
+  // against a short page and lands at the top. Remember the spot and put it back.
+  useEffect(() => {
+    const save = () => {
+      try {
+        sessionStorage.setItem('pf_board_scroll', String(Math.round(window.scrollY)));
+      } catch {}
+    };
+    window.addEventListener('pagehide', save);
+    return () => window.removeEventListener('pagehide', save);
+  }, []);
+  const restoredScroll = useRef(false);
+  useEffect(() => {
+    if (!isMobile || restoredScroll.current) return;
+    restoredScroll.current = true;
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (nav?.type !== 'back_forward') return;
+    let y = 0;
+    try {
+      y = Number(sessionStorage.getItem('pf_board_scroll')) || 0;
+    } catch {}
+    if (y <= 0) return;
+    // The phone canvas fills in over a few frames; wait until the page is tall enough.
+    let tries = 0;
+    const tick = () => {
+      if (document.documentElement.scrollHeight - window.innerHeight >= y || tries++ > 60) {
+        window.scrollTo(0, y);
+        return;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [isMobile]);
+
   return (
     // reducedMotion="user": the CSS reduced-motion rule can't reach framer's JS
     // springs, so this drops their transform motion and keeps the opacity fades.
