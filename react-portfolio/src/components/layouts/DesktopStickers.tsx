@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Position } from '@/types';
-import { useResponsive, DESIGN_H } from '@/hooks/useDimensions';
+import { useResponsive, DESIGN_W, DESIGN_H } from '@/hooks/useDimensions';
+import { waveSlot, type StickerEntrance } from '@/components/stickers/base/Sticker';
 import {
   PhotoSticker,
   ImageSticker,
@@ -19,36 +20,20 @@ import {
   HatRackSticker,
 } from '@/components/stickers';
 
-// First-visit wake-up wave: content stickers breathe once in a gentle stagger,
-// top→bottom of the cluster. Starts after the entrance stagger (last sticker is
-// the coffee machine at 1200ms) settles, spanning ~0.8s.
-const WAKE_BASE = 1100;
-const WAKE_STAGGER = 60;
-const WAKE_ORDER = [
-  'portrait',
-  'charminar',
-  'linkedin',
-  'email',
-  'plane',
-  'laptop',
-  'hats',
-  'folder',
-  'wheel',
-  'council',
-  'airpods',
-  'beach',
-  'camera',
-  'gym',
-  'pickleball',
-  'terrapin',
-];
-const wakeDelayFor = (id: string) => WAKE_BASE + Math.max(0, WAKE_ORDER.indexOf(id)) * WAKE_STAGGER;
+// The center card, in design space. The entrance wave spreads out from its edge.
+const CARD = { cx: DESIGN_W / 2, cy: DESIGN_H / 2, halfW: 220, halfH: 160 };
+const COFFEE_MACHINE = { x: 6, y: DESIGN_H - 180, w: 107, h: 135 };
+// Render boxes for the center math; anything unlisted is close enough to 100x100.
+const BOX: Record<string, [number, number]> = { tagPM: [117, 39], tagAI: [181, 39] };
+
+type Slot = { entrance: StickerEntrance; entranceDelay: number };
 
 interface DesktopStickersProps {
   positions: Record<string, Position>;
   portraitW: number;
   portraitH: number;
-  wake?: boolean;
+  /** First visit: the laptop nudges once to invite the first click. */
+  nudge?: boolean;
   writingCount?: number;
   handlers: {
     openLinkedIn: () => void;
@@ -76,11 +61,37 @@ export function DesktopStickers({
   positions,
   portraitW,
   portraitH,
-  wake = false,
+  nudge = false,
   writingCount,
   handlers,
 }: DesktopStickersProps) {
   const { s } = useResponsive();
+
+  // Each sticker's place in the wave is its rank by gap to the card's edge, so
+  // the wave runs outward from the card and one far-flung sticker (the coffee
+  // machine) can't squash everyone else into the first beat.
+  const wave = useMemo(() => {
+    const boxes: Record<string, { x: number; y: number; w: number; h: number }> = {
+      coffeeMachine: COFFEE_MACHINE,
+    };
+    for (const [id, p] of Object.entries(positions)) {
+      if (id === 'portrait') continue;
+      const [w, h] = BOX[id] ?? [100, 100];
+      boxes[id] = { x: p.x, y: p.y, w, h };
+    }
+    const gap = ({ x, y, w, h }: (typeof boxes)[string]) =>
+      Math.hypot(
+        Math.max(0, Math.abs(x + w / 2 - CARD.cx) - CARD.halfW),
+        Math.max(0, Math.abs(y + h / 2 - CARD.cy) - CARD.halfH)
+      );
+    const order = Object.keys(boxes).sort((a, b) => gap(boxes[a]) - gap(boxes[b]));
+    const slots: Record<string, Slot> = {};
+    order.forEach((id, i) => {
+      slots[id] = waveSlot(i / Math.max(1, order.length - 1));
+    });
+    return slots;
+  }, [positions]);
+  const enter = (id: string): Slot => wave[id] ?? waveSlot(1);
 
   return (
     <>
@@ -95,7 +106,7 @@ export function DesktopStickers({
         fontSize={s(13)}
         padX={s(14)}
         padY={s(7)}
-        entranceDelay={100}
+        {...enter('tagPM')}
       />
       <WordSticker
         id="tag-ai"
@@ -107,7 +118,7 @@ export function DesktopStickers({
         fontSize={s(13)}
         padX={s(14)}
         padY={s(7)}
-        entranceDelay={150}
+        {...enter('tagAI')}
       />
 
       {/* Portrait */}
@@ -120,10 +131,8 @@ export function DesktopStickers({
         zBase={15}
         noBorder={true}
         onClick={handlers.portraitClick}
-        entranceDelay={50}
+        entrance="lead"
         peekLabel="that's me"
-        wake={wake}
-        wakeDelay={wakeDelayFor('portrait')}
       />
 
       {/* Location stickers */}
@@ -134,10 +143,8 @@ export function DesktopStickers({
         initial={positions.charminar || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.charminarFact}
-        entranceDelay={200}
+        {...enter('charminar')}
         peekLabel="hyderabad"
-        wake={wake}
-        wakeDelay={wakeDelayFor('charminar')}
       />
 
       {/* Communication */}
@@ -148,20 +155,16 @@ export function DesktopStickers({
         initial={positions.linkedin || { x: 0, y: 0, rot: 0 }}
         zBase={10}
         onClick={handlers.openLinkedIn}
-        entranceDelay={300}
+        {...enter('linkedin')}
         peekLabel="linkedin ↗"
-        wake={wake}
-        wakeDelay={wakeDelayFor('linkedin')}
       />
       <EmailSticker
         id="email"
         initial={positions.email || { x: 0, y: 0, rot: 0 }}
         zBase={10}
         onClick={handlers.openEmail}
-        entranceDelay={350}
+        {...enter('email')}
         peekLabel="say hi"
-        wake={wake}
-        wakeDelay={wakeDelayFor('email')}
       />
 
       {/* Travel */}
@@ -172,10 +175,8 @@ export function DesktopStickers({
         initial={positions.plane || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.travelList}
-        entranceDelay={500}
+        {...enter('plane')}
         peekLabel="where i've been"
-        wake={wake}
-        wakeDelay={wakeDelayFor('plane')}
       />
       <ImageSticker
         id="beach"
@@ -184,10 +185,8 @@ export function DesktopStickers({
         initial={positions.beach || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.beachVibes}
-        entranceDelay={550}
+        {...enter('beach')}
         peekLabel="beach brain"
-        wake={wake}
-        wakeDelay={wakeDelayFor('beach')}
       />
 
       {/* Hobbies / lifestyle */}
@@ -196,10 +195,8 @@ export function DesktopStickers({
         initial={positions.headphones || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onPlay={handlers.toggleMusic}
-        entranceDelay={600}
+        {...enter('headphones')}
         peekLabel="press play"
-        wake={wake}
-        wakeDelay={wakeDelayFor('airpods')}
       />
       <ImageSticker
         id="coffee"
@@ -208,20 +205,16 @@ export function DesktopStickers({
         initial={positions.coffee || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.coffeeVibes}
-        entranceDelay={650}
+        {...enter('coffee')}
         peekLabel="coffee talk"
-        wake={wake}
-        wakeDelay={wakeDelayFor('coffee')}
       />
       <CameraSticker
         id="camera"
         initial={positions.camera || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.cameraVibes}
-        entranceDelay={700}
+        {...enter('camera')}
         peekLabel="street photos"
-        wake={wake}
-        wakeDelay={wakeDelayFor('camera')}
       />
       <ImageSticker
         id="gym"
@@ -230,20 +223,16 @@ export function DesktopStickers({
         initial={positions.gym || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.gymVibes}
-        entranceDelay={750}
+        {...enter('gym')}
         peekLabel="the grind"
-        wake={wake}
-        wakeDelay={wakeDelayFor('gym')}
       />
       <PickleballSticker
         id="pickleball"
         initial={positions.pickleball || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.pickleballVibes}
-        entranceDelay={800}
+        {...enter('pickleball')}
         peekLabel="racket sports"
-        wake={wake}
-        wakeDelay={wakeDelayFor('pickleball')}
       />
       <ImageSticker
         id="terrapin"
@@ -252,10 +241,8 @@ export function DesktopStickers({
         initial={positions.terrapin || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.terrapinFact}
-        entranceDelay={850}
+        {...enter('terrapin')}
         peekLabel="go terps"
-        wake={wake}
-        wakeDelay={wakeDelayFor('terrapin')}
       />
 
       {/* My Work - Laptop sticker */}
@@ -264,9 +251,8 @@ export function DesktopStickers({
         initial={positions.laptop || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.openWork}
-        entranceDelay={900}
-        wake={wake}
-        wakeDelay={wakeDelayFor('laptop')}
+        {...enter('laptop')}
+        nudge={nudge}
       />
 
       {/* What you get - Hat rack sticker */}
@@ -275,11 +261,9 @@ export function DesktopStickers({
         initial={positions.hats || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.openHats}
-        entranceDelay={925}
+        {...enter('hats')}
         title="what you get · pick a hat"
         peekLabel="try on a hat →"
-        wake={wake}
-        wakeDelay={wakeDelayFor('hats')}
       />
 
       {/* Writing - Folder sticker */}
@@ -288,12 +272,10 @@ export function DesktopStickers({
         initial={positions.folder || { x: 0, y: 0, rot: 0 }}
         zBase={8}
         onClick={handlers.openWriting}
-        entranceDelay={950}
+        {...enter('folder')}
         count={writingCount}
         title={writingCount ? `writing · ${writingCount} posts` : 'writing'}
         peekLabel={writingCount ? `${writingCount} reads inside →` : 'read my writing →'}
-        wake={wake}
-        wakeDelay={wakeDelayFor('folder')}
       />
 
       {/* Rabbit holes: the topic machine */}
@@ -302,10 +284,8 @@ export function DesktopStickers({
         initial={positions.wheel || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.openWheel}
-        entranceDelay={875}
+        {...enter('wheel')}
         peekLabel="find something to learn →"
-        wake={wake}
-        wakeDelay={wakeDelayFor('wheel')}
       />
 
       {/* The Council */}
@@ -314,20 +294,18 @@ export function DesktopStickers({
         initial={positions.council || { x: 0, y: 0, rot: 0 }}
         zBase={7}
         onClick={handlers.openCouncil}
-        entranceDelay={1025}
+        {...enter('council')}
         title="the council · question everything"
         peekLabel="the council has opinions →"
-        wake={wake}
-        wakeDelay={wakeDelayFor('council')}
       />
 
       {/* Easter Egg: Coffee Machine, tucked into the bottom-left corner */}
       <CoffeeMachineSticker
         id="coffeeMachine"
-        initial={{ x: 6, y: DESIGN_H - 180, rot: -3 }}
+        initial={{ x: COFFEE_MACHINE.x, y: COFFEE_MACHINE.y, rot: -3 }}
         zBase={6}
         onBrew={handlers.brewCoffee}
-        entranceDelay={1200}
+        {...enter('coffeeMachine')}
       />
     </>
   );

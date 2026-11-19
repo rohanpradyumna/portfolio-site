@@ -47,18 +47,38 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  // First-visit "wake-up wave": content stickers breathe once to invite
-  // exploration. Gated to once per visitor (localStorage) and skipped under
-  // reduced motion. Independent of the async useMotion state for robustness.
-  const [wake, setWake] = useState(false);
+  // First visit only: the laptop ("what I've shipped") nudges once, a few seconds
+  // in view, to invite the first click. It counts as seen once it has played or
+  // the visitor has clicked something (they've found their way). A scroll is not
+  // a click, so phones still get it when the laptop scrolls into view.
+  const [nudge, setNudge] = useState(false);
   useEffect(() => {
+    const KEY = 'pf_nudge_seen';
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
-      if (!localStorage.getItem('pf_wake_seen')) {
-        setWake(true);
-        localStorage.setItem('pf_wake_seen', '1');
-      }
-    } catch {}
+      if (localStorage.getItem(KEY)) return;
+    } catch {
+      return;
+    }
+    setNudge(true);
+    const done = () => {
+      try {
+        localStorage.setItem(KEY, '1');
+      } catch {}
+      setNudge(false);
+      cleanup();
+    };
+    // CSS modules hash the keyframe name, so match on the readable part.
+    const onAnimEnd = (e: AnimationEvent) => {
+      if (e.animationName.includes('stickerNudge')) done();
+    };
+    const cleanup = () => {
+      window.removeEventListener('click', done);
+      window.removeEventListener('animationend', onAnimEnd);
+    };
+    window.addEventListener('click', done);
+    window.addEventListener('animationend', onAnimEnd);
+    return cleanup;
   }, []);
 
   // Writing count drives the folder's "more to read" badge. Default to a sane
@@ -390,7 +410,7 @@ export default function Home() {
             {/* Center card stack */}
             <CardStack />
             {/* Mobile: draggable pocket canvas below card */}
-            <MobileDragCanvas handlers={handlers} wake={wake} writingCount={writingCount} />
+            <MobileDragCanvas handlers={handlers} nudge={nudge} writingCount={writingCount} />
           </>
         ) : (
           // Desktop: fixed design canvas, uniformly scaled to fit the viewport
@@ -400,7 +420,7 @@ export default function Home() {
               portraitW={portraitW}
               portraitH={portraitH}
               handlers={handlers}
-              wake={wake}
+              nudge={nudge}
               writingCount={writingCount}
             />
             <CardStack />
@@ -409,7 +429,7 @@ export default function Home() {
       </main>
 
       {/* Modals */}
-      <Modal open={modal === 'phone'} noAnimation={true} onClose={closeModal} title="call me" color="#1a1a1a">
+      <Modal open={modal === 'phone'} onClose={closeModal} title="call me" color="#1a1a1a">
         <div
           style={{
             fontSize: 28,
@@ -442,7 +462,7 @@ export default function Home() {
         </a>
       </Modal>
 
-      <Modal open={modal === 'music'} noAnimation={true} onClose={closeModal} title="now playing" color="#1a1a1a">
+      <Modal open={modal === 'music'} onClose={closeModal} title="now playing" color="#1a1a1a">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
           <EqBars playing={musicPlaying} />
           <div>
@@ -472,7 +492,7 @@ export default function Home() {
         </button>
       </Modal>
 
-      <Modal open={modal === 'terrapin'} noAnimation={true} onClose={closeModal} title="go terps 🐢" color="#c8102e">
+      <Modal open={modal === 'terrapin'} onClose={closeModal} title="go terps 🐢" color="#c8102e">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
           masters from the robert h. smith school of business. disruptive innovation, digital business transformation,
           and machine learning. the stuff that got me building AI in d.c. fear the turtle.
@@ -484,7 +504,7 @@ export default function Home() {
         <UmdRoll />
       </Modal>
 
-      <Modal open={modal === 'charminar'} noAnimation={true} onClose={closeModal} title="hyderabad 🍛" color="#8a5f36">
+      <Modal open={modal === 'charminar'} onClose={closeModal} title="hyderabad 🍛" color="#8a5f36">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 10 }}>
           home. my heart lives here even when I don&apos;t. the city that never sleeps, and neither did I when I was
           there.
@@ -496,7 +516,7 @@ export default function Home() {
         </div>
       </Modal>
 
-      <Modal open={modal === 'travel'} noAnimation={true} onClose={closeModal} title="travel vibes ✈️" color="#1a1a1a">
+      <Modal open={modal === 'travel'} onClose={closeModal} title="travel vibes ✈️" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef', marginBottom: 12 }}>
           hot take: I&apos;d rather go back to a place I love than hunt for somewhere new. once a city clicks, I want to
           keep going back. they tell me stories.
@@ -510,7 +530,7 @@ export default function Home() {
         </div>
       </Modal>
 
-      <Modal open={modal === 'beach'} noAnimation={true} onClose={closeModal} title="beach brain" color="#2a63cf">
+      <Modal open={modal === 'beach'} onClose={closeModal} title="beach brain" color="#2a63cf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef' }}>
           my best product ideas happen when I&apos;m 10 feet from the water and nowhere near a laptop. kerala backwaters
           &gt; boardrooms.
@@ -519,7 +539,6 @@ export default function Home() {
 
       <Modal
         open={modal === 'pickleball'}
-        noAnimation={true}
         onClose={closeModal}
         title="racket sports 🏓"
         color="#34703d"
@@ -534,7 +553,7 @@ export default function Home() {
         </div>
       </Modal>
 
-      <Modal open={modal === 'camera'} noAnimation={true} onClose={closeModal} title="photo walks" color="#1a1a1a">
+      <Modal open={modal === 'camera'} onClose={closeModal} title="photo walks" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#f5f2e8' }}>
           mostly street + architecture on a fuji x100v. not for the &apos;gram, just for me. there&apos;s something
           about noticing that makes me a better PM too.
@@ -543,7 +562,6 @@ export default function Home() {
 
       <Modal
         open={modal === 'coffee'}
-        noAnimation={true}
         onClose={closeModal}
         title="coffee obsession ☕"
         color="#6b3a1f"
@@ -561,14 +579,14 @@ export default function Home() {
         </div>
       </Modal>
 
-      <Modal open={modal === 'gym'} noAnimation={true} onClose={closeModal} title="fitness arc 💪" color="#2a63cf">
+      <Modal open={modal === 'gym'} onClose={closeModal} title="fitness arc 💪" color="#2a63cf">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#faf7ef' }}>
           currently in my &quot;get fit&quot; era. shipping products = sitting all day, so the gym is non-negotiable.
           compound effect works here too: small reps, big gains. (that&apos;s the plan anyway)
         </div>
       </Modal>
 
-      <Modal open={modal === 'portrait'} noAnimation={true} onClose={closeModal} title="that's me" color="#1a1a1a">
+      <Modal open={modal === 'portrait'} onClose={closeModal} title="that's me" color="#1a1a1a">
         <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#f5f2e8' }}>
           occasionally productive, generally fun, always smiling. the coffee helps.
         </div>

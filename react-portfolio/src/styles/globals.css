@@ -24,6 +24,14 @@ body {
   background: var(--paper);
 }
 
+/* Every sticker has its own press feedback; iOS's gray tap flash fights it.
+   No font inflation when a phone turns sideways. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 /* Board surface is non-selectable so dragging stickers never starts a text
    selection. Modal/body copy stays selectable (see Modal.module.css) so phone
    numbers and quotes can be copied. */

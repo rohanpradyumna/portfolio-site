@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef, useLayoutEffect, useSyncExternalStore } from 'react';
-import { motion, PanInfo, useMotionValue, animate } from 'framer-motion';
+import React, { useEffect, useRef, useLayoutEffect, useState, useSyncExternalStore } from 'react';
+import { motion, PanInfo, useMotionValue, useReducedMotion, animate } from 'framer-motion';
 import { useAudio } from '@/hooks/useAudio';
 import { Position } from '@/types';
 import styles from './Sticker.module.css';
@@ -27,6 +27,34 @@ const findSnapPoint = (value: number): number | null => {
   return distance <= SNAP_THRESHOLD ? nearestGrid : null;
 };
 
+/** How a sticker arrives on first load. The lead grows in from furthest, the near ring
+    a little less, the outer ring only fades, and 'none' is simply there. */
+export type StickerEntrance = 'lead' | 'near' | 'outer' | 'none';
+
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+const ENTRANCES: Record<Exclude<StickerEntrance, 'none'>, { from: number; duration: number }> = {
+  lead: { from: 0.9, duration: 0.5 },
+  near: { from: 0.93, duration: 0.4 },
+  outer: { from: 1, duration: 0.4 },
+};
+
+// The board's entrance wave. The portrait leads with the card at 0ms; every other
+// sticker starts by how far it sits from the card (t: 0 nearest, 1 furthest). The
+// delays ease out, so the gaps shrink as the wave spreads instead of ticking like a
+// metronome, and the whole board has started by WAVE_LAST.
+const WAVE_FIRST = 120;
+const WAVE_LAST = 600;
+const NEAR_UNTIL = 0.4;
+
+export function waveSlot(t: number): { entrance: StickerEntrance; entranceDelay: number } {
+  const k = Math.min(1, Math.max(0, t));
+  const eased = 1 - (1 - k) * (1 - k);
+  return {
+    entrance: k < NEAR_UNTIL ? 'near' : 'outer',
+    entranceDelay: Math.round(WAVE_FIRST + (WAVE_LAST - WAVE_FIRST) * eased),
+  };
+}
+
 
 export interface StickerProps {
   id: string;
@@ -39,6 +67,9 @@ export interface StickerProps {
   title?: string;
   className?: string;
   style?: React.CSSProperties;
+  /** First-load entrance treatment (see StickerEntrance). */
+  entrance?: StickerEntrance;
+  /** Ms before the entrance starts; ignored under reduced motion. */
   entranceDelay?: number;
   scale?: number;
   /** Bounds the drag so the sticker can't be flung out of its container (mobile canvas). */
@@ -55,10 +86,8 @@ export interface StickerProps {
   snapBackHome?: boolean;
   /** Quiet mono chip naming what's inside; revealed on hover (real pointers only). */
   peekLabel?: string;
-  /** One-shot "breathe" on first visit to invite exploration. */
-  wake?: boolean;
-  /** Delay (ms) before this sticker's wake breathe fires; used to stagger the wave. */
-  wakeDelay?: number;
+  /** One small nudge a few seconds in, inviting the first click. */
+  nudge?: boolean;
 }
 
 export function Sticker({
@@ -72,14 +101,14 @@ export function Sticker({
   title,
   className = '',
   style = {},
+  entrance = 'near',
   entranceDelay = 0,
   dragConstraints,
   disableSnap = false,
   allowPageScroll = false,
   snapBackHome = false,
   peekLabel,
-  wake = false,
-  wakeDelay = 0,
+  nudge = false,
 }: StickerProps) {
   // Use refs instead of state to avoid re-renders during drag
   const hasMoved = useRef(false);
@@ -92,6 +121,36 @@ export function Sticker({
   const y = useMotionValue(initial.y);
 
   const { playTapSound, triggerHaptic } = useAudio();
+  const reduceMotion = useReducedMotion();
+  const enter = entrance === 'none' ? null : ENTRANCES[entrance];
+  const grows = !!enter && enter.from < 1;
+
+  // The nudge only plays where it can be seen: about 2.5s into the visit if the
+  // sticker is already on screen (desktop), or shortly after it scrolls into view
+  // (phones, where it starts below the fold).
+  const [nudgeStarted, setNudgeStarted] = useState(false);
+  useEffect(() => {
+    const el = elementRef.current;
+    if (!nudge || !el) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        clearTimeout(timer);
+        if (!entry.isIntersecting) return;
+        timer = setTimeout(() => {
+          io.disconnect();
+          setNudgeStarted(true);
+        }, Math.max(400, 2500 - performance.now()));
+      },
+      { threshold: 0.6 }
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      clearTimeout(timer);
+    };
+  }, [nudge]);
+  const nudging = nudge && nudgeStarted;
 
   // framer-motion force-sets touch-action: none on drag-enabled elements,
   // overriding the style prop, so re-apply pan-y on the DOM node after every
@@ -179,17 +238,6 @@ export function Sticker({
     <motion.div
       ref={elementRef}
       className={`${styles.sticker} ${className}`}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        opacity: { delay: entranceDelay / 1000, duration: 0.3, ease: 'easeOut' },
-        scale: {
-          delay: entranceDelay / 1000,
-          type: 'spring',
-          stiffness: 300,
-          damping: 25,
-        },
-      }}
       suppressHydrationWarning
       style={{
         position: 'absolute',
@@ -203,8 +251,10 @@ export function Sticker({
         touchAction: allowPageScroll ? 'pan-y' : 'none',
         ...style,
       }}
-      drag
-      // A touch that starts sideways may drag; one that turns into a scroll never carries the sticker down the board.
+      // Phones drag sideways only. framer's pan session adds window scroll to the
+      // drag while it is live, and iOS keeps it live through a scroll, so a y axis
+      // let the sticker ride the page down over its neighbours. Vertical is the page's.
+      drag={allowPageScroll ? 'x' : true}
       dragDirectionLock={allowPageScroll}
       dragConstraints={dragConstraints}
       dragMomentum={!snapBackHome}
@@ -218,6 +268,11 @@ export function Sticker({
       // On touch, a press is usually the start of a scroll: grow only once it is really a drag.
       whileTap={coarse ? undefined : { scale: 1.08 }}
       onPointerDown={handlePointerDown}
+      // The browser took the touch for a scroll: whatever moved goes home.
+      onPointerCancel={snapBackHome ? () => {
+        animate(x, initial.x, { type: 'spring', stiffness: 280, damping: 26 });
+        animate(y, initial.y, { type: 'spring', stiffness: 280, damping: 26 });
+      } : undefined}
       onDragStart={handleDragStart}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
@@ -233,14 +288,19 @@ export function Sticker({
         }
       }}
     >
-      {/* Inner layer runs the one-shot wake "breathe" as a CSS animation, on a
-          transform separate from the outer drag/hover transform so it never
-          fights the x/y motion values or whileHover. The animation plays once
-          when the .wake class lands (delayed per-sticker to stagger the wave)
-          and settles back to scale 1. No wake = plain static div. */}
-      <div
-        className={`${styles.inner} ${wake ? styles.wake : ''}`}
-        style={wake ? { animationDelay: `${wakeDelay}ms` } : undefined}
+      {/* The entrance and the nudge live on this inner layer, so they never touch
+          the outer element's drag x/y or its hover and press scale. A transform
+          string (not the scale shorthand) lets framer hand it to WAAPI, which
+          keeps the wave smooth while the page is still hydrating. */}
+      <motion.div
+        className={`${styles.inner} ${nudging ? styles.nudge : ''}`}
+        initial={enter ? { opacity: 0, ...(grows && { transform: `scale(${enter.from})` }) } : false}
+        animate={enter ? { opacity: 1, ...(grows && { transform: 'scale(1)' }) } : undefined}
+        transition={
+          reduceMotion
+            ? { opacity: { duration: 0.2 }, transform: { duration: 0 } }
+            : { duration: enter?.duration, delay: entranceDelay / 1000, ease: EASE_OUT }
+        }
       >
         {children}
         {peekLabel && (
@@ -248,7 +308,7 @@ export function Sticker({
             {peekLabel}
           </span>
         )}
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useResponsive } from '@/hooks/useDimensions';
-import { useMotion } from '@/hooks/useMotion';
+import { waveSlot, type StickerEntrance } from '@/components/stickers/base/Sticker';
 import {
   PhotoSticker,
   ImageSticker,
@@ -19,13 +19,12 @@ import {
   HatRackSticker,
 } from '@/components/stickers';
 
-// First-visit wake-up wave timing (mirrors DesktopStickers). On touch this is the
-// primary discoverability cue: there's no hover, so no peek labels.
-const WAKE_BASE = 1100;
-const WAKE_STAGGER = 60;
+type Slot = { entrance: StickerEntrance; entranceDelay: number };
+const STILL: Slot = { entrance: 'none', entranceDelay: 0 };
 
 interface MobileDragCanvasProps {
-  wake?: boolean;
+  /** First visit: the laptop nudges once, when it scrolls into view. */
+  nudge?: boolean;
   writingCount?: number;
   handlers: {
     openLinkedIn: () => void;
@@ -96,16 +95,15 @@ const BY_ID = Object.fromEntries(LAYOUT.map((l) => [l.id, l])) as Record<string,
 // Tall enough for the lowest sticker plus its label, and no taller.
 const CANVAS_MAX_W = 520;
 const CANVAS_MIN_HEIGHT = Math.max(...LAYOUT.map((l) => l.y + l.h)) + 24;
+// Free horizontal track inside the 16px side padding, capped so a phone on its
+// side keeps the stickers in a readable column instead of at the far edges.
+const fitCanvas = (viewportW: number) => Math.max(0, Math.min(viewportW - 32, CANVAS_MAX_W));
 
-export function MobileDragCanvas({ wake = false, writingCount, handlers }: MobileDragCanvasProps) {
+export function MobileDragCanvas({ nudge = false, writingCount, handlers }: MobileDragCanvasProps) {
   const { dims } = useResponsive();
-  const { reducedMotion } = useMotion();
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  // Free horizontal track inside the 16px side padding.
-  // Capped so a phone on its side keeps the stickers in a readable column
-  // instead of flinging them to the far edges.
-  const canvasW = Math.max(0, Math.min(dims.w - 32, CANVAS_MAX_W));
+  const canvasW = fitCanvas(dims.w);
 
   const pos = (item: LayoutItem) => ({
     x: Math.round(item.xFrac * (canvasW - item.w)),
@@ -113,10 +111,53 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
     rot: item.rot,
   });
 
-  // Entrance stagger keyed to vertical order, suppressed under reduced motion.
-  const order = LAYOUT.map((l) => l.id);
-  const delayFor = (id: string) => (reducedMotion ? 0 : 50 + order.indexOf(id) * 45);
-  const wakeDelayFor = (id: string) => WAKE_BASE + Math.max(0, order.indexOf(id)) * WAKE_STAGGER;
+  // The entrance is planned once, from where the canvas sits when the page opens.
+  // The portrait leads; the other stickers on screen follow by their distance from
+  // the card above, and anything below the fold is simply there (an entrance
+  // nobody sees only delays it). Stickers mount with this plan, so none of them
+  // flashes in with the wrong treatment. Two things settle just after mount and
+  // would put the fold in the wrong place: a phone can hydrate at a briefly wrong
+  // width (360 reads as 401), so the plan waits for the tracked width to agree with
+  // the window (400ms at most), and the card stack above still has one render to
+  // go before it sits in the flow, so the measurement waits two frames.
+  const [plan, setPlan] = useState<{ w: number; slots: Record<string, Slot> } | null>(null);
+  const [waited, setWaited] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setWaited(true), 400);
+    return () => window.clearTimeout(t);
+  }, []);
+  useEffect(() => {
+    if (plan || (!waited && fitCanvas(window.innerWidth) !== canvasW)) return;
+    const measure = () => {
+      const el = canvasRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      const fold = window.innerHeight;
+      const reach = Math.hypot(canvasW / 2, Math.max(1, fold - top));
+      const slots: Record<string, Slot> = {};
+      for (const item of LAYOUT) {
+        if (top + item.y >= fold) slots[item.id] = STILL;
+        else if (item.id === 'portrait') slots[item.id] = { entrance: 'lead', entranceDelay: 0 };
+        else {
+          const dx = (item.xFrac - 0.5) * (canvasW - item.w);
+          slots[item.id] = waveSlot(Math.hypot(dx, item.y + item.h / 2) / reach);
+        }
+      }
+      setPlan({ w: canvasW, slots });
+    };
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(measure);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [plan, canvasW, waited]);
+
+  // The canvas re-keys (remounts every sticker) when its width changes, e.g. on
+  // rotation. Those remounts must not replay the wave, so once the width has moved
+  // off the planned one, every sticker is just there.
+  const [stale, setStale] = useState(false);
+  if (plan && !stale && canvasW !== plan.w) setStale(true);
+  const enter = (id: string): Slot =>
+    !plan || stale || canvasW !== plan.w ? STILL : plan.slots[id];
 
   return (
     <div
@@ -152,318 +193,289 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
           touchAction: 'pan-y',
         }}
       >
-        <PhotoSticker
-          id="portrait-m"
-          src="/assets/rohan-casual-cut.webp"
-          w={150}
-          h={226}
-          initial={pos(BY_ID.portrait)}
-          zBase={15}
-          noBorder={true}
-          onClick={handlers.portraitClick}
-          entranceDelay={delayFor('portrait')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('portrait')}
-        />
+        {plan && (
+          <>
+            <PhotoSticker
+              id="portrait-m"
+              src="/assets/rohan-casual-cut.webp"
+              w={150}
+              h={226}
+              initial={pos(BY_ID.portrait)}
+              zBase={15}
+              noBorder={true}
+              onClick={handlers.portraitClick}
+              {...enter('portrait')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <WordSticker
-          id="tag-founder-m"
-          text="ex-founder"
-          initial={pos(BY_ID.tagFounder)}
-          zBase={5}
-          bg="#1a1a1a"
-          fg="#faf7ef"
-          fontSize={12}
-          padX={12}
-          padY={6}
-          entranceDelay={delayFor('tagFounder')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-        />
-        <WordSticker
-          id="tag-ai-m"
-          text="ai product manager"
-          initial={pos(BY_ID.tagAI)}
-          zBase={5}
-          bg="var(--accent-orange)"
-          fg="#faf7ef"
-          fontSize={12}
-          padX={12}
-          padY={6}
-          entranceDelay={delayFor('tagAI')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-        />
+            <WordSticker
+              id="tag-founder-m"
+              text="ex-founder"
+              initial={pos(BY_ID.tagFounder)}
+              zBase={5}
+              bg="#1a1a1a"
+              fg="#faf7ef"
+              fontSize={12}
+              padX={12}
+              padY={6}
+              {...enter('tagFounder')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <WordSticker
+              id="tag-ai-m"
+              text="ai product manager"
+              initial={pos(BY_ID.tagAI)}
+              zBase={5}
+              bg="var(--accent-orange)"
+              fg="#faf7ef"
+              fontSize={12}
+              padX={12}
+              padY={6}
+              {...enter('tagAI')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <ImageSticker
-          id="linkedin-m"
-          src="/assets/icons/linkedin.png"
-          size={88}
-          initial={pos(BY_ID.linkedin)}
-          zBase={10}
-          onClick={handlers.openLinkedIn}
-          entranceDelay={delayFor('linkedin')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('linkedin')}
-        />
-        <EmailSticker
-          id="email-m"
-          initial={pos(BY_ID.email)}
-          zBase={10}
-          onClick={handlers.openEmail}
-          entranceDelay={delayFor('email')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('email')}
-        />
+            <ImageSticker
+              id="linkedin-m"
+              src="/assets/icons/linkedin.png"
+              size={88}
+              initial={pos(BY_ID.linkedin)}
+              zBase={10}
+              onClick={handlers.openLinkedIn}
+              {...enter('linkedin')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <EmailSticker
+              id="email-m"
+              initial={pos(BY_ID.email)}
+              zBase={10}
+              onClick={handlers.openEmail}
+              {...enter('email')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <ImageSticker
-          id="charminar-m"
-          src="/assets/icons/charminar.png"
-          size={104}
-          initial={pos(BY_ID.charminar)}
-          zBase={8}
-          onClick={handlers.charminarFact}
-          entranceDelay={delayFor('charminar')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('charminar')}
-        />
-        <ImageSticker
-          id="plane-m"
-          src="/assets/icons/plane.png"
-          size={92}
-          initial={pos(BY_ID.plane)}
-          zBase={7}
-          onClick={handlers.travelList}
-          entranceDelay={delayFor('plane')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('plane')}
-        />
+            <ImageSticker
+              id="charminar-m"
+              src="/assets/icons/charminar.png"
+              size={104}
+              initial={pos(BY_ID.charminar)}
+              zBase={8}
+              onClick={handlers.charminarFact}
+              {...enter('charminar')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <ImageSticker
+              id="plane-m"
+              src="/assets/icons/plane.png"
+              size={92}
+              initial={pos(BY_ID.plane)}
+              zBase={7}
+              onClick={handlers.travelList}
+              {...enter('plane')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <LaptopSticker
-          id="laptop-m"
-          initial={pos(BY_ID.laptop)}
-          zBase={8}
-          onClick={handlers.openWork}
-          entranceDelay={delayFor('laptop')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('laptop')}
-        />
-        <FolderSticker
-          id="folder-m"
-          initial={pos(BY_ID.folder)}
-          zBase={8}
-          onClick={handlers.openWriting}
-          entranceDelay={delayFor('folder')}
-          count={writingCount}
-          title={writingCount ? `writing · ${writingCount} posts` : 'writing'}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('folder')}
-        />
+            <LaptopSticker
+              id="laptop-m"
+              initial={pos(BY_ID.laptop)}
+              zBase={8}
+              onClick={handlers.openWork}
+              {...enter('laptop')}
+              nudge={nudge}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <FolderSticker
+              id="folder-m"
+              initial={pos(BY_ID.folder)}
+              zBase={8}
+              onClick={handlers.openWriting}
+              {...enter('folder')}
+              count={writingCount}
+              title={writingCount ? `writing · ${writingCount} posts` : 'writing'}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <AirPodsSticker
-          id="airpods-m"
-          initial={pos(BY_ID.airpods)}
-          zBase={7}
-          onPlay={handlers.toggleMusic}
-          entranceDelay={delayFor('airpods')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('airpods')}
-        />
-        <ImageSticker
-          id="beach-m"
-          src="/assets/icons/beach.png"
-          size={92}
-          initial={pos(BY_ID.beach)}
-          zBase={7}
-          onClick={handlers.beachVibes}
-          entranceDelay={delayFor('beach')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('beach')}
-        />
-        <CameraSticker
-          id="camera-m"
-          initial={pos(BY_ID.camera)}
-          zBase={7}
-          onClick={handlers.cameraVibes}
-          entranceDelay={delayFor('camera')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('camera')}
-        />
+            <AirPodsSticker
+              id="airpods-m"
+              initial={pos(BY_ID.airpods)}
+              zBase={7}
+              onPlay={handlers.toggleMusic}
+              {...enter('airpods')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <ImageSticker
+              id="beach-m"
+              src="/assets/icons/beach.png"
+              size={92}
+              initial={pos(BY_ID.beach)}
+              zBase={7}
+              onClick={handlers.beachVibes}
+              {...enter('beach')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <CameraSticker
+              id="camera-m"
+              initial={pos(BY_ID.camera)}
+              zBase={7}
+              onClick={handlers.cameraVibes}
+              {...enter('camera')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <ImageSticker
-          id="coffee-m"
-          src="/assets/icons/coffee.png"
-          size={84}
-          initial={pos(BY_ID.coffee)}
-          zBase={7}
-          onClick={handlers.coffeeVibes}
-          entranceDelay={delayFor('coffee')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('coffee')}
-        />
-        <ImageSticker
-          id="gym-m"
-          src="/assets/icons/gym.png"
-          size={88}
-          initial={pos(BY_ID.gym)}
-          zBase={7}
-          onClick={handlers.gymVibes}
-          entranceDelay={delayFor('gym')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('gym')}
-        />
-        <PickleballSticker
-          id="pickleball-m"
-          initial={pos(BY_ID.pickleball)}
-          zBase={7}
-          onClick={handlers.pickleballVibes}
-          entranceDelay={delayFor('pickleball')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('pickleball')}
-        />
-        <ImageSticker
-          id="terrapin-m"
-          src="/assets/icons/terrapin.png"
-          size={96}
-          initial={pos(BY_ID.terrapin)}
-          zBase={7}
-          onClick={handlers.terrapinFact}
-          entranceDelay={delayFor('terrapin')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('terrapin')}
-        />
+            <ImageSticker
+              id="coffee-m"
+              src="/assets/icons/coffee.png"
+              size={84}
+              initial={pos(BY_ID.coffee)}
+              zBase={7}
+              onClick={handlers.coffeeVibes}
+              {...enter('coffee')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <ImageSticker
+              id="gym-m"
+              src="/assets/icons/gym.png"
+              size={88}
+              initial={pos(BY_ID.gym)}
+              zBase={7}
+              onClick={handlers.gymVibes}
+              {...enter('gym')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <PickleballSticker
+              id="pickleball-m"
+              initial={pos(BY_ID.pickleball)}
+              zBase={7}
+              onClick={handlers.pickleballVibes}
+              {...enter('pickleball')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+            <ImageSticker
+              id="terrapin-m"
+              src="/assets/icons/terrapin.png"
+              size={96}
+              initial={pos(BY_ID.terrapin)}
+              zBase={7}
+              onClick={handlers.terrapinFact}
+              {...enter('terrapin')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <WheelSticker
-          id="wheel-m"
-          initial={pos(BY_ID.wheel)}
-          zBase={7}
-          onClick={handlers.openWheel}
-          entranceDelay={delayFor('wheel')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          wake={wake}
-          wakeDelay={wakeDelayFor('wheel')}
-        />
+            <WheelSticker
+              id="wheel-m"
+              initial={pos(BY_ID.wheel)}
+              zBase={7}
+              onClick={handlers.openWheel}
+              {...enter('wheel')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
 
-        <CouncilSticker
-          id="council-m"
-          initial={pos(BY_ID.council)}
-          zBase={7}
-          onClick={handlers.openCouncil}
-          entranceDelay={delayFor('council')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          title="the council · question everything"
-          wake={wake}
-          wakeDelay={wakeDelayFor('council')}
-        />
+            <CouncilSticker
+              id="council-m"
+              initial={pos(BY_ID.council)}
+              zBase={7}
+              onClick={handlers.openCouncil}
+              {...enter('council')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+              title="the council · question everything"
+            />
 
-        <HatRackSticker
-          id="hats-m"
-          initial={pos(BY_ID.hats)}
-          zBase={8}
-          onClick={handlers.openHats}
-          entranceDelay={delayFor('hats')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-          title="what you get · pick a hat"
-          wake={wake}
-          wakeDelay={wakeDelayFor('hats')}
-        />
+            <HatRackSticker
+              id="hats-m"
+              initial={pos(BY_ID.hats)}
+              zBase={8}
+              onClick={handlers.openHats}
+              {...enter('hats')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+              title="what you get · pick a hat"
+            />
 
-        {/* Easter egg label + coffee machine, tucked at the bottom of the canvas */}
-        <div
-          style={{
-            position: 'absolute',
-            top: BY_ID.coffeeMachine.y - 26,
-            left: 0,
-            width: '100%',
-            textAlign: 'center',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 12,
-            color: 'var(--ink-secondary)',
-            pointerEvents: 'none',
-          }}
-        >
-          ↓ easter egg ↓
-        </div>
-        <CoffeeMachineSticker
-          id="coffeeMachine-m"
-          initial={pos(BY_ID.coffeeMachine)}
-          zBase={6}
-          onBrew={handlers.brewCoffee}
-          entranceDelay={delayFor('coffeeMachine')}
-          dragConstraints={canvasRef}
-          disableSnap
-          allowPageScroll
-          snapBackHome
-        />
+            {/* Easter egg label + coffee machine, tucked at the bottom of the canvas */}
+            <div
+              style={{
+                position: 'absolute',
+                top: BY_ID.coffeeMachine.y - 26,
+                left: 0,
+                width: '100%',
+                textAlign: 'center',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                color: 'var(--ink-secondary)',
+                pointerEvents: 'none',
+              }}
+            >
+              ↓ easter egg ↓
+            </div>
+            <CoffeeMachineSticker
+              id="coffeeMachine-m"
+              initial={pos(BY_ID.coffeeMachine)}
+              zBase={6}
+              onBrew={handlers.brewCoffee}
+              {...enter('coffeeMachine')}
+              dragConstraints={canvasRef}
+              disableSnap
+              allowPageScroll
+              snapBackHome
+            />
+          </>
+        )}
       </div>
     </div>
   );

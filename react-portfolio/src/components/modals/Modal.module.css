@@ -1,20 +1,91 @@
 .overlay {
+  --modal-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --modal-ease-exit: cubic-bezier(0.33, 1, 0.68, 1);
+  --modal-ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
   position: fixed;
   inset: 0;
-  background: rgba(20, 15, 5, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   z-index: 100000;
   display: flex;
   justify-content: center;
 }
 
-.content {
+.overlay[data-state='closing'] {
+  pointer-events: none;
+}
+
+/* The scrim is its own layer so it can fade without dimming the panel twice */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 15, 5, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: opacity 200ms ease-out;
+}
+
+.content,
+.sheet {
   color: #f5f2e8;
   box-shadow: 0 -10px 40px rgba(20, 10, 0, 0.3), 0 30px 60px rgba(20, 10, 0, 0.4);
   font-family: var(--font-mono);
   position: relative;
   overflow-y: auto;
+}
+
+/* Desktop dialog: grows from the trigger (transform-origin is set inline by
+   Modal.tsx), and shrinks back toward it on close. Transitions rather than
+   keyframes so a reopen mid-exit retargets from wherever it is. */
+.content {
+  transition:
+    transform 250ms var(--modal-ease-out),
+    opacity 200ms var(--modal-ease-out);
+}
+
+/* Phone bottom sheet: slides up from the edge, back down on close */
+.sheet {
+  transition: transform 300ms var(--modal-ease-sheet);
+}
+
+@starting-style {
+  .backdrop {
+    opacity: 0;
+  }
+  .content {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  .sheet {
+    transform: translateY(100%);
+  }
+}
+
+.overlay[data-state='closing'] .backdrop {
+  opacity: 0;
+  transition: opacity 150ms var(--modal-ease-exit);
+}
+
+.overlay[data-state='closing'] .content {
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    transform 150ms var(--modal-ease-exit),
+    opacity 150ms var(--modal-ease-exit);
+}
+
+.overlay[data-state='closing'] .sheet {
+  transform: translateY(100%);
+  transition: transform 200ms var(--modal-ease-exit);
+}
+
+/* The sheet travels its full height, so its scrim fades out on the same 200ms */
+.overlay[data-variant='sheet'][data-state='closing'] .backdrop {
+  transition-duration: 200ms;
+}
+
+.instant .backdrop,
+.instant .content,
+.instant .sheet {
+  transition: none;
 }
 
 .dragHandle {
@@ -68,16 +139,44 @@
 /* Trim the mobile blur cost (cheaper than desktop) and supply a solid fallback
    for browsers without backdrop-filter support. */
 @media (max-width: 768px), (max-height: 500px) and (max-width: 1024px) {
-  .overlay {
+  .backdrop {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
   }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .overlay {
+  .backdrop {
     background: rgba(20, 15, 5, 0.7);
   }
 }
 
-/* Animations are defined in globals.css */
+/* Reduced motion: the same beats as opacity only, no scale or slide. The
+   global reduced-motion reset in theme.css zeroes every transition with
+   !important, so these need !important (and class specificity) to keep the fade. */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .content,
+  .sheet {
+    transition: opacity 200ms ease-out !important;
+  }
+  @starting-style {
+    .content,
+    .sheet {
+      opacity: 0;
+      transform: none;
+    }
+  }
+  .overlay[data-state='closing'] .backdrop,
+  .overlay[data-state='closing'] .content,
+  .overlay[data-state='closing'] .sheet {
+    opacity: 0;
+    transform: none;
+    transition: opacity 150ms ease-out !important;
+  }
+  .instant .backdrop,
+  .instant .content,
+  .instant .sheet {
+    transition: none !important;
+  }
+}
