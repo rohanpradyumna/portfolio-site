@@ -49,7 +49,7 @@ framer-motion does **NOT** auto-compensate for a plain-CSS-transformed ancestor.
 `src/app/page.tsx` (`Home`) is the single orchestrator. It owns all modal state, computes orbital positions, and decides mobile vs desktop:
 
 - **Desktop:** `<Stage bbox={bbox}>` wraps `<DesktopStickers/>` + `<CardStack/>`. Both are scaled.
-- **Mobile** (`dims.w <= 768`): `<CardStack/>` + `<MobileStickerGrid/>` (no Stage, simple grid).
+- **Mobile** (`useResponsive().isMobile`: width 768 or less, or a phone on its side): `<CardStack/>` + `<MobileDragCanvas/>` (no Stage).
 - **Modals are siblings of `<main>`, OUTSIDE the Stage** — so they render at true viewport scale and are unaffected by the board transform.
 
 ### Orbital layout + collision resolution
@@ -88,6 +88,22 @@ CSS custom properties live in `react-portfolio/src/styles/theme.css` / `globals.
 `--paper #fdfbf7`, `--ink #2a251f`, `--ink-secondary #6b5d52`, `--accent-orange #c4472a` (deep enough for white text at WCAG AA; don't brighten it back to `#e85d3a`), `--accent-blue`, `--accent-green`, `--accent-yellow`. Fonts: **Instrument Serif** (name/headings), **Geist** (body), **Geist Mono** (card copy/UI), loaded via `next/font` in `layout.tsx`.
 
 Always reference fonts as `var(--font-serif)` / `var(--font-sans)` / `var(--font-mono)`, never by literal family name: `next/font` hashes the names, so `'Geist Mono'` silently falls back to a system font. Keep functional text (sticker labels, chrome) at 11px or larger.
+
+## Fit every screen (default for everything we build)
+
+Every page, takeover, sticker and component must fit whatever screen it opens on, without being asked. "Done" means it works at all of these, not just the one you built it on:
+
+- **Phones:** 360x740, 390x844, 430x932. No horizontal scroll, 16px side gutters, tap targets at least 44px (grow the hit area with `::after` under `@media (pointer: coarse)` if the visual must stay small).
+- **Phones on their side:** 844x390, 667x375. Wide but short: the main thing (the machine, the window, the card) must sit on the first screen, so compact the header and lay out in a row rather than a tall stack.
+- **Tablet and small laptop:** 768x1024, 1024x768, 1280x800.
+- **Desktops:** 1440x900, 1920x1080, 2560x1440. Big screens grow the composition in proportion (the board's `Stage`, `useCanvasFit`, or a page zoom like `/wheel`'s `usePageZoom`), never a small island in empty space. Cap the growth so it never looks blown up.
+
+How:
+
+- Use the shared queries in `src/utils/breakpoints.ts` (`PHONE_QUERY`, `WIDE_QUERY`) in JS, and spell out the same two queries in CSS. Never a width-only `max-width: 768px`: it sends landscape phones to the desktop layout.
+- Lay out once at a design size and scale uniformly on wide screens; give phones their own flowing layout.
+- When anything is scaled (transform or CSS `zoom`), compensate framer-motion drags with `MotionConfig transformPagePoint`, and keep text at 11px or more at the smallest scale.
+- Verify with screenshots across the sizes above (Playwright, `isMobile`/`hasTouch` for phones) before calling it done.
 
 ## Conventions
 

@@ -1,10 +1,20 @@
 'use client';
 
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useSyncExternalStore } from 'react';
 import { motion, PanInfo, useMotionValue, animate } from 'framer-motion';
 import { useAudio } from '@/hooks/useAudio';
 import { Position } from '@/types';
 import styles from './Sticker.module.css';
+
+const COARSE = '(pointer: coarse)';
+const subscribeCoarse = (cb: () => void) => {
+  const mq = window.matchMedia(COARSE);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+};
+/** True on touch screens. The server renders for a mouse; phones correct on hydration. */
+const useCoarsePointer = () =>
+  useSyncExternalStore(subscribeCoarse, () => window.matchMedia(COARSE).matches, () => false);
 
 // Magnetic snap configuration
 const GRID_SIZE = 140; // Major grid lines (matches globals.css)
@@ -73,6 +83,7 @@ export function Sticker({
 }: StickerProps) {
   // Use refs instead of state to avoid re-renders during drag
   const hasMoved = useRef(false);
+  const coarse = useCoarsePointer();
   const elementRef = useRef<HTMLDivElement>(null);
   const zIndexRef = useRef(zBase);
 
@@ -99,6 +110,8 @@ export function Sticker({
     // Update z-index directly via DOM to avoid re-render
     if (elementRef.current) {
       elementRef.current.style.zIndex = '9999';
+      // Touch stickers rest without their own layer; give it one while it moves.
+      elementRef.current.style.willChange = 'transform';
     }
     onDragStart?.(id);
   };
@@ -191,6 +204,8 @@ export function Sticker({
         ...style,
       }}
       drag
+      // A touch that starts sideways may drag; one that turns into a scroll never carries the sticker down the board.
+      dragDirectionLock={allowPageScroll}
       dragConstraints={dragConstraints}
       dragMomentum={!snapBackHome}
       dragElastic={0.12}
@@ -200,7 +215,8 @@ export function Sticker({
       }}
       whileHover={{ scale: 1.05, rotate: (initial.rot || 0) + 1.5 }}
       whileDrag={{ scale: 1.08, cursor: 'grabbing' }}
-      whileTap={{ scale: 1.08 }}
+      // On touch, a press is usually the start of a scroll: grow only once it is really a drag.
+      whileTap={coarse ? undefined : { scale: 1.08 }}
       onPointerDown={handlePointerDown}
       onDragStart={handleDragStart}
       onDrag={handleDrag}

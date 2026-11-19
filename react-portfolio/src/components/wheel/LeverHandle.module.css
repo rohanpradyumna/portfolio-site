@@ -114,6 +114,23 @@
   }
 }
 
+/* A phone on its side has no height for the rail: just the button, beside the reels. */
+@media (max-height: 500px) and (max-width: 1024px) and (orientation: landscape) {
+  .leverWrap {
+    width: auto;
+  }
+
+  .rail {
+    display: none;
+  }
+
+  .pullButton {
+    width: auto;
+    min-height: 60px;
+    padding: 0 24px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .knobDisabled {
     animation: none;

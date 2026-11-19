@@ -154,7 +154,7 @@ export function MobileDragCanvas({ wake = false, writingCount, handlers }: Mobil
       >
         <PhotoSticker
           id="portrait-m"
-          src="/assets/rohan-casual.webp"
+          src="/assets/rohan-casual-cut.webp"
           w={150}
           h={226}
           initial={pos(BY_ID.portrait)}

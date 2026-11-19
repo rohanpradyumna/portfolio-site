@@ -13,8 +13,21 @@
   }
 }
 
-.sticker:active {
-  filter: drop-shadow(0 24px 32px rgba(40,30,10,0.35)) drop-shadow(0 8px 12px rgba(40,30,10,0.25));
+@media (pointer: fine) {
+  .sticker:active {
+    filter: drop-shadow(0 24px 32px rgba(40,30,10,0.35)) drop-shadow(0 8px 12px rgba(40,30,10,0.25));
+  }
+}
+
+/* Phones: every scroll starts on a sticker, so a press must not repaint anything.
+   No layer per sticker (twenty filtered layers is what iOS drops frames on),
+   one lighter shadow, and no shadow swap on :active. */
+@media (pointer: coarse) {
+  .sticker {
+    will-change: auto;
+    filter: drop-shadow(0 4px 6px rgba(40,30,10,0.22));
+    transition: none;
+  }
 }
 
 .inner {

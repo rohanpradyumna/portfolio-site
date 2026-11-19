@@ -5,7 +5,7 @@ import { MotionConfig } from 'framer-motion';
 import { useResponsive, DESIGN_W, DESIGN_H } from '@/hooks/useDimensions';
 import { useSongAudio } from '@/hooks/useAudio';
 import { CardStack } from '@/components/cards';
-import { Modal, StoicWisdomModal, AIShowcaseModal } from '@/components/modals';
+import { Modal, StoicWisdomModal, AIShowcaseModal, UmdRoll } from '@/components/modals';
 import { WorkDesktop } from '@/components/experience/WorkDesktop';
 import { HatRack } from '@/components/hats/HatRack';
 import { EqBars } from '@/components/ui/EqBars';
@@ -481,6 +481,7 @@ export default function Home() {
           plenty of volleyball and good times in the startup shell, plus the wildest parties I could throw along the
           way. I loved my professors, and I&apos;d run the whole course all over again given the chance.
         </div>
+        <UmdRoll />
       </Modal>
 
       <Modal open={modal === 'charminar'} noAnimation={true} onClose={closeModal} title="hyderabad 🍛" color="#8a5f36">

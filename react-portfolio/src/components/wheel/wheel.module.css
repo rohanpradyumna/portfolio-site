@@ -28,6 +28,8 @@
   max-width: 920px;
   margin: 0 auto;
   padding: 112px 24px 96px;
+  /* Wide screens grow the whole page in proportion (set by WheelExperience), like the board's Stage. */
+  zoom: var(--k, 1);
 }
 
 .head {
@@ -308,7 +310,8 @@
   padding-bottom: 12px;
   border-bottom: 1.5px dashed var(--grid-strong);
   font-family: var(--font-mono);
-  font-size: 12px;
+  /* 13, not 12: the page zooms down to 0.85 on small laptops and labels stay at 11px or more. */
+  font-size: 13px;
   color: var(--ink-secondary);
 }
 
@@ -408,8 +411,7 @@
 }
 
 .linkButton {
-  margin-left: 4px;
-  padding: 8px 4px;
+  padding: 8px 0;
   border: none;
   background: none;
   color: var(--ink-secondary);
@@ -444,6 +446,10 @@
   .hold {
     min-height: 44px;
     padding: 0 20px;
+  }
+
+  .linkButton {
+    min-height: 44px;
   }
 }
 
@@ -519,6 +525,84 @@
   .actions .ctaSecondary {
     flex: 1 1 100%;
     justify-content: center;
+  }
+}
+
+/* A phone on its side: the desktop row of reels, one line each, so the whole
+   machine sits on the first screen under a compact head. */
+@media (max-height: 500px) and (max-width: 1024px) and (orientation: landscape) {
+  .wrap {
+    padding: 20px 24px 48px;
+  }
+
+  .head {
+    margin-bottom: 20px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .sub {
+    max-width: none;
+    margin-top: 4px;
+    font-size: 15px;
+  }
+
+  .machine {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 16px;
+    padding: 16px 16px 20px;
+  }
+
+  .reels {
+    --reel-half: 0;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .reelCol {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'label hold' 'window window';
+    align-items: center;
+    gap: 4px 8px;
+  }
+
+  .reelLabel {
+    grid-area: label;
+  }
+
+  .hold {
+    grid-area: hold;
+    margin-bottom: 0;
+  }
+
+  .reelCol > :nth-child(2) {
+    grid-area: window;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .payline {
+    left: 0;
+    right: 0;
+    border-radius: 0;
+    transform: none;
+  }
+
+  .reelText {
+    font-size: 14px;
+  }
+
+  .tray {
+    scroll-margin-top: 16px;
+  }
+
+  .actions .ctaPrimary,
+  .actions .ctaSecondary {
+    flex: 0 1 auto;
   }
 }
 

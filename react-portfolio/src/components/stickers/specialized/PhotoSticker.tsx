@@ -32,10 +32,9 @@ export function PhotoSticker({
             width: w,
             height: h,
             objectFit: 'contain',
-            // Chained white drop-shadows trace the cutout's alpha edge, giving
-            // the photo the same die-cut border the illustrated stickers have.
-            filter:
-              'drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 12px rgba(40,30,10,0.25))',
+            // The die-cut white border is baked into the cutout asset. It used to be
+            // five chained drop-shadow filters, repainted on every touch and scale,
+            // which made phones stutter when a scroll started on the photo.
             pointerEvents: 'none',
           }}
         />
